@@ -1,36 +1,13 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Planteria
 
-## Getting Started
+**Planteria** is an AI-powered planning tool designed to help **solo builders** quickly turn fuzzy ideas into clear, shippable plans. It treats plans as structured data—moving from **ideas → outcomes → slices → tasks**—with strict guardrails to ensure clarity, demoability, and focus on the minimum shippable path.
 
-First, run the development server:
+The tool emphasizes:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* **Simplicity first**: No technical specs, no UI design, no overcomplexity.
+* **Fast value**: Users go from idea to validated plan in minutes.
+* **Structured editing**: Supports both node-level (rename, split/merge, move, prune) and plan-level operations (rescope, reprioritize, audit).
+* **Guardrails**: Enforces validity rules (e.g., ≤8 slices, ≤40 tasks, no cycles/orphans, non-goals respected).
+* **Phased growth**: Starts lean with auto-accepted edits and no integrations, then gradually adds exports, MCP agent access, approval workflows, grounding with evidence, and eventually branching/advanced prioritization.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+At its core, Planteria is about **maximizing user speed and clarity** while keeping complexity low, with AI acting as a copilot for structured planning.
