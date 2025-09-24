@@ -12,7 +12,7 @@ if (!convexUrl) {
 }
 
 const convex = new ConvexReactClient(convexUrl, {
-  expectAuth: true,
+  expectAuth: false,
 });
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
