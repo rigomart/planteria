@@ -4,12 +4,14 @@ import {
   Authenticated,
   AuthLoading,
   Unauthenticated,
+  useConvexAuth,
   useQuery,
 } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 export default function Home() {
   const tasks = useQuery(api.tasks.get);
+  const { isAuthenticated, isLoading } = useConvexAuth();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -21,6 +23,10 @@ export default function Home() {
           {text}
         </div>
       ))}
+
+      {isLoading && <div>Loading...</div>}
+      {isAuthenticated && <div>Authenticated</div>}
+      {!isAuthenticated && <div>Unauthenticated</div>}
     </main>
   );
 }
