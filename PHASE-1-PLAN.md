@@ -15,7 +15,7 @@ Deliver a demoable flow that turns a solo builder's rough idea into a validated,
 ## Platform Requirements
 - Install packages: `pnpm add better-auth@1.3.8 @convex-dev/better-auth ai @ai-sdk/openai zod`.
 - Update `convex.config.ts` to `app.use(betterAuth)` via `@convex-dev/better-auth/convex.config` and register the HTTP routes with `httpRouter` + `nextJsHandler`.
-- Configure Google OAuth in `createAuth` using Better Auth's Google provider (client ID/secret, allowed redirect URIs) while disabling password login.
+- Configure Better Auth providers: keep email/password enabled for local verification, then re-enable the Google OAuth provider with client ID/secret and redirect URIs once credentials are ready.
 - Populate environment variables:
   - Convex: `BETTER_AUTH_SECRET`, `SITE_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `CONVEX_DEPLOYMENT` (dev), `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL` via `npx convex env set`.
   - Next.js: mirror `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, `NEXT_PUBLIC_SITE_URL`, and `BETTER_AUTH_URL` if required by Better Auth client helpers.
@@ -25,10 +25,12 @@ Deliver a demoable flow that turns a solo builder's rough idea into a validated,
 ## Workstreams
 
 ### 1. Authentication & Platform Setup
-- Scaffold `convex/auth.ts` using Better Auth's `createClient`/`createAuth` helpers; enable the Google provider and Convex plugin, set `expectAuth` on the client, and wire `httpRouter` routes plus the Next.js `/api/auth/[...route]` handler.
-- Build a minimal sign-in page/modal with a Google button that calls `authClient.signIn({ provider: "google" })`; add sign-out handling and loading states.
-- Ensure Convex functions read identities via `authComponent.getAuthUser` and enforce authentication before plan mutations.
-- Smoke-test the flow: Google OAuth → Convex session issuance → client receives token; add telemetry for failed auth attempts.
+- Better Auth + Convex wiring now runs with email/password while Google OAuth credentials are staged for reactivation after smoke-testing.
+- Implementation checkpoints:
+  - Added Better Auth/Convex dependencies, registered the component in `convex/convex.config.ts`, and exposed routes through `convex/http.ts` plus Next.js `/api/auth/[...route]`.
+  - Created `convex/auth.ts` with `createClient`/`createAuth`, enabled the Convex plugin, scaffolding `getCurrentUser`, and wrapped the frontend with `ConvexBetterAuthProvider` via `src/app/convex-client-provider.tsx`, `src/lib/auth-client.ts`, and `src/lib/auth-server.ts`.
+  - Configured the Convex client with `expectAuth: true`, documented required env vars (`BETTER_AUTH_SECRET`, `SITE_URL`, `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`), and deferred Google provider settings until credentials land.
+- Next steps: layer the minimal sign-in UI (Google button + sign-out), gate plan mutations with `authComponent.getAuthUser`, and add telemetry plus manual smoke tests covering OAuth, session issuance, and Convex access controls.
 
 ### 2. LLM Services & Tooling (Vercel AI SDK)
 - Create a shared Convex action utility that wraps `generateObject`/`generateText` from `ai`, targets `openai('gpt-4o-mini')` (or chosen model), handles retries, and redacts logs.
@@ -63,7 +65,7 @@ Deliver a demoable flow that turns a solo builder's rough idea into a validated,
 - Provide undo/redo controls that replay diffs only after validators pass, preventing invalid rewinds and syncing across collaborators.
 
 ### 9. Demo Readiness & Ops
-- Run manual smoke-tests covering: Google sign-in/out, idea flows (clean/vague/conflicting), invalid edit rejection, undo/redo happy path.
+- Run manual smoke-tests covering: email/password sign-up/in/out, Google sign-in once reinstated, idea flows (clean/vague/conflicting), invalid edit rejection, undo/redo happy path.
 - Instrument analytics on LLM usage (clarifying question rate, validator failure counts, fallback frequency) and auth drop-off points.
 - Update README/docs with Phase 1 behavior, environment setup (Google OAuth console, Convex env, LLM keys), manual test checklist, and guardrail rationale.
 
