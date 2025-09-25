@@ -26,7 +26,7 @@ export default async function AuthLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header
         user={{
           email: currentUser.email,

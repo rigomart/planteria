@@ -42,10 +42,10 @@ export function SandboxPanel() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-xl border  p-6 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Idea input</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="text-lg font-semibold ">Idea input</h2>
+          <p className="text-sm ">
             Describe what you want to build. Keep it conversational.
           </p>
         </div>
@@ -54,7 +54,7 @@ export function SandboxPanel() {
           value={idea}
           onChange={(event) => setIdea(event.target.value)}
           placeholder="Example: A guided planner that helps indie founders turn fuzzy ideas into shippable slices in a week."
-          className="mt-4 h-36 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          className="mt-4 h-36 w-full resize-none rounded-lg border  px-3 py-2 text-sm  shadow-inner "
         />
 
         <div className="mt-4 flex flex-wrap gap-3">
@@ -115,7 +115,7 @@ function Placeholder({ message }: { message: string }) {
 
 function PreBlock({ data }: { data: unknown }) {
   return (
-    <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-800">
+    <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-lg border p-3 text-xs ">
       {JSON.stringify(data, null, 2)}
     </pre>
   );
@@ -133,15 +133,11 @@ function ResultCard({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm ${className ?? ""}`}
-    >
+    <div className={`rounded-xl border p-5 shadow-sm ${className ?? ""}`}>
       <div className="space-y-1">
-        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+        <h3 className="text-base font-semibold">{title}</h3>
         {subtitle ? (
-          <p className="text-xs uppercase tracking-wide text-slate-400">
-            {subtitle}
-          </p>
+          <p className="text-xs uppercase tracking-wide">{subtitle}</p>
         ) : null}
       </div>
       <div className="mt-4">{children}</div>

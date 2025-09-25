@@ -4,7 +4,6 @@ import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,18 +49,18 @@ export function UserMenu({ user }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={signingOut}>
-        <Button variant="ghost">
-          <Avatar className="size-8">
+        <button
+          type="button"
+          className="cursor-pointer flex items-center gap-2 rounded-none p-2 transition-all duration-100 hover:bg-accent"
+        >
+          <Avatar className="h-8 w-8">
             <AvatarImage src={user.image} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight max-w-32">
             <span className="truncate font-medium">{user.name}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </span>
           </div>
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-w-52 p-2">
         <DropdownMenuLabel className="p-0 font-normal">
