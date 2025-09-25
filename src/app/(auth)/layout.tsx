@@ -1,9 +1,9 @@
 import { fetchQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { api } from "@/convex/_generated/api";
+import type { safeGetUser } from "@/convex/users";
 import { getToken } from "@/lib/auth-server";
-import { api } from "../../../convex/_generated/api";
-import type { safeGetUser } from "../../../convex/users";
 import { Header } from "./_components/header";
 
 type CurrentUser = NonNullable<Awaited<ReturnType<typeof safeGetUser>>>;
