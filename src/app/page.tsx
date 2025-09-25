@@ -5,7 +5,7 @@ import { api } from "../../convex/_generated/api";
 export default async function Home() {
   const token = await getToken();
 
-  const preloadedUser = await preloadQuery(
+  const _preloadedUser = await preloadQuery(
     api.users.getCurrentUser,
     {},
     { token },
