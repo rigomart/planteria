@@ -1,17 +1,15 @@
+import { createThread } from "@convex-dev/agent";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+import { components, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { action, internalMutation, mutation, query } from "./_generated/server";
-import { generateStructuredObject } from "./lib/llm";
+import { planningAgent } from "./agents/planning";
 import type { PlanDraft } from "./lib/plan_schemas";
 import { planDraftSchema, STATUS_VALUES } from "./lib/plan_schemas";
 import { buildPlanDraftPrompt } from "./lib/prompts";
 
 type StatusValue = (typeof STATUS_VALUES)[number];
-
-const PLAN_SYSTEM_PROMPT =
-  "You are a senior product planner who turns ideas into outcomes, deliverables, and concrete actions.";
 
 export const generatePlan = action({
   args: {
@@ -24,18 +22,27 @@ export const generatePlan = action({
       throw new Error("Unauthorized");
     }
 
-    const prompt = buildPlanDraftPrompt({
-      idea: args.idea,
+    const threadId = await createThread(ctx, components.agent, {
+      userId: identity.subject,
+      title: "Test thread",
+      summary: "Test summary",
     });
 
-    const aiResponseObject = await generateStructuredObject({
-      schema: planDraftSchema,
-      system: PLAN_SYSTEM_PROMPT,
-      prompt,
-    });
+    const aiResponse = await planningAgent.generateObject(
+      ctx,
+      { threadId },
+      {
+        schema: planDraftSchema,
+        prompt: buildPlanDraftPrompt({
+          idea: args.idea,
+        }),
+      },
+    );
+
+    const parsedPlan = planDraftSchema.parse(aiResponse.object);
 
     const data = await ctx.runMutation(internal.plans.createPlan, {
-      plan: aiResponseObject,
+      plan: parsedPlan,
       userId: identity.subject,
     });
 

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v3";
 
 export const STATUS_VALUES = ["todo", "doing", "done"] as const;
 
@@ -13,12 +13,7 @@ export const planActionSchema = z.object({
   status: statusSchema
     .default("todo")
     .describe("Action status (todo/doing/done)"),
-  order: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe("Position index within deliverable"),
+  order: z.number().int().min(0).describe("Position index within deliverable"),
 });
 
 export const planDeliverableSchema = z.object({
@@ -29,17 +24,11 @@ export const planDeliverableSchema = z.object({
     .max(160)
     .describe("Definition of done sentence (10-160 chars)"),
   status: statusSchema.default("todo").describe("Deliverable status"),
-  order: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe("Position index within outcome"),
+  order: z.number().int().min(0).describe("Position index within outcome"),
   notes: z
     .string()
     .max(160)
     .nullable()
-    .optional()
     .describe("Short AI note when attention is needed"),
   actions: z
     .array(planActionSchema)
@@ -53,15 +42,9 @@ export const planOutcomeSchema = z.object({
   summary: z
     .string()
     .max(160)
-    .optional()
     .describe("Short description of the value unlocked"),
   status: statusSchema.default("todo").describe("Outcome status"),
-  order: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe("Position index within plan"),
+  order: z.number().int().min(0).describe("Position index within plan"),
   deliverables: z
     .array(planDeliverableSchema)
     .min(1)
