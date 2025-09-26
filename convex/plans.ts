@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
-import type { MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import type { PlanDraft } from "./lib/plan_schemas";
 import { planDraftSchema, STATUS_VALUES } from "./lib/plan_schemas";
@@ -91,59 +91,7 @@ export const getCurrentPlan = query({
       return null;
     }
 
-    const outcomes = await ctx.db
-      .query("outcomes")
-      .withIndex("by_plan_order", (q) => q.eq("planId", plan._id))
-      .collect();
-
-    const outcomePayload = [];
-    for (const outcome of outcomes) {
-      const deliverables = await ctx.db
-        .query("deliverables")
-        .withIndex("by_outcome_order", (q) => q.eq("outcomeId", outcome._id))
-        .collect();
-
-      const deliverablePayload = [];
-      for (const deliverable of deliverables) {
-        const actions = await ctx.db
-          .query("actions")
-          .withIndex("by_deliverable_order", (q) =>
-            q.eq("deliverableId", deliverable._id),
-          )
-          .collect();
-
-        deliverablePayload.push({
-          id: deliverable._id,
-          title: deliverable.title,
-          doneWhen: deliverable.doneWhen,
-          notes: deliverable.notes ?? null,
-          status: deliverable.status,
-          order: deliverable.order,
-          actions: actions.map((actionDoc) => ({
-            id: actionDoc._id,
-            title: actionDoc.title,
-            status: actionDoc.status,
-            order: actionDoc.order,
-          })),
-        });
-      }
-
-      outcomePayload.push({
-        id: outcome._id,
-        title: outcome.title,
-        summary: outcome.summary ?? null,
-        status: outcome.status,
-        order: outcome.order,
-        deliverables: deliverablePayload,
-      });
-    }
-
-    return {
-      id: plan._id,
-      idea: plan.idea,
-      mission: plan.mission,
-      outcomes: outcomePayload,
-    };
+    return loadPlanWithStructure(ctx, plan._id);
   },
 });
 
@@ -169,6 +117,25 @@ export const listPlans = query({
         updatedAt: plan.updatedAt,
       }))
       .sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+});
+
+export const getPlan = query({
+  args: {
+    planId: v.id("plans"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    const plan = await ctx.db.get(args.planId);
+    if (!plan || plan.userId !== identity.subject) {
+      return null;
+    }
+
+    return loadPlanWithStructure(ctx, plan._id);
   },
 });
 
@@ -294,4 +261,68 @@ async function replacePlanInternal(
 
   await clearExistingStructure(ctx, planId);
   await insertStructure(ctx, planId, plan, timestamp);
+}
+
+async function loadPlanWithStructure(
+  ctx: QueryCtx | MutationCtx,
+  planId: Id<"plans">,
+) {
+  const plan = await ctx.db.get(planId);
+  if (!plan) {
+    return null;
+  }
+
+  const outcomes = await ctx.db
+    .query("outcomes")
+    .withIndex("by_plan_order", (q) => q.eq("planId", planId))
+    .collect();
+
+  const outcomePayload = [];
+  for (const outcome of outcomes) {
+    const deliverables = await ctx.db
+      .query("deliverables")
+      .withIndex("by_outcome_order", (q) => q.eq("outcomeId", outcome._id))
+      .collect();
+
+    const deliverablePayload = [];
+    for (const deliverable of deliverables) {
+      const actions = await ctx.db
+        .query("actions")
+        .withIndex("by_deliverable_order", (q) =>
+          q.eq("deliverableId", deliverable._id),
+        )
+        .collect();
+
+      deliverablePayload.push({
+        id: deliverable._id,
+        title: deliverable.title,
+        doneWhen: deliverable.doneWhen,
+        notes: deliverable.notes ?? null,
+        status: deliverable.status,
+        order: deliverable.order,
+        actions: actions.map((actionDoc) => ({
+          id: actionDoc._id,
+          title: actionDoc.title,
+          status: actionDoc.status,
+          order: actionDoc.order,
+        })),
+      });
+    }
+
+    outcomePayload.push({
+      id: outcome._id,
+      title: outcome.title,
+      summary: outcome.summary ?? null,
+      status: outcome.status,
+      order: outcome.order,
+      deliverables: deliverablePayload,
+    });
+  }
+
+  return {
+    id: plan._id,
+    idea: plan.idea,
+    mission: plan.mission,
+    outcomes: outcomePayload,
+  };
 }

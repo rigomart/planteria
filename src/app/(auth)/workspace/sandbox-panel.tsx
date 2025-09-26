@@ -1,61 +1,70 @@
 "use client";
 
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 
 type DraftResult = Awaited<ReturnType<ReturnType<typeof useDraftPlan>>>;
 
-export function SandboxPanel() {
-  const draftPlanAction = useDraftPlan();
-  const saveDraftMutation = useSaveDraft();
-  const storedPlan = useQuery(api.plans.getCurrentPlan);
+type SandboxPanelProps = {
+  onCompleted?: () => void;
+};
+
+export function SandboxPanel({ onCompleted }: SandboxPanelProps) {
+  const draftPlan = useDraftPlan();
+  const createPlan = useCreatePlan();
+  const router = useRouter();
 
   const [idea, setIdea] = useState("");
-
   const [planResult, setPlanResult] = useState<DraftResult | null>(null);
-
-  const [planLoading, setPlanLoading] = useState(false);
-
   const [planError, setPlanError] = useState<string | null>(null);
   const [persistError, setPersistError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const planPreview = useMemo(
+    () => (planResult ? JSON.stringify(planResult, null, 2) : null),
+    [planResult],
+  );
 
   const handleDraftPlan = async () => {
     setPlanError(null);
     setPersistError(null);
 
-    if (!idea.trim()) {
+    const trimmedIdea = idea.trim();
+    if (!trimmedIdea) {
       setPlanError("Provide an idea before drafting a plan.");
       return;
     }
 
-    setPlanLoading(true);
+    setIsSubmitting(true);
+
     try {
-      const result = await draftPlanAction({
-        idea: idea.trim(),
-      });
+      const result = await draftPlan({ idea: trimmedIdea });
       setPlanResult(result);
 
       try {
-        await saveDraftMutation({ plan: result });
+        const response = await createPlan({ plan: result });
+        onCompleted?.();
+        router.push(`/workspace/${response.planId}`);
       } catch (error) {
         setPersistError(getErrorMessage(error));
       }
     } catch (error) {
       setPlanError(getErrorMessage(error));
     } finally {
-      setPlanLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <section className="rounded-xl border  p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold ">Idea input</h2>
-          <p className="text-sm ">
+    <div className="flex flex-col gap-6">
+      <section className="rounded-xl border p-6 shadow-sm">
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Idea input</h2>
+          <p className="text-sm">
             Describe what you want to build. Keep it conversational.
           </p>
         </div>
@@ -64,49 +73,35 @@ export function SandboxPanel() {
           value={idea}
           onChange={(event) => setIdea(event.target.value)}
           placeholder="Example: A guided planner that helps indie founders turn fuzzy ideas into shippable slices in a week."
-          className="mt-4 h-36 w-full resize-none rounded-lg border  px-3 py-2 text-sm  shadow-inner "
+          className="mt-4 h-36 w-full resize-none rounded-lg border px-3 py-2 text-sm shadow-inner"
         />
 
         <div className="mt-4 flex flex-wrap gap-3">
           <Button
             variant="secondary"
             onClick={handleDraftPlan}
-            disabled={planLoading}
+            disabled={isSubmitting}
           >
-            {planLoading ? (
-              <LoadingSpinner label="Drafting plan" />
-            ) : (
-              "Draft plan"
-            )}
+            {isSubmitting ? <LoadingSpinner label="Creating" /> : "Draft plan"}
           </Button>
         </div>
 
-        {planError ? (
-          <p className="mt-1 text-sm text-red-500">{planError}</p>
-        ) : null}
-        {persistError ? (
-          <p className="mt-1 text-sm text-red-500">{persistError}</p>
-        ) : null}
+        {planError ? <ErrorMessage message={planError} /> : null}
+        {persistError ? <ErrorMessage message={persistError} /> : null}
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2">
-        <ResultCard className="md:col-span-2" title="Plan draft result">
-          {planResult ? (
-            <PreBlock data={planResult} />
-          ) : (
-            <Placeholder message="Draft a plan to inspect generated outcomes, deliverables, and actions." />
-          )}
-        </ResultCard>
-
-        <ResultCard className="md:col-span-2" title="Persisted plan (Convex)">
-          {storedPlan === undefined ? (
-            <Placeholder message="Loading stored plan..." />
-          ) : storedPlan ? (
-            <PreBlock data={storedPlan} />
-          ) : (
-            <Placeholder message="No plan saved yet." />
-          )}
-        </ResultCard>
+      <section className="rounded-xl border p-6 shadow-sm">
+        <h3 className="text-lg font-semibold">Plan draft preview</h3>
+        {planPreview ? (
+          <pre className="mt-4 max-h-80 overflow-y-auto whitespace-pre-wrap rounded border px-3 py-2 text-xs">
+            {planPreview}
+          </pre>
+        ) : (
+          <p className="mt-4 text-sm">
+            Draft a plan to inspect generated outcomes, deliverables, and
+            actions.
+          </p>
+        )}
       </section>
     </div>
   );
@@ -116,8 +111,8 @@ function useDraftPlan() {
   return useAction(api.llm.draftPlan);
 }
 
-function useSaveDraft() {
-  return useMutation(api.plans.saveDraft);
+function useCreatePlan() {
+  return useMutation(api.plans.createPlan);
 }
 
 function getErrorMessage(error: unknown) {
@@ -136,38 +131,6 @@ function LoadingSpinner({ label }: { label: string }) {
   );
 }
 
-function Placeholder({ message }: { message: string }) {
-  return <p className="text-sm text-slate-500">{message}</p>;
-}
-
-function PreBlock({ data }: { data: unknown }) {
-  return (
-    <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-lg border p-3 text-xs ">
-      {JSON.stringify(data, null, 2)}
-    </pre>
-  );
-}
-
-function ResultCard({
-  title,
-  subtitle,
-  className,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={`rounded-xl border p-5 shadow-sm ${className ?? ""}`}>
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold">{title}</h3>
-        {subtitle ? (
-          <p className="text-xs uppercase tracking-wide">{subtitle}</p>
-        ) : null}
-      </div>
-      <div className="mt-4">{children}</div>
-    </div>
-  );
+function ErrorMessage({ message }: { message: string }) {
+  return <p className="mt-3 text-sm font-medium">Error: {message}</p>;
 }
