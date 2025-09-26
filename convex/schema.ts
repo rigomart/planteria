@@ -11,7 +11,9 @@ export default defineSchema({
   plans: defineTable({
     userId: v.string(),
     idea: v.string(),
-    mission: v.string(),
+    title: v.string(),
+    summary: v.string(),
+    mission: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),

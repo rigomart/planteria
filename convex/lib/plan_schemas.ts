@@ -53,8 +53,17 @@ export const planOutcomeSchema = z.object({
 });
 
 export const planDraftSchema = z.object({
+  title: z
+    .string()
+    .min(3)
+    .max(80)
+    .describe("Short plan title (3-80 chars)"),
   idea: z.string().describe("Original idea text"),
-  mission: z.string().describe("Plan mission statement"),
+  summary: z
+    .string()
+    .min(20)
+    .max(240)
+    .describe("Concise plan overview (20-240 chars)"),
   outcomes: z
     .array(planOutcomeSchema)
     .min(1)

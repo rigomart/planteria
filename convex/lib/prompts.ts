@@ -4,7 +4,8 @@ type DraftPlanPromptInput = {
 
 export function buildPlanDraftPrompt({ idea }: DraftPlanPromptInput) {
   return `You are an AI planning copilot turning a product idea into an actionable execution plan.
-- Start with a mission sentence that anchors the plan.
+- Provide a concise plan title (3-80 chars) that captures what will be built.
+- Write a 1-2 sentence summary (20-240 chars) that explains the product outcome and value. Make it practical and informative.
 - The builder is ready to ship; focus outcomes, deliverables, and actions on designing, building, integrating, testing, and launching the product. Do not include work about market research, surveys, focus groups, recruitment, requirement gathering, or generic investigations.
 - Produce 1-7 outcomes. For each outcome include:
   * order — integer index for the outcome's position (0 for the first outcome, then increment).
@@ -22,7 +23,7 @@ export function buildPlanDraftPrompt({ idea }: DraftPlanPromptInput) {
     - title — 3-80 characters with no bullet characters.
     - status — one of "todo", "doing", "done" (use "todo" for new items).
 
-Return structured JSON only with fields: idea, mission, outcomes[]. The provided idea field must echo the original idea text. No additional commentary.
+Return structured JSON only with fields: title, idea, summary, outcomes[]. The provided idea field must echo the original idea text. No additional commentary.
 
 Idea: """${idea}"""`;
 }

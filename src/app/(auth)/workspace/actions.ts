@@ -2,7 +2,7 @@
 
 import { fetchAction } from "convex/nextjs";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { api } from "@/convex/_generated/api";
 import { getToken } from "@/lib/auth-server";
 

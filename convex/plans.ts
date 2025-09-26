@@ -151,8 +151,9 @@ export const listPlans = query({
     return plans
       .map((plan) => ({
         id: plan._id,
+        title: plan.title ?? plan.idea,
         idea: plan.idea,
-        mission: plan.mission,
+        summary: plan.summary ?? plan.mission ?? "",
         createdAt: plan.createdAt,
         updatedAt: plan.updatedAt,
       }))
@@ -277,7 +278,8 @@ async function createPlanInternal(
   const planId = await ctx.db.insert("plans", {
     userId,
     idea: plan.idea,
-    mission: plan.mission,
+    title: plan.title,
+    summary: plan.summary,
     createdAt: timestamp,
     updatedAt: timestamp,
   });
@@ -295,7 +297,8 @@ async function replacePlanInternal(
 
   await ctx.db.patch(planId, {
     idea: plan.idea,
-    mission: plan.mission,
+    title: plan.title,
+    summary: plan.summary,
     updatedAt: timestamp,
   });
 
@@ -362,7 +365,8 @@ async function loadPlanWithStructure(
   return {
     id: plan._id,
     idea: plan.idea,
-    mission: plan.mission,
+    title: plan.title ?? plan.idea,
+    summary: plan.summary ?? plan.mission ?? "",
     outcomes: outcomePayload,
   };
 }

@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 
 type ListedPlan = {
   id: Id<"plans">;
+  title: string;
   idea: string;
-  mission: string;
+  summary: string;
   createdAt: number;
   updatedAt: number;
 };
@@ -52,8 +53,8 @@ function PlanRow({ plan }: { plan: ListedPlan }) {
       )}
     >
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold">{plan.mission}</h2>
-        <p className="text-sm line-clamp-2">{plan.idea}</p>
+        <h2 className="text-lg font-semibold">{plan.title}</h2>
+        <p className="text-sm line-clamp-2">{plan.summary || plan.idea}</p>
       </div>
       <p className="text-xs uppercase tracking-wide">Updated {updated}</p>
     </Link>

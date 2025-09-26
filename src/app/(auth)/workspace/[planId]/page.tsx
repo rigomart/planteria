@@ -34,8 +34,9 @@ export default async function PlanWorkspacePage({
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs uppercase tracking-wide">Plan overview</p>
-          <h1 className="text-3xl font-semibold">{plan.mission}</h1>
-          <p className="text-sm">{plan.idea}</p>
+          <h1 className="text-3xl font-semibold">{plan.title}</h1>
+          <p className="text-sm">{plan.summary}</p>
+          <p className="text-sm text-muted-foreground">{plan.idea}</p>
         </div>
         <Button asChild variant="secondary">
           <Link href="/workspace">Back to plans</Link>
