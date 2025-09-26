@@ -14,6 +14,7 @@ import type * as lib_llm from "../lib/llm.js";
 import type * as lib_plan_schemas from "../lib/plan_schemas.js";
 import type * as lib_prompts from "../lib/prompts.js";
 import type * as llm from "../llm.js";
+import type * as plans from "../plans.js";
 import type * as users from "../users.js";
 
 import type {
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   "lib/plan_schemas": typeof lib_plan_schemas;
   "lib/prompts": typeof lib_prompts;
   llm: typeof llm;
+  plans: typeof plans;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

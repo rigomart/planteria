@@ -1,6 +1,6 @@
 "use client";
 
-import { useAction } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ type DraftResult = Awaited<ReturnType<ReturnType<typeof useDraftPlan>>>;
 
 export function SandboxPanel() {
   const draftPlanAction = useDraftPlan();
+  const saveDraftMutation = useSaveDraft();
+  const storedPlan = useQuery(api.plans.getCurrentPlan);
 
   const [idea, setIdea] = useState("");
 
@@ -18,9 +20,11 @@ export function SandboxPanel() {
   const [planLoading, setPlanLoading] = useState(false);
 
   const [planError, setPlanError] = useState<string | null>(null);
+  const [persistError, setPersistError] = useState<string | null>(null);
 
   const handleDraftPlan = async () => {
     setPlanError(null);
+    setPersistError(null);
 
     if (!idea.trim()) {
       setPlanError("Provide an idea before drafting a plan.");
@@ -33,6 +37,12 @@ export function SandboxPanel() {
         idea: idea.trim(),
       });
       setPlanResult(result);
+
+      try {
+        await saveDraftMutation({ plan: result });
+      } catch (error) {
+        setPersistError(getErrorMessage(error));
+      }
     } catch (error) {
       setPlanError(getErrorMessage(error));
     } finally {
@@ -74,6 +84,9 @@ export function SandboxPanel() {
         {planError ? (
           <p className="mt-1 text-sm text-red-500">{planError}</p>
         ) : null}
+        {persistError ? (
+          <p className="mt-1 text-sm text-red-500">{persistError}</p>
+        ) : null}
       </section>
 
       <section className="grid gap-6 md:grid-cols-2">
@@ -84,6 +97,16 @@ export function SandboxPanel() {
             <Placeholder message="Draft a plan to inspect generated outcomes, deliverables, and actions." />
           )}
         </ResultCard>
+
+        <ResultCard className="md:col-span-2" title="Persisted plan (Convex)">
+          {storedPlan === undefined ? (
+            <Placeholder message="Loading stored plan..." />
+          ) : storedPlan ? (
+            <PreBlock data={storedPlan} />
+          ) : (
+            <Placeholder message="No plan saved yet." />
+          )}
+        </ResultCard>
       </section>
     </div>
   );
@@ -91,6 +114,10 @@ export function SandboxPanel() {
 
 function useDraftPlan() {
   return useAction(api.llm.draftPlan);
+}
+
+function useSaveDraft() {
+  return useMutation(api.plans.saveDraft);
 }
 
 function getErrorMessage(error: unknown) {
