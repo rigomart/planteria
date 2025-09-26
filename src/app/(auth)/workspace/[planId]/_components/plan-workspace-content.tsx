@@ -98,9 +98,9 @@ export function PlanWorkspaceContent({
             {plan.summary}
           </p>
 
-          <div className="rounded-lg border border-border/50 bg-background/60 p-3 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">Idea</span>
-            <span className="ml-2 text-muted-foreground/90">{plan.idea}</span>
+          <div className="flex flex-col gap-1 rounded-lg border border-border/50 bg-background/60 p-3 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Initial idea</span>
+            <span className="text-muted-foreground/90">{plan.idea}</span>
           </div>
         </div>
       </div>

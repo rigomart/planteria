@@ -28,5 +28,9 @@ export default async function PlanWorkspacePage({
     notFound();
   }
 
-  return <PlanWorkspaceContent preloadedPlan={preloadedPlan} />;
+  return (
+    <div className="workspace-pattern">
+      <PlanWorkspaceContent preloadedPlan={preloadedPlan} />
+    </div>
+  );
 }
