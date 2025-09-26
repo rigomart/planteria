@@ -5,7 +5,7 @@ import { type PlanDraft, planDraftSchema } from "./lib/plan_schemas";
 import { buildPlanDraftPrompt } from "./lib/prompts";
 
 const PLAN_SYSTEM_PROMPT =
-  "You are a senior product planner who breaks big missions into outcomes, slices, and tightly scoped tasks.";
+  "You are a senior product planner who turns ideas into outcomes, deliverables, and concrete actions.";
 
 export const draftPlan = action({
   args: {

@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Overview
-- Planteria helps solo builders break fuzzy ideas into structured plans—ideas, outcomes, slices, and tasks—with AI guardrails enforcing clarity and scope.
+- Planteria helps solo builders break fuzzy ideas into structured plans—ideas, outcomes, deliverables, and actions—with AI guardrails enforcing clarity and scope.
 - The app pairs a Next.js frontend with Convex for realtime persistence so plans stay in sync across sessions and collaborators.
 
 ## Project Structure & Module Organization

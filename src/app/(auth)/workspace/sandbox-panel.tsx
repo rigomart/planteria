@@ -81,7 +81,7 @@ export function SandboxPanel() {
           {planResult ? (
             <PreBlock data={planResult} />
           ) : (
-            <Placeholder message="Draft a plan to inspect generated plan slices." />
+            <Placeholder message="Draft a plan to inspect generated outcomes, deliverables, and actions." />
           )}
         </ResultCard>
       </section>

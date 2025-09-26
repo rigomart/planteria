@@ -9,7 +9,7 @@ Deliver a demoable flow that turns a solo builder's rough idea into a validated,
 
 ## Stack Baseline & Dependencies
 - **Authentication**: Convex 1.25+ with Better Auth (`better-auth@1.3.8`, `@convex-dev/better-auth`) and the Google OAuth provider. Sessions flow through Convex tables via the Better Auth adapter and surface client-side with `ConvexBetterAuthProvider`.
-- **LLM Services**: Vercel AI SDK (`ai`, `@ai-sdk/openai`) invoked from Convex actions for both intake clarifications and plan creation. Use `generateObject` with Zod schemas to ensure validators receive structured JSON.
+- **LLM Services**: Vercel AI SDK (`ai`, `@ai-sdk/openai`) invoked from Convex actions to draft structured plans (idea → outcomes → deliverables → actions). Use `generateObject` with Zod schemas to ensure validators receive structured JSON.
 - **Shared Tooling**: `zod` for schema validation, Convex codegen for typed APIs, shadcn/ui already present.
 
 ## Platform Requirements
@@ -33,8 +33,8 @@ Deliver a demoable flow that turns a solo builder's rough idea into a validated,
 - Next steps: layer the minimal sign-in UI (Google button + sign-out), gate plan mutations with `authComponent.getAuthUser`, and add telemetry plus manual smoke tests covering OAuth, session issuance, and Convex access controls.
 
 ### 2. LLM Services & Tooling (Vercel AI SDK)
-- Create a shared Convex action utility that wraps `generateObject`/`generateText` from `ai`, targets `openai('gpt-4o-mini')` (or chosen model), handles retries, and redacts logs.
-- Define Zod schemas that map to the plan structure (idea analysis, clarifying questions, outcomes/slices/tasks) and validate AI responses before returning to callers.
+- Create a shared Convex action utility that wraps `generateObject` from `ai`, targets the chosen OpenAI model, handles retries, and redacts logs.
+- Define Zod schemas that map to the plan structure (idea, mission, outcomes, deliverables, actions with statuses) and validate AI responses before returning to callers.
 - Centralize rate limiting and token accounting per user to guard against abuse; capture metrics for latency and fallback usage.
 
 ### 3. Idea Intake & Pre-Check
@@ -43,22 +43,23 @@ Deliver a demoable flow that turns a solo builder's rough idea into a validated,
 - Surface inline messaging, track when questions are answered, and persist idea metadata for auditability.
 
 ### 4. AI Plan Draft Generation
-- Define prompt templates and Zod schema for outcome → slice → task JSON with non-technical wording and duration hints.
-- Build a Convex mutation that invokes the LLM wrapper, enforces caps (≤8 slices, ≤40 tasks, 2–5 day slices, ≤90 minute tasks), and persists the validated plan.
+- Define prompt templates and Zod schema for outcome → deliverable → action JSON with concise copy that fits UI limits.
+- Build a Convex action that invokes the LLM wrapper, enforces caps (≤7 outcomes, ≤9 deliverables per outcome, ≤7 actions per deliverable), and persists the validated plan.
 - Implement retry + fallback stub plan logic so users always land in an editable state.
 
 ### 5. Guardrails & Validators
-- Centralize validators (caps, demoable phrasing, orphan/cycle detection, non-goal compliance) reusable by initial generation and edits.
+- Centralize validators (caps, demoable `doneWhen`, status transitions Todo/Doing/Done, orphan/cycle detection, non-goal compliance) reusable by initial generation and edits.
 - Normalize error payloads for UI consumption and log validator outcomes for future tuning.
 
 ### 6. Essential Editing Experience
-- Create a tree-style editor supporting rename/rephrase, split, merge, move/defer, and delete across outcomes/slices/tasks.
+- Create a tree-style editor supporting rename/rephrase, split, merge, move/defer, and delete across outcomes/deliverables/actions.
+- Ship the three primary views: Outline (default outcome → deliverable hierarchy with inline actions), Board (action-centric Kanban: Todo/Doing/Done), and Split (Outline + Board side-by-side).
 - Implement Convex mutations per action, using the LLM helper only when users request AI rephrasing/splitting, and gate optimistic updates behind validator results.
-- Ensure UI surfaces rejection reasons clearly and maintains realtime sync through Convex subscriptions.
+- Ensure UI surfaces rejection reasons clearly and maintains realtime sync through Convex subscriptions. Global controls (AI refine, Add Outcome) live in the top bar; node-level controls handle status, edit, reorder, delete.
 
 ### 7. Plan Health Basics
-- Flag vague or oversized nodes using heuristics plus optional one-shot Vercel AI suggestions; annotate guards via badges/tooltips.
-- Highlight the minimum shippable path with an AI-generated rationale and ensure it respects validator constraints.
+- Flag vague or oversized outcomes/deliverables using heuristics plus optional one-shot Vercel AI suggestions; annotate guards via badges/tooltips.
+- Highlight the minimum shippable path with an AI-generated rationale, leaning on deliverable-level MVP flags and respecting validator constraints.
 
 ### 8. History & Undo
 - Store a capped list of edit diffs (with timestamps/authors) in Convex, accessible via authenticated queries.
@@ -66,7 +67,7 @@ Deliver a demoable flow that turns a solo builder's rough idea into a validated,
 
 ### 9. Demo Readiness & Ops
 - Run manual smoke-tests covering: email/password sign-up/in/out, Google sign-in once reinstated, idea flows (clean/vague/conflicting), invalid edit rejection, undo/redo happy path.
-- Instrument analytics on LLM usage (clarifying question rate, validator failure counts, fallback frequency) and auth drop-off points.
+- Instrument analytics on LLM usage (plan draft success rate, validator failure counts, fallback frequency) and auth drop-off points.
 - Update README/docs with Phase 1 behavior, environment setup (Google OAuth console, Convex env, LLM keys), manual test checklist, and guardrail rationale.
 
 ## Milestones
