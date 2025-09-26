@@ -1,6 +1,6 @@
-import { ArrowUpDown, CheckCircle2, Pencil, Trash2 } from "lucide-react";
+import { CheckCircle2, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Id } from "@/convex/_generated/dataModel";
-import { NodeActionButton } from "./node-action-button";
 import { StatusBadge } from "./status-badge";
 import type { ActionItem } from "./types";
 import { ensureStatus } from "./utils";
@@ -22,34 +22,12 @@ export function ActionRow({ action, deliverableId }: ActionRowProps) {
         <span className="leading-tight">{action.title}</span>
       </div>
       <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-        <NodeActionButton
-          icon={CheckCircle2}
-          label="Toggle status"
-          onClick={() =>
-            console.log("[UI] toggle action status", action.id, deliverableId)
-          }
-        />
-        <NodeActionButton
-          icon={Pencil}
-          label="Edit action"
-          onClick={() =>
-            console.log("[UI] edit action", action.id, deliverableId)
-          }
-        />
-        <NodeActionButton
-          icon={ArrowUpDown}
-          label="Reorder"
-          onClick={() =>
-            console.log("[UI] reorder action", action.id, deliverableId)
-          }
-        />
-        <NodeActionButton
-          icon={Trash2}
-          label="Delete"
-          onClick={() =>
-            console.log("[UI] delete action", action.id, deliverableId)
-          }
-        />
+        <Button variant="ghost" size="icon">
+          <Pencil className="size-4" />
+        </Button>
+        <Button variant="ghost" size="icon">
+          <CheckCircle2 className="size-4" />
+        </Button>
       </div>
     </li>
   );

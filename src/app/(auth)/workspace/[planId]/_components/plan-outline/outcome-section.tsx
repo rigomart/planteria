@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { DeliverableItem } from "./deliverable-item";
-import { NodeActionGroup } from "./node-action-group";
+import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
 import type { OutcomeSectionProps } from "./types";
 import { ensureStatus, sortByOrder } from "./utils";
@@ -18,24 +18,25 @@ export function OutcomeSection({
   );
 
   return (
-    <div className="border-l-4 border border-l-primary/20 p-4">
-      <div className="flex items-center gap-2 justify-end">
-        <StatusBadge status={ensureStatus(outcome.status)} />
+    <div className="border-l-4 border border-l-primary/40 p-4">
+      <div className="flex items-center gap-2 justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
+            Outcome {index + 1}
+          </span>
+          <StatusBadge status={ensureStatus(outcome.status)} />
+        </div>
 
-        <NodeActionGroup
-          onEdit={() => console.log("[UI] edit outcome", outcome.id)}
-          onStatus={() => console.log("[UI] status outcome", outcome.id)}
+        <NodeOptionsMenu
+          onComplete={() => console.log("[UI] complete outcome", outcome.id)}
           onAiAdjust={() => console.log("[UI] AI adjust outcome", outcome.id)}
-          onReorder={() => console.log("[UI] reorder outcome", outcome.id)}
           onDelete={() =>
             console.log("[UI] delete outcome", outcome.id, "plan", planId)
           }
         />
       </div>
-      <div className="flex flex-col gap-3">
-        <div className="text-xl font-semibold">
-          {index + 1}. {outcome.title}
-        </div>
+      <div className="flex flex-col gap-1">
+        <div className="text-xl font-semibold">{outcome.title}</div>
         <p className="text-sm text-muted-foreground">{outcome.summary}</p>
       </div>
 

@@ -1,13 +1,4 @@
-import {
-  ArrowUpDown,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  Pencil,
-  Plus,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -23,7 +14,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ActionRow } from "./action-row";
-import { NodeActionButton } from "./node-action-button";
+import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
 import type { DeliverableItemProps } from "./types";
 import { ensureStatus, sortByOrder } from "./utils";
@@ -68,42 +59,18 @@ export function DeliverableItem({
         ) : null}
 
         <CardAction className="flex flex-wrap items-center gap-1">
-          <NodeActionButton
-            icon={Pencil}
-            label="Edit deliverable"
-            onClick={() =>
-              console.log("[UI] edit deliverable", deliverable.id, outcomeId)
-            }
-          />
-          <NodeActionButton
-            icon={CheckCircle2}
-            label="Update status"
-            onClick={() =>
+          <NodeOptionsMenu
+            onComplete={() =>
               console.log("[UI] status deliverable", deliverable.id, outcomeId)
             }
-          />
-          <NodeActionButton
-            icon={Sparkles}
-            label="AI adjust"
-            onClick={() =>
+            onAiAdjust={() =>
               console.log(
                 "[UI] AI adjust deliverable",
                 deliverable.id,
                 outcomeId,
               )
             }
-          />
-          <NodeActionButton
-            icon={ArrowUpDown}
-            label="Reorder"
-            onClick={() =>
-              console.log("[UI] reorder deliverable", deliverable.id, outcomeId)
-            }
-          />
-          <NodeActionButton
-            icon={Trash2}
-            label="Delete"
-            onClick={() =>
+            onDelete={() =>
               console.log("[UI] delete deliverable", deliverable.id, outcomeId)
             }
           />
