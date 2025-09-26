@@ -4,6 +4,7 @@ import { type Preloaded, usePreloadedQuery } from "convex/react";
 import { AlertTriangle, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { api } from "@/convex/_generated/api";
 import { PlanOutline } from "./plan-outline";
 
@@ -83,26 +84,31 @@ export function PlanWorkspaceContent({
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-4">
-      <div className="flex flex-col gap-3 items-start">
-        <Button asChild variant="secondary" size="sm">
+      <div className="flex flex-col gap-4">
+        <Button asChild variant="secondary" size="sm" className="self-start">
           <Link href="/workspace">
             <ArrowLeft className="size-4" />
             Back to plans
           </Link>
         </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold">
+              {plan.title}
+            </CardTitle>
+          </CardHeader>
 
-        <div className="space-y-3">
-          <h1 className="text-3xl font-semibold leading-tight">{plan.title}</h1>
+          <CardContent className="space-y-4">
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              {plan.summary}
+            </p>
 
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            {plan.summary}
-          </p>
-
-          <div className="flex flex-col gap-1 rounded-lg border border-border/50 bg-background/60 p-3 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">Initial idea</span>
-            <span className="text-muted-foreground/90">{plan.idea}</span>
-          </div>
-        </div>
+            <div className="flex flex-col gap-1 rounded-lg border p-3 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Initial idea</span>
+              <span className="text-muted-foreground/90">{plan.idea}</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <PlanOutline plan={plan} />

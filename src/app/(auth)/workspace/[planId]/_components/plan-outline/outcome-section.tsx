@@ -1,14 +1,6 @@
 import { Plus } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { DeliverableItem } from "./deliverable-item";
 import { NodeActionGroup } from "./node-action-group";
 import { StatusBadge } from "./status-badge";
@@ -26,35 +18,28 @@ export function OutcomeSection({
   );
 
   return (
-    <Card>
-      <CardHeader className="gap-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Outcome {index + 1}
-            </span>
-            <StatusBadge status={ensureStatus(outcome.status)} />
-          </div>
-          <CardTitle className="text-xl font-semibold">
-            {outcome.title}
-          </CardTitle>
-          {outcome.summary ? (
-            <CardDescription>{outcome.summary}</CardDescription>
-          ) : null}
+    <div className="border-l-4 border border-l-primary/20 p-4">
+      <div className="flex items-center gap-2 justify-end">
+        <StatusBadge status={ensureStatus(outcome.status)} />
+
+        <NodeActionGroup
+          onEdit={() => console.log("[UI] edit outcome", outcome.id)}
+          onStatus={() => console.log("[UI] status outcome", outcome.id)}
+          onAiAdjust={() => console.log("[UI] AI adjust outcome", outcome.id)}
+          onReorder={() => console.log("[UI] reorder outcome", outcome.id)}
+          onDelete={() =>
+            console.log("[UI] delete outcome", outcome.id, "plan", planId)
+          }
+        />
+      </div>
+      <div className="flex flex-col gap-3">
+        <div className="text-xl font-semibold">
+          {index + 1}. {outcome.title}
         </div>
-        <CardAction>
-          <NodeActionGroup
-            onEdit={() => console.log("[UI] edit outcome", outcome.id)}
-            onStatus={() => console.log("[UI] status outcome", outcome.id)}
-            onAiAdjust={() => console.log("[UI] AI adjust outcome", outcome.id)}
-            onReorder={() => console.log("[UI] reorder outcome", outcome.id)}
-            onDelete={() =>
-              console.log("[UI] delete outcome", outcome.id, "plan", planId)
-            }
-          />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+        <p className="text-sm text-muted-foreground">{outcome.summary}</p>
+      </div>
+
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4">
           {deliverables.map((deliverable, deliverableIndex) => (
             <DeliverableItem
@@ -76,7 +61,7 @@ export function OutcomeSection({
         >
           <Plus className="mr-2 size-4" /> Add deliverable
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

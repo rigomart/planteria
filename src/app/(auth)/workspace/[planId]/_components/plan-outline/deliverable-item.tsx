@@ -12,6 +12,12 @@ import { useMemo, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+} from "@/components/ui/card";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -39,30 +45,29 @@ export function DeliverableItem({
   const ToggleIcon = showActions ? ChevronDown : ChevronRight;
 
   return (
-    <div className="rounded-xl border border-border/60 bg-muted/10">
-      <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Deliverable {index + 1}
-            </span>
-            <StatusBadge status={ensureStatus(deliverable.status)} />
-          </div>
-          <h3 className="text-base font-medium leading-tight">
-            {deliverable.title}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Done when{" "}
-            <span className="text-foreground/90">{deliverable.doneWhen}</span>
-          </p>
-          {deliverable.notes ? (
-            <Alert>
-              <AlertTitle>Note</AlertTitle>
-              <AlertDescription>{deliverable.notes}</AlertDescription>
-            </Alert>
-          ) : null}
+    <Card>
+      <CardHeader>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs uppercase tracking-wide text-muted-foreground">
+            Deliverable {index + 1}
+          </span>
+          <StatusBadge status={ensureStatus(deliverable.status)} />
         </div>
-        <div className="flex flex-wrap items-center gap-1">
+        <h3 className="text-base font-medium leading-tight">
+          {deliverable.title}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Done when{" "}
+          <span className="text-foreground/90">{deliverable.doneWhen}</span>
+        </p>
+        {deliverable.notes ? (
+          <Alert>
+            <AlertTitle>Note</AlertTitle>
+            <AlertDescription>{deliverable.notes}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        <CardAction className="flex flex-wrap items-center gap-1">
           <NodeActionButton
             icon={Pencil}
             label="Edit deliverable"
@@ -102,9 +107,9 @@ export function DeliverableItem({
               console.log("[UI] delete deliverable", deliverable.id, outcomeId)
             }
           />
-        </div>
-      </div>
-      <div className="space-y-4 border-t border-border/40 p-4">
+        </CardAction>
+      </CardHeader>
+      <CardContent className="space-y-4 border-t border-border/40 pt-6">
         <Collapsible open={showActions} onOpenChange={setShowActions}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <CollapsibleTrigger asChild>
@@ -163,7 +168,7 @@ export function DeliverableItem({
         >
           <Plus className="mr-2 size-4" /> Add action
         </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

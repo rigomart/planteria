@@ -29,7 +29,7 @@ export default defineSchema({
   outcomes: defineTable({
     planId: v.id("plans"),
     title: v.string(),
-    summary: v.optional(v.string()),
+    summary: v.string(),
     status,
     order: v.number(),
     createdAt: v.number(),

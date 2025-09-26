@@ -259,7 +259,7 @@ async function insertStructure(
     const outcomeId = await ctx.db.insert("outcomes", {
       planId,
       title: outcome.title,
-      summary: outcome.summary ?? undefined,
+      summary: outcome.summary,
       status: ensureStatus(outcome.status),
       order: outcomeIndex,
       createdAt: timestamp,
@@ -376,7 +376,7 @@ async function loadPlanWithStructure(
     outcomePayload.push({
       id: outcome._id,
       title: outcome.title,
-      summary: outcome.summary ?? null,
+      summary: outcome.summary,
       status: outcome.status,
       order: outcome.order,
       deliverables: deliverablePayload,
