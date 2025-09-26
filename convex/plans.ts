@@ -1,24 +1,57 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { mutation, query } from "./_generated/server";
+import { action, internalMutation, mutation, query } from "./_generated/server";
+import { generateStructuredObject } from "./lib/llm";
 import type { PlanDraft } from "./lib/plan_schemas";
 import { planDraftSchema, STATUS_VALUES } from "./lib/plan_schemas";
+import { buildPlanDraftPrompt } from "./lib/prompts";
 
 type StatusValue = (typeof STATUS_VALUES)[number];
 
-export const createPlan = mutation({
+const PLAN_SYSTEM_PROMPT =
+  "You are a senior product planner who turns ideas into outcomes, deliverables, and concrete actions.";
+
+export const generatePlan = action({
   args: {
-    plan: v.any(),
+    idea: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ planId: Id<"plans"> }> => {
     const identity = await ctx.auth.getUserIdentity();
+
     if (!identity) {
       throw new Error("Unauthorized");
     }
 
+    const prompt = buildPlanDraftPrompt({
+      idea: args.idea,
+    });
+
+    const aiResponseObject = await generateStructuredObject({
+      schema: planDraftSchema,
+      system: PLAN_SYSTEM_PROMPT,
+      prompt,
+    });
+
+    const data = await ctx.runMutation(internal.plans.createPlan, {
+      plan: aiResponseObject,
+      userId: identity.subject,
+    });
+
+    return { planId: data.planId };
+  },
+});
+
+export const createPlan = internalMutation({
+  args: {
+    plan: v.any(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
     const parsed = planDraftSchema.parse(args.plan);
-    const planId = await createPlanInternal(ctx, identity.subject, parsed);
+
+    const planId = await createPlanInternal(ctx, args.userId, parsed);
 
     return { planId };
   },

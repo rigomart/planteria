@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { NewPlanDialog } from "./new-plan-dialog";
-import { PlansList } from "./plans-list";
+import { NewPlanDialog } from "./_components/new-plan-dialog";
+import { PlansList } from "./_components/plans-list";
 
 export default function WorkspaceIndexPage() {
   return (

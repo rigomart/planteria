@@ -28,7 +28,7 @@ export function NewPlanDialog() {
             and actions. You can refine everything after creation.
           </DialogDescription>
         </DialogHeader>
-        <SandboxPanel onCompleted={() => setOpen(false)} />
+        <SandboxPanel />
       </DialogContent>
     </Dialog>
   );

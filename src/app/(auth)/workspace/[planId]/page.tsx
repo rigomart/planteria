@@ -9,7 +9,7 @@ import { getToken } from "@/lib/auth-server";
 export default async function PlanWorkspacePage({
   params,
 }: {
-  params: { planId: string };
+  params: Promise<{ planId: string }>;
 }) {
   const token = await getToken();
 
@@ -17,9 +17,11 @@ export default async function PlanWorkspacePage({
     throw new Error("Authentication token missing");
   }
 
+  const { planId } = await params;
+
   const plan = await fetchQuery(
     api.plans.getPlan,
-    { planId: params.planId as Id<"plans"> },
+    { planId: planId as Id<"plans"> },
     { token },
   );
 
