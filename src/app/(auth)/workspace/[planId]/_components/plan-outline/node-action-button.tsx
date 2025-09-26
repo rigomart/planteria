@@ -1,5 +1,10 @@
 import { Button } from "@/components/ui/button";
-import type { NodeActionButtonProps } from "./types";
+
+type NodeActionButtonProps = {
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+};
 
 export function NodeActionButton({
   icon: Icon,

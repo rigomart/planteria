@@ -109,7 +109,7 @@ export function DeliverableItem({
           />
         </CardAction>
       </CardHeader>
-      <CardContent className="space-y-4 border-t border-border/40 pt-6">
+      <CardContent className="space-y-4 border-t border-border/40">
         <Collapsible open={showActions} onOpenChange={setShowActions}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <CollapsibleTrigger asChild>
@@ -139,12 +139,11 @@ export function DeliverableItem({
             <div className="mt-3 flex flex-col gap-2">
               {totalActions > 0 ? (
                 <ul className="flex flex-col gap-2">
-                  {actions.map((action, actionIndex) => (
+                  {actions.map((action) => (
                     <ActionRow
                       key={action.id}
                       action={action}
                       deliverableId={deliverable.id}
-                      index={actionIndex}
                     />
                   ))}
                 </ul>
@@ -154,20 +153,19 @@ export function DeliverableItem({
                   unambiguous.
                 </p>
               )}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() =>
+                  console.log("[UI] add action", deliverable.id, outcomeId)
+                }
+                className="w-full border-dashed border border-primary/10"
+              >
+                <Plus className="mr-2 size-4" /> Add action
+              </Button>
             </div>
           </CollapsibleContent>
         </Collapsible>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="self-start"
-          onClick={() =>
-            console.log("[UI] add action", deliverable.id, outcomeId)
-          }
-        >
-          <Plus className="mr-2 size-4" /> Add action
-        </Button>
       </CardContent>
     </Card>
   );

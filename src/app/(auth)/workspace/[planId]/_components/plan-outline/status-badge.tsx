@@ -1,6 +1,11 @@
 import { cn } from "@/lib/utils";
 import { STATUS_STYLES } from "./constants";
-import type { StatusBadgeProps } from "./types";
+import type { StatusValue } from "./types";
+
+type StatusBadgeProps = {
+  status: StatusValue;
+  className?: string;
+};
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const style = STATUS_STYLES[status];

@@ -52,14 +52,13 @@ export function OutcomeSection({
         </div>
         <Button
           type="button"
-          variant="outline"
-          size="sm"
-          className="self-start"
+          variant="ghost"
           onClick={() =>
             console.log("[UI] add deliverable", outcome.id, "plan", planId)
           }
+          className="w-full border-dashed border border-primary/10"
         >
-          <Plus className="mr-2 size-4" /> Add deliverable
+          <Plus className="size-4" /> Add deliverable
         </Button>
       </div>
     </div>

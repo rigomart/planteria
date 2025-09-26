@@ -1,10 +1,16 @@
 import { ArrowUpDown, CheckCircle2, Pencil, Trash2 } from "lucide-react";
+import type { Id } from "@/convex/_generated/dataModel";
 import { NodeActionButton } from "./node-action-button";
 import { StatusBadge } from "./status-badge";
-import type { ActionRowProps } from "./types";
+import type { ActionItem } from "./types";
 import { ensureStatus } from "./utils";
 
-export function ActionRow({ action, deliverableId, index }: ActionRowProps) {
+type ActionRowProps = {
+  action: ActionItem;
+  deliverableId: Id<"deliverables">;
+};
+
+export function ActionRow({ action, deliverableId }: ActionRowProps) {
   return (
     <li className="group flex items-center justify-between rounded-lg border border-transparent bg-background/40 px-3 py-2 text-sm transition hover:border-border/60 hover:bg-muted/20">
       <div className="flex items-center gap-3">
@@ -12,12 +18,8 @@ export function ActionRow({ action, deliverableId, index }: ActionRowProps) {
           status={ensureStatus(action.status)}
           className="px-2 py-0.5 text-[11px]"
         />
-        <div className="flex flex-col">
-          <span className="font-medium leading-tight">{action.title}</span>
-          <span className="text-xs text-muted-foreground">
-            Action {index + 1}
-          </span>
-        </div>
+
+        <span className="leading-tight">{action.title}</span>
       </div>
       <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
         <NodeActionButton

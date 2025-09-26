@@ -35,28 +35,3 @@ export type DeliverableItemProps = {
   outcomeId: Id<"outcomes">;
   index: number;
 };
-
-export type ActionRowProps = {
-  action: ActionItem;
-  deliverableId: Id<"deliverables">;
-  index: number;
-};
-
-export type NodeActionGroupProps = {
-  onEdit: () => void;
-  onStatus: () => void;
-  onAiAdjust: () => void;
-  onReorder: () => void;
-  onDelete: () => void;
-};
-
-export type NodeActionButtonProps = {
-  icon: React.ElementType;
-  label: string;
-  onClick: () => void;
-};
-
-export type StatusBadgeProps = {
-  status: StatusValue;
-  className?: string;
-};

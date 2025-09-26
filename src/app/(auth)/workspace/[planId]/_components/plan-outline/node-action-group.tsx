@@ -6,7 +6,14 @@ import {
   Trash2,
 } from "lucide-react";
 import { NodeActionButton } from "./node-action-button";
-import type { NodeActionGroupProps } from "./types";
+
+type NodeActionGroupProps = {
+  onEdit: () => void;
+  onStatus: () => void;
+  onAiAdjust: () => void;
+  onReorder: () => void;
+  onDelete: () => void;
+};
 
 export function NodeActionGroup({
   onEdit,
