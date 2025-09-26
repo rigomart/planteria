@@ -5,6 +5,7 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
+import { PlanOutline } from "./plan-outline";
 
 type PlanWorkspaceContentProps = {
   preloadedPlan: Preloaded<typeof api.plans.getPlan>;
@@ -55,39 +56,59 @@ export function PlanWorkspaceContent({
     );
   }
 
+  if (plan.status !== "ready") {
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-semibold">{plan.title}</h1>
+            <p className="text-sm text-muted-foreground">{plan.idea}</p>
+          </div>
+          <Button asChild variant="secondary">
+            <Link href="/workspace">Back to plans</Link>
+          </Button>
+        </header>
+
+        <section className="rounded-xl border bg-card p-6 shadow-sm">
+          {plan.status === "generating" && (
+            <GeneratingPlanView idea={plan.idea} />
+          )}
+          {plan.status === "error" && (
+            <PlanErrorView error={plan.generationError} />
+          )}
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-semibold">{plan.title}</h1>
-          <p className="text-sm">{plan.summary}</p>
-          <p className="text-sm text-muted-foreground">{plan.idea}</p>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Plan outline
+            </p>
+            <h1 className="text-3xl font-semibold leading-tight">
+              {plan.title}
+            </h1>
+          </div>
+          {plan.summary ? (
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              {plan.summary}
+            </p>
+          ) : null}
+          <div className="rounded-lg border border-border/50 bg-background/60 p-3 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Idea</span>
+            <span className="ml-2 text-muted-foreground/90">{plan.idea}</span>
+          </div>
         </div>
         <Button asChild variant="secondary">
           <Link href="/workspace">Back to plans</Link>
         </Button>
       </header>
 
-      <section className="rounded-xl border bg-card p-6 shadow-sm">
-        {plan.status === "ready" && (
-          <>
-            <h2 className="text-lg font-semibold">Stored plan JSON</h2>
-            <p className="text-sm">
-              Temporary view until the full editor is wired. Data is already
-              stored in Convex.
-            </p>
-            <pre className="mt-4 max-h-[32rem] overflow-y-auto whitespace-pre-wrap rounded border px-4 py-3 text-xs">
-              {JSON.stringify(plan, null, 2)}
-            </pre>
-          </>
-        )}
-        {plan.status === "generating" && (
-          <GeneratingPlanView idea={plan.idea} />
-        )}
-        {plan.status === "error" && (
-          <PlanErrorView error={plan.generationError} />
-        )}
-      </section>
+      <PlanOutline plan={plan} />
     </div>
   );
 }
