@@ -18,7 +18,7 @@ export function OutcomeSection({
   );
 
   return (
-    <div className="border-l-4 border border-l-primary/40 p-4">
+    <div className="border border-primary/10 p-4 sm:p-6 bg-card/60">
       <div className="flex items-center gap-2 justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
@@ -40,7 +40,7 @@ export function OutcomeSection({
         <p className="text-sm text-muted-foreground">{outcome.summary}</p>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 mt-6">
         <div className="flex flex-col gap-4">
           {deliverables.map((deliverable, deliverableIndex) => (
             <DeliverableItem

@@ -36,7 +36,7 @@ export function DeliverableItem({
   const ToggleIcon = showActions ? ChevronDown : ChevronRight;
 
   return (
-    <Card>
+    <Card className="border-l-2 border-l-primary/40">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground">
