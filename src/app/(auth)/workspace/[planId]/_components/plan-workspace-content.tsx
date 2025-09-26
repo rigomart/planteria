@@ -5,43 +5,6 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-
-type PlanAction = {
-  id: Id<"actions">;
-  title: string;
-  status: string;
-  order: number;
-};
-
-type PlanDeliverable = {
-  id: Id<"deliverables">;
-  title: string;
-  doneWhen: string;
-  notes: string | null;
-  status: string;
-  order: number;
-  actions: PlanAction[];
-};
-
-type PlanOutcome = {
-  id: Id<"outcomes">;
-  title: string;
-  summary: string | null;
-  status: string;
-  order: number;
-  deliverables: PlanDeliverable[];
-};
-
-type PlanWorkspaceData = {
-  id: Id<"plans">;
-  idea: string;
-  title: string;
-  summary: string;
-  status: "generating" | "ready" | "error";
-  generationError: string | null;
-  outcomes: PlanOutcome[];
-};
 
 type PlanWorkspaceContentProps = {
   preloadedPlan: Preloaded<typeof api.plans.getPlan>;
@@ -50,10 +13,7 @@ type PlanWorkspaceContentProps = {
 export function PlanWorkspaceContent({
   preloadedPlan,
 }: PlanWorkspaceContentProps) {
-  const plan = usePreloadedQuery(preloadedPlan) as
-    | PlanWorkspaceData
-    | null
-    | undefined;
+  const plan = usePreloadedQuery(preloadedPlan);
 
   if (plan === undefined) {
     return (
@@ -109,7 +69,18 @@ export function PlanWorkspaceContent({
       </header>
 
       <section className="rounded-xl border bg-card p-6 shadow-sm">
-        {plan.status === "ready" && <ReadyPlanView plan={plan} />}
+        {plan.status === "ready" && (
+          <>
+            <h2 className="text-lg font-semibold">Stored plan JSON</h2>
+            <p className="text-sm">
+              Temporary view until the full editor is wired. Data is already
+              stored in Convex.
+            </p>
+            <pre className="mt-4 max-h-[32rem] overflow-y-auto whitespace-pre-wrap rounded border px-4 py-3 text-xs">
+              {JSON.stringify(plan, null, 2)}
+            </pre>
+          </>
+        )}
         {plan.status === "generating" && (
           <GeneratingPlanView idea={plan.idea} />
         )}
@@ -118,21 +89,6 @@ export function PlanWorkspaceContent({
         )}
       </section>
     </div>
-  );
-}
-
-function ReadyPlanView({ plan }: { plan: PlanWorkspaceData }) {
-  return (
-    <>
-      <h2 className="text-lg font-semibold">Stored plan JSON</h2>
-      <p className="text-sm">
-        Temporary view until the full editor is wired. Data is already stored in
-        Convex.
-      </p>
-      <pre className="mt-4 max-h-[32rem] overflow-y-auto whitespace-pre-wrap rounded border px-4 py-3 text-xs">
-        {JSON.stringify(plan, null, 2)}
-      </pre>
-    </>
   );
 }
 
