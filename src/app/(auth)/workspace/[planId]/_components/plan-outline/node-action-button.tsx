@@ -1,0 +1,21 @@
+import { Button } from "@/components/ui/button";
+import type { NodeActionButtonProps } from "./types";
+
+export function NodeActionButton({
+  icon: Icon,
+  label,
+  onClick,
+}: NodeActionButtonProps) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="size-8"
+      onClick={onClick}
+      aria-label={label}
+    >
+      <Icon className="size-4" />
+    </Button>
+  );
+}
