@@ -50,14 +50,38 @@ type PlanWorkspaceContentProps = {
 export function PlanWorkspaceContent({
   preloadedPlan,
 }: PlanWorkspaceContentProps) {
-  const plan = usePreloadedQuery(preloadedPlan);
+  const plan = usePreloadedQuery(preloadedPlan) as
+    | PlanWorkspaceData
+    | null
+    | undefined;
 
-  if (!plan) {
+  if (plan === undefined) {
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-semibold">Loading plan</h1>
+            <p className="text-sm text-muted-foreground">
+              Setting up your workspace and subscribing to live updates.
+            </p>
+          </div>
+          <Button asChild variant="secondary" disabled>
+            <Link href="/workspace">Back to plans</Link>
+          </Button>
+        </div>
+        <section className="flex items-center gap-3 rounded-xl border bg-card p-6 text-sm text-muted-foreground shadow-sm">
+          <Loader2 className="size-5 animate-spin" />
+          Loading...
+        </section>
+      </div>
+    );
+  }
+
+  if (plan === null) {
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide">Plan overview</p>
             <h1 className="text-3xl font-semibold">Plan missing</h1>
             <p className="text-sm text-muted-foreground">
               We couldn’t load this plan. Try returning to your workspace.
@@ -75,13 +99,9 @@ export function PlanWorkspaceContent({
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-wide">Plan overview</p>
           <h1 className="text-3xl font-semibold">{plan.title}</h1>
           <p className="text-sm">{plan.summary}</p>
           <p className="text-sm text-muted-foreground">{plan.idea}</p>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Status: {plan.status}
-          </p>
         </div>
         <Button asChild variant="secondary">
           <Link href="/workspace">Back to plans</Link>
