@@ -3,13 +3,57 @@ import { v } from "convex/values";
 import { components, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { action, internalMutation, mutation, query } from "./_generated/server";
+import {
+  action,
+  internalAction,
+  internalMutation,
+  query,
+} from "./_generated/server";
 import { planningAgent } from "./agents/planning";
 import type { PlanDraft } from "./lib/plan_schemas";
 import { planDraftSchema, STATUS_VALUES } from "./lib/plan_schemas";
 import { buildPlanDraftPrompt } from "./lib/prompts";
 
 type StatusValue = (typeof STATUS_VALUES)[number];
+
+const GENERATING_SUMMARY = "Hang tight while we generate your plan.";
+const PLACEHOLDER_TITLE_FALLBACK = "New plan";
+const MAX_PLAN_TITLE_LENGTH = 80;
+const MAX_GENERATION_ERROR_LENGTH = 240;
+
+function derivePlaceholderTitle(idea: string) {
+  const trimmed = idea.trim();
+
+  if (trimmed.length >= 3 && trimmed.length <= MAX_PLAN_TITLE_LENGTH) {
+    return trimmed;
+  }
+
+  if (trimmed.length > MAX_PLAN_TITLE_LENGTH) {
+    return `${trimmed.slice(0, MAX_PLAN_TITLE_LENGTH - 3).trimEnd()}...`;
+  }
+
+  return PLACEHOLDER_TITLE_FALLBACK;
+}
+
+function errorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return "Unknown error";
+}
+
+function truncateError(message: string) {
+  if (message.length <= MAX_GENERATION_ERROR_LENGTH) {
+    return message;
+  }
+
+  return `${message.slice(0, MAX_GENERATION_ERROR_LENGTH - 3)}...`;
+}
 
 export const generatePlan = action({
   args: {
@@ -22,116 +66,108 @@ export const generatePlan = action({
       throw new Error("Unauthorized");
     }
 
-    const threadId = await createThread(ctx, components.agent, {
-      userId: identity.subject,
-      title: "Test thread",
-      summary: "Test summary",
-    });
-
-    const aiResponse = await planningAgent.generateObject(
-      ctx,
-      { threadId },
-      {
-        schema: planDraftSchema,
-        prompt: buildPlanDraftPrompt({
-          idea: args.idea,
-        }),
-      },
-    );
-
-    const parsedPlan = planDraftSchema.parse(aiResponse.object);
-
-    const data = await ctx.runMutation(internal.plans.createPlan, {
-      plan: parsedPlan,
+    const { planId } = await ctx.runMutation(internal.plans.createPlanShell, {
+      idea: args.idea,
       userId: identity.subject,
     });
 
-    return { planId: data.planId };
-  },
-});
-
-export const createPlan = internalMutation({
-  args: {
-    plan: v.any(),
-    userId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const parsed = planDraftSchema.parse(args.plan);
-
-    const planId = await createPlanInternal(ctx, args.userId, parsed);
+    await ctx.scheduler.runAfter(0, internal.plans.generatePlanInBackground, {
+      idea: args.idea,
+      planId,
+      userId: identity.subject,
+    });
 
     return { planId };
   },
 });
 
-export const replacePlan = mutation({
+export const createPlanShell = internalMutation({
   args: {
-    planId: v.id("plans"),
-    plan: v.any(),
+    idea: v.string(),
+    userId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthorized");
-    }
+    const timestamp = Date.now();
+    const planId = await ctx.db.insert("plans", {
+      userId: args.userId,
+      idea: args.idea,
+      title: derivePlaceholderTitle(args.idea),
+      summary: GENERATING_SUMMARY,
+      status: "generating",
+      generationError: null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
 
+    return { planId };
+  },
+});
+
+export const generatePlanInBackground = internalAction({
+  args: {
+    idea: v.string(),
+    planId: v.id("plans"),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const threadId = await createThread(ctx, components.agent, {
+        userId: args.userId,
+        title: "Plan generation",
+        summary: "Generating plan draft",
+      });
+
+      const aiResponse = await planningAgent.generateObject(
+        ctx,
+        { threadId },
+        {
+          schema: planDraftSchema,
+          prompt: buildPlanDraftPrompt({
+            idea: args.idea,
+          }),
+        },
+      );
+
+      const parsedPlan = planDraftSchema.parse(aiResponse.object);
+
+      await ctx.runMutation(internal.plans.applyPlanDraft, {
+        plan: parsedPlan,
+        planId: args.planId,
+      });
+    } catch (error) {
+      await ctx.runMutation(internal.plans.markPlanGenerationFailed, {
+        error: errorMessage(error),
+        planId: args.planId,
+      });
+
+      throw error;
+    }
+  },
+});
+
+export const applyPlanDraft = internalMutation({
+  args: {
+    plan: v.any(),
+    planId: v.id("plans"),
+  },
+  handler: async (ctx, args) => {
     const parsed = planDraftSchema.parse(args.plan);
-    const planDoc = await ctx.db.get(args.planId);
-
-    if (!planDoc || planDoc.userId !== identity.subject) {
-      throw new Error("Plan not found");
-    }
-
     await replacePlanInternal(ctx, args.planId, parsed);
-
     return { planId: args.planId };
   },
 });
 
-export const saveDraft = mutation({
+export const markPlanGenerationFailed = internalMutation({
   args: {
-    plan: v.any(),
+    error: v.string(),
+    planId: v.id("plans"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthorized");
-    }
-
-    const parsed = planDraftSchema.parse(args.plan);
-    const existingPlan = await ctx.db
-      .query("plans")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
-      .first();
-
-    if (!existingPlan) {
-      const planId = await createPlanInternal(ctx, identity.subject, parsed);
-      return { planId };
-    }
-
-    await replacePlanInternal(ctx, existingPlan._id, parsed);
-    return { planId: existingPlan._id };
-  },
-});
-
-export const getCurrentPlan = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    const plan = await ctx.db
-      .query("plans")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
-      .first();
-
-    if (!plan) {
-      return null;
-    }
-
-    return loadPlanWithStructure(ctx, plan._id);
+    await ctx.db.patch(args.planId, {
+      status: "error",
+      generationError: truncateError(args.error),
+      updatedAt: Date.now(),
+    });
   },
 });
 
@@ -153,7 +189,9 @@ export const listPlans = query({
         id: plan._id,
         title: plan.title ?? plan.idea,
         idea: plan.idea,
-        summary: plan.summary ?? plan.mission ?? "",
+        summary: plan.summary,
+        status: plan.status,
+        generationError: plan.generationError ?? null,
         createdAt: plan.createdAt,
         updatedAt: plan.updatedAt,
       }))
@@ -269,25 +307,6 @@ function ensureStatus(value: string | undefined): StatusValue {
   return STATUS_VALUES[0];
 }
 
-async function createPlanInternal(
-  ctx: MutationCtx,
-  userId: string,
-  plan: PlanDraft,
-) {
-  const timestamp = Date.now();
-  const planId = await ctx.db.insert("plans", {
-    userId,
-    idea: plan.idea,
-    title: plan.title,
-    summary: plan.summary,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  });
-
-  await insertStructure(ctx, planId, plan, timestamp);
-  return planId;
-}
-
 async function replacePlanInternal(
   ctx: MutationCtx,
   planId: Id<"plans">,
@@ -299,6 +318,8 @@ async function replacePlanInternal(
     idea: plan.idea,
     title: plan.title,
     summary: plan.summary,
+    status: "ready",
+    generationError: null,
     updatedAt: timestamp,
   });
 
@@ -366,7 +387,9 @@ async function loadPlanWithStructure(
     id: plan._id,
     idea: plan.idea,
     title: plan.title ?? plan.idea,
-    summary: plan.summary ?? plan.mission ?? "",
+    summary: plan.summary,
+    status: plan.status,
+    generationError: plan.generationError ?? null,
     outcomes: outcomePayload,
   };
 }

@@ -7,6 +7,12 @@ const status = v.union(
   v.literal("done"),
 );
 
+const planLifecycleStatus = v.union(
+  v.literal("generating"),
+  v.literal("ready"),
+  v.literal("error"),
+);
+
 export default defineSchema({
   plans: defineTable({
     userId: v.string(),
@@ -14,6 +20,8 @@ export default defineSchema({
     title: v.string(),
     summary: v.string(),
     mission: v.optional(v.string()),
+    status: planLifecycleStatus,
+    generationError: v.optional(v.union(v.string(), v.null())),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),

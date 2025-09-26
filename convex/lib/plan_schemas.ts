@@ -4,6 +4,14 @@ export const STATUS_VALUES = ["todo", "doing", "done"] as const;
 
 export const statusSchema = z.enum(STATUS_VALUES);
 
+export const PLAN_LIFECYCLE_STATUS_VALUES = [
+  "generating",
+  "ready",
+  "error",
+] as const;
+
+export type PlanLifecycleStatus = (typeof PLAN_LIFECYCLE_STATUS_VALUES)[number];
+
 export const planActionSchema = z.object({
   title: z
     .string()
@@ -53,11 +61,7 @@ export const planOutcomeSchema = z.object({
 });
 
 export const planDraftSchema = z.object({
-  title: z
-    .string()
-    .min(3)
-    .max(80)
-    .describe("Short plan title (3-80 chars)"),
+  title: z.string().min(3).max(80).describe("Short plan title (3-80 chars)"),
   idea: z.string().describe("Original idea text"),
   summary: z
     .string()
