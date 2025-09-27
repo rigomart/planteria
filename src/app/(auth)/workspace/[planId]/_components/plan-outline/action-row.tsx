@@ -22,8 +22,8 @@ export function ActionRow({ action, deliverableId }: ActionRowProps) {
             })
           }
           placeholder="Add a brief action title"
-          displayClassName="text-sm text-muted-foreground"
-          editorClassName="text-sm"
+          displayClassName="text-xs text-muted-foreground"
+          editorClassName="text-xs"
         />
 
         <StatusBadge status={action.status} />

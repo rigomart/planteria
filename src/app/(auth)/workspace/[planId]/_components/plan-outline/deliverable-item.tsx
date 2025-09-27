@@ -29,9 +29,6 @@ export function DeliverableItem({
     () => sortByOrder(deliverable.actions ?? []),
     [deliverable.actions],
   );
-  const completedActions = actions.filter(
-    (item) => item.status === "done",
-  ).length;
   const totalActions = actions.length;
 
   return (
@@ -79,7 +76,7 @@ export function DeliverableItem({
             </div>
           </div>
 
-          <CollapsibleContent>
+          <CollapsibleContent className="space-y-3">
             <div className="flex flex-col">
               <EditableField
                 value={deliverable.doneWhen ?? ""}
@@ -99,18 +96,6 @@ export function DeliverableItem({
                   <AlertDescription>{deliverable.notes}</AlertDescription>
                 </Alert>
               ) : null}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              {totalActions > 0 ? (
-                <span className="text-xs text-muted-foreground">
-                  {completedActions}/{totalActions} done
-                </span>
-              ) : (
-                <span className="text-xs text-muted-foreground">
-                  No actions yet
-                </span>
-              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -133,9 +118,11 @@ export function DeliverableItem({
               <Button
                 type="button"
                 variant="dashed"
+                size="sm"
                 onClick={() =>
                   console.log("[UI] add action", deliverable.id, outcomeId)
                 }
+                className="self-start"
               >
                 <Plus className="mr-2 size-4" /> Add action
               </Button>
