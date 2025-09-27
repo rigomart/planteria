@@ -83,8 +83,8 @@ export function PlanWorkspaceContent({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-4">
-      <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8 py-4">
+      <div className="flex flex-col gap-2">
         <Button asChild variant="secondary" size="sm" className="self-start">
           <Link href="/workspace">
             <ArrowLeft className="size-4" />
@@ -111,7 +111,9 @@ export function PlanWorkspaceContent({
         </Card>
       </div>
 
-      <PlanOutline plan={plan} />
+      <div className="mx-auto flex flex-col w-full max-w-5xl">
+        <PlanOutline plan={plan} />
+      </div>
     </div>
   );
 }

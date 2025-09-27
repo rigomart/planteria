@@ -1,4 +1,4 @@
-import { CheckCircle2, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
+import { MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,13 +8,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type NodeOptionsMenuProps = {
-  onComplete: () => void;
   onAiAdjust: () => void;
   onDelete: () => void;
 };
 
 export function NodeOptionsMenu({
-  onComplete,
   onAiAdjust,
   onDelete,
 }: NodeOptionsMenuProps) {
@@ -32,16 +30,6 @@ export function NodeOptionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="bottom" className="w-48 p-1">
-        <DropdownMenuItem
-          variant="default"
-          onSelect={(event) => {
-            event.preventDefault();
-            onComplete();
-          }}
-        >
-          <CheckCircle2 className="size-4" />
-          Complete
-        </DropdownMenuItem>
         <DropdownMenuItem
           variant="default"
           onSelect={(event) => {

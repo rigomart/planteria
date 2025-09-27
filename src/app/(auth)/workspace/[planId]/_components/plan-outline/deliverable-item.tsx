@@ -60,9 +60,6 @@ export function DeliverableItem({
 
         <CardAction className="flex flex-wrap items-center gap-1">
           <NodeOptionsMenu
-            onComplete={() =>
-              console.log("[UI] status deliverable", deliverable.id, outcomeId)
-            }
             onAiAdjust={() =>
               console.log(
                 "[UI] AI adjust deliverable",

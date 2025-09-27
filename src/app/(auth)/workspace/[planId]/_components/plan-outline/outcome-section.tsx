@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { DeliverableItem } from "./deliverable-item";
+import { InlineEditableField } from "./inline-editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
 import type { OutcomeSectionProps } from "./types";
@@ -18,8 +19,8 @@ export function OutcomeSection({
   );
 
   return (
-    <div className="border border-primary/10 p-4 sm:p-6 bg-card/60">
-      <div className="flex items-center gap-2 justify-between mb-3">
+    <div className="border border-primary/10 p-4 sm:p-6 bg-card/40">
+      <div className="flex items-center gap-2 justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
             Outcome {index + 1}
@@ -28,16 +29,39 @@ export function OutcomeSection({
         </div>
 
         <NodeOptionsMenu
-          onComplete={() => console.log("[UI] complete outcome", outcome.id)}
           onAiAdjust={() => console.log("[UI] AI adjust outcome", outcome.id)}
           onDelete={() =>
             console.log("[UI] delete outcome", outcome.id, "plan", planId)
           }
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <div className="text-xl font-semibold">{outcome.title}</div>
-        <p className="text-sm text-muted-foreground">{outcome.summary}</p>
+      <div className="flex flex-col gap-0">
+        <InlineEditableField
+          value={outcome.title ?? ""}
+          onSave={(nextValue) =>
+            console.log("[UI] save outcome title", {
+              planId,
+              outcomeId: outcome.id,
+              value: nextValue,
+            })
+          }
+          placeholder="Add an outcome title"
+          displayClassName="text-xl font-semibold"
+          editorClassName="text-xl font-semibold"
+        />
+        <InlineEditableField
+          value={outcome.summary ?? ""}
+          onSave={(nextValue) =>
+            console.log("[UI] save outcome summary", {
+              planId,
+              outcomeId: outcome.id,
+              value: nextValue,
+            })
+          }
+          placeholder="Add a brief outcome summary"
+          displayClassName="text-sm text-muted-foreground"
+          editorClassName="text-sm"
+        />
       </div>
 
       <div className="flex flex-col gap-4 mt-6">
