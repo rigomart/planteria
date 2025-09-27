@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { DeliverableItem } from "./deliverable-item";
-import { InlineEditableField } from "./inline-editable-field";
+import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
 import type { OutcomeSectionProps } from "./types";
@@ -36,7 +36,7 @@ export function OutcomeSection({
         />
       </div>
       <div className="flex flex-col gap-0">
-        <InlineEditableField
+        <EditableField
           value={outcome.title ?? ""}
           onSave={(nextValue) =>
             console.log("[UI] save outcome title", {
@@ -49,7 +49,7 @@ export function OutcomeSection({
           displayClassName="text-xl font-semibold"
           editorClassName="text-xl font-semibold"
         />
-        <InlineEditableField
+        <EditableField
           value={outcome.summary ?? ""}
           onSave={(nextValue) =>
             console.log("[UI] save outcome summary", {

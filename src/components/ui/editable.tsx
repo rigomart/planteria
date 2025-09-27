@@ -134,6 +134,7 @@ interface EditableContextValue {
   readOnly?: boolean;
   required?: boolean;
   invalid?: boolean;
+  submitOnBlur?: boolean;
 }
 
 const EditableContext = React.createContext<EditableContextValue | null>(null);
@@ -173,6 +174,7 @@ interface EditableRootProps
   readOnly?: boolean;
   required?: boolean;
   invalid?: boolean;
+  submitOnBlur?: boolean;
 }
 
 function EditableRoot(props: EditableRootProps) {
@@ -233,6 +235,7 @@ function EditableRootImpl(
     required,
     readOnly,
     invalid,
+    submitOnBlur = false,
     className,
     ref,
     ...rootProps
@@ -310,6 +313,7 @@ function EditableRootImpl(
       readOnly,
       required,
       invalid,
+      submitOnBlur,
     }),
     [
       id,
@@ -330,6 +334,7 @@ function EditableRootImpl(
       required,
       readOnly,
       invalid,
+      submitOnBlur,
     ],
   );
 
@@ -503,7 +508,7 @@ function EditablePreview(props: EditablePreviewProps) {
       onFocus={onFocus}
       onKeyDown={onKeyDown}
       className={cn(
-        "cursor-text truncate rounded-sm border border-transparent py-1 text-base focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring data-disabled:cursor-not-allowed data-readonly:cursor-default data-empty:text-muted-foreground data-disabled:opacity-50 md:text-sm",
+        "cursor-text truncate rounded-sm border border-transparent py-1 text-base focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring data-disabled:cursor-not-allowed data-readonly:cursor-default data-empty:text-muted-foreground data-disabled:opacity-50 hover:bg-foreground/5",
         className,
       )}
     >
@@ -571,13 +576,26 @@ function EditableInput(props: EditableInputProps) {
       const isAction =
         relatedTarget instanceof HTMLElement &&
         (relatedTarget.closest(`[data-slot="editable-trigger"]`) ||
-          relatedTarget.closest(`[data-slot="editable-cancel"]`));
+          relatedTarget.closest(`[data-slot="editable-cancel"]`) ||
+          relatedTarget.closest(`[data-slot="editable-submit"]`));
 
       if (!isAction) {
-        context.onSubmit(value);
+        if (context.submitOnBlur) {
+          context.onSubmit(value);
+        } else {
+          context.onCancel();
+        }
       }
     },
-    [value, context.onSubmit, inputProps.onBlur, isDisabled, isReadOnly],
+    [
+      value,
+      context.onSubmit,
+      context.onCancel,
+      context.submitOnBlur,
+      inputProps.onBlur,
+      isDisabled,
+      isReadOnly,
+    ],
   );
 
   const onChange = React.useCallback(
@@ -662,7 +680,7 @@ function EditableInput(props: EditableInputProps) {
       onChange={onChange}
       onKeyDown={onKeyDown}
       className={cn(
-        "flex rounded-sm border border-input bg-transparent py-1 text-base shadow-xs transition-colors file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "flex rounded-sm border border-input bg-transparent py-1 text-base shadow-xs transition-colors file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
         context.autosize ? "w-auto" : "w-full",
         className,
       )}
