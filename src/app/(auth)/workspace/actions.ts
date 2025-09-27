@@ -27,7 +27,7 @@ export async function createPlanForIdea(
   }
 
   const { planId } = await fetchAction(
-    api.plans.generatePlan,
+    api.plans.generation.generatePlan,
     { idea: validatedFields.data.idea },
     { token },
   );

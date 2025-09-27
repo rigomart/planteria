@@ -19,7 +19,7 @@ export default async function PlanWorkspacePage({
   const { planId } = await params;
 
   const preloadedPlan = await preloadQuery(
-    api.plans.getPlan,
+    api.plans.queries.getPlan,
     { planId },
     { token },
   );

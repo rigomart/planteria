@@ -13,7 +13,8 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as lib_plan_schemas from "../lib/plan_schemas.js";
 import type * as lib_prompts from "../lib/prompts.js";
-import type * as plans from "../plans.js";
+import type * as plans_generation from "../plans/generation.js";
+import type * as plans_queries from "../plans/queries.js";
 import type * as users from "../users.js";
 
 import type {
@@ -36,7 +37,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/plan_schemas": typeof lib_plan_schemas;
   "lib/prompts": typeof lib_prompts;
-  plans: typeof plans;
+  "plans/generation": typeof plans_generation;
+  "plans/queries": typeof plans_queries;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

@@ -9,7 +9,7 @@ import type { api } from "@/convex/_generated/api";
 import { PlanOutline } from "./plan-outline";
 
 type PlanWorkspaceContentProps = {
-  preloadedPlan: Preloaded<typeof api.plans.getPlan>;
+  preloadedPlan: Preloaded<typeof api.plans.queries.getPlan>;
 };
 
 export function PlanWorkspaceContent({

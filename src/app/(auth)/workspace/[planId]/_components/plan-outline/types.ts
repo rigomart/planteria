@@ -8,7 +8,7 @@ export type StatusStyle = {
 };
 
 export type LoadedPlan = NonNullable<
-  FunctionReturnType<typeof api.plans.getPlan>
+  FunctionReturnType<typeof api.plans.queries.getPlan>
 >;
 
 export type Outcome = LoadedPlan["outcomes"][number];

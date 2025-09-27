@@ -1,19 +1,11 @@
 import { createThread } from "@convex-dev/agent";
 import { v } from "convex/values";
-import { components, internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
-import type { MutationCtx, QueryCtx } from "./_generated/server";
-import {
-  action,
-  internalAction,
-  internalMutation,
-  query,
-} from "./_generated/server";
-import { planningAgent } from "./agents/planning";
-import { planDraftSchema, STATUS_VALUES } from "./lib/plan_schemas";
-import { buildPlanDraftPrompt } from "./lib/prompts";
-
-type StatusValue = (typeof STATUS_VALUES)[number];
+import { components, internal } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
+import { action, internalAction, internalMutation } from "../_generated/server";
+import { planningAgent } from "../agents/planning";
+import { planDraftSchema, STATUS_VALUES } from "../lib/plan_schemas";
+import { buildPlanDraftPrompt } from "../lib/prompts";
 
 const GENERATING_SUMMARY = "Hang tight while we generate your plan.";
 const MAX_GENERATION_ERROR_LENGTH = 240;
@@ -58,16 +50,23 @@ export const generatePlan = action({
       throw new Error("Unauthorized");
     }
 
-    const { planId } = await ctx.runMutation(internal.plans.createPlanShell, {
-      idea: args.idea,
-      userId: identity.subject,
-    });
+    const { planId } = await ctx.runMutation(
+      internal.plans.generation.createPlanShell,
+      {
+        idea: args.idea,
+        userId: identity.subject,
+      },
+    );
 
-    await ctx.scheduler.runAfter(0, internal.plans.generatePlanInBackground, {
-      idea: args.idea,
-      planId,
-      userId: identity.subject,
-    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.plans.generation.generatePlanInBackground,
+      {
+        idea: args.idea,
+        planId,
+        userId: identity.subject,
+      },
+    );
 
     return { planId };
   },
@@ -128,15 +127,18 @@ export const generatePlanInBackground = internalAction({
 
       const parsedPlan = planDraftSchema.parse(aiResponse.object);
 
-      await ctx.runMutation(internal.plans.initializePlan, {
+      await ctx.runMutation(internal.plans.generation.initializePlan, {
         plan: parsedPlan,
         planId: args.planId,
       });
     } catch (error) {
-      await ctx.runMutation(internal.plans.markPlanGenerationFailed, {
-        error: errorMessage(error),
-        planId: args.planId,
-      });
+      await ctx.runMutation(
+        internal.plans.generation.markPlanGenerationFailed,
+        {
+          error: errorMessage(error),
+          planId: args.planId,
+        },
+      );
 
       throw error;
     }
@@ -221,58 +223,7 @@ export const markPlanGenerationFailed = internalMutation({
   },
 });
 
-/**
- * Query returning the authenticated user's plans, newest first, for the workspace list view.
- */
-export const listPlans = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    const plans = await ctx.db
-      .query("plans")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
-      .collect();
-
-    return plans
-      .map((plan) => ({
-        id: plan._id,
-        title: plan.title ?? plan.idea,
-        idea: plan.idea,
-        summary: plan.summary,
-        status: plan.status,
-        generationError: plan.generationError ?? null,
-        createdAt: plan.createdAt,
-        updatedAt: plan.updatedAt,
-      }))
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-  },
-});
-
-/**
- * Query that loads a single plan plus nested structure with an authorization check.
- */
-export const getPlan = query({
-  args: {
-    planId: v.id("plans"),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    const plan = await ctx.db.get(args.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      return null;
-    }
-
-    return loadPlanWithStructure(ctx, plan._id);
-  },
-});
+type StatusValue = (typeof STATUS_VALUES)[number];
 
 /**
  * Fall back to a known status value if the incoming string is missing or invalid.
@@ -287,74 +238,4 @@ function ensureStatus(value: string | undefined): StatusValue {
   }
 
   return STATUS_VALUES[0];
-}
-
-/**
- * Aggregate the plan document with its ordered outcomes, deliverables, and actions.
- */
-async function loadPlanWithStructure(
-  ctx: QueryCtx | MutationCtx,
-  planId: Id<"plans">,
-) {
-  const plan = await ctx.db.get(planId);
-  if (!plan) {
-    return null;
-  }
-
-  const outcomes = await ctx.db
-    .query("outcomes")
-    .withIndex("by_plan_order", (q) => q.eq("planId", planId))
-    .collect();
-
-  const outcomePayload = [];
-  for (const outcome of outcomes) {
-    const deliverables = await ctx.db
-      .query("deliverables")
-      .withIndex("by_outcome_order", (q) => q.eq("outcomeId", outcome._id))
-      .collect();
-
-    const deliverablePayload = [];
-    for (const deliverable of deliverables) {
-      const actions = await ctx.db
-        .query("actions")
-        .withIndex("by_deliverable_order", (q) =>
-          q.eq("deliverableId", deliverable._id),
-        )
-        .collect();
-
-      deliverablePayload.push({
-        id: deliverable._id,
-        title: deliverable.title,
-        doneWhen: deliverable.doneWhen,
-        notes: deliverable.notes ?? null,
-        status: deliverable.status,
-        order: deliverable.order,
-        actions: actions.map((actionDoc) => ({
-          id: actionDoc._id,
-          title: actionDoc.title,
-          status: actionDoc.status,
-          order: actionDoc.order,
-        })),
-      });
-    }
-
-    outcomePayload.push({
-      id: outcome._id,
-      title: outcome.title,
-      summary: outcome.summary,
-      status: outcome.status,
-      order: outcome.order,
-      deliverables: deliverablePayload,
-    });
-  }
-
-  return {
-    id: plan._id,
-    idea: plan.idea,
-    title: plan.title ?? plan.idea,
-    summary: plan.summary,
-    status: plan.status,
-    generationError: plan.generationError ?? null,
-    outcomes: outcomePayload,
-  };
 }

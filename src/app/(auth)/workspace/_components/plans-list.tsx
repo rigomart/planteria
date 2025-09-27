@@ -21,7 +21,7 @@ export async function PlansList() {
     throw new Error("Authentication token missing");
   }
 
-  const plans = await fetchQuery(api.plans.listPlans, {}, { token });
+  const plans = await fetchQuery(api.plans.queries.listPlans, {}, { token });
 
   if (!plans.length) {
     return (
