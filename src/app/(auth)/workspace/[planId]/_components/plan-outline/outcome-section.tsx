@@ -1,12 +1,19 @@
 import { Plus } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import type { Id } from "@/convex/_generated/dataModel";
 import { DeliverableItem } from "./deliverable-item";
 import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
-import type { OutcomeSectionProps } from "./types";
+import type { Outcome } from "./types";
 import { sortByOrder } from "./utils";
+
+export type OutcomeSectionProps = {
+  planId: Id<"plans">;
+  outcome: Outcome;
+  index: number;
+};
 
 export function OutcomeSection({
   planId,

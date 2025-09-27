@@ -4,8 +4,12 @@ import { Plus } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { OutcomeSection } from "./outcome-section";
-import type { PlanOutlineProps } from "./types";
+import type { LoadedPlan } from "./types";
 import { sortByOrder } from "./utils";
+
+export type PlanOutlineProps = {
+  plan: LoadedPlan;
+};
 
 export function PlanOutline({ plan }: PlanOutlineProps) {
   const outcomes = useMemo(
