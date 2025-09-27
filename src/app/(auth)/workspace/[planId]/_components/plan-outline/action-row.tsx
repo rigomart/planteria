@@ -2,7 +2,6 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { InlineEditableField } from "./inline-editable-field";
 import { StatusBadge } from "./status-badge";
 import type { ActionItem } from "./types";
-import { ensureStatus } from "./utils";
 
 type ActionRowProps = {
   action: ActionItem;
@@ -27,7 +26,7 @@ export function ActionRow({ action, deliverableId }: ActionRowProps) {
           editorClassName="text-sm"
         />
 
-        <StatusBadge status={ensureStatus(action.status)} />
+        <StatusBadge status={action.status} />
       </div>
     </li>
   );

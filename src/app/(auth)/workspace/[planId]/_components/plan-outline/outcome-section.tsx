@@ -6,7 +6,7 @@ import { InlineEditableField } from "./inline-editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
 import type { OutcomeSectionProps } from "./types";
-import { ensureStatus, sortByOrder } from "./utils";
+import { sortByOrder } from "./utils";
 
 export function OutcomeSection({
   planId,
@@ -25,7 +25,7 @@ export function OutcomeSection({
           <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
             Outcome {index + 1}
           </span>
-          <StatusBadge status={ensureStatus(outcome.status)} />
+          <StatusBadge status={outcome.status} />
         </div>
 
         <NodeOptionsMenu

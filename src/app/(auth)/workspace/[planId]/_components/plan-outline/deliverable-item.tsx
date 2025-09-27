@@ -17,7 +17,7 @@ import { ActionRow } from "./action-row";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
 import type { DeliverableItemProps } from "./types";
-import { ensureStatus, sortByOrder } from "./utils";
+import { sortByOrder } from "./utils";
 
 export function DeliverableItem({
   deliverable,
@@ -30,7 +30,7 @@ export function DeliverableItem({
     [deliverable.actions],
   );
   const completedActions = actions.filter(
-    (item) => ensureStatus(item.status) === "done",
+    (item) => item.status === "done",
   ).length;
   const totalActions = actions.length;
   const ToggleIcon = showActions ? ChevronDown : ChevronRight;
@@ -42,7 +42,7 @@ export function DeliverableItem({
           <span className="text-xs uppercase tracking-wide text-muted-foreground">
             Deliverable {index + 1}
           </span>
-          <StatusBadge status={ensureStatus(deliverable.status)} />
+          <StatusBadge status={deliverable.status} />
         </div>
         <h3 className="text-base font-medium leading-tight">
           {deliverable.title}
