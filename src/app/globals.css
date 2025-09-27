@@ -189,30 +189,10 @@
     pointer-events: none;
   }
 
-  .workspace-pattern::before {
-    background:
-      radial-gradient(
-        160% 160% at -10% -20%,
-        color-mix(in srgb, var(--primary) 10%, transparent) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        150% 150% at 110% 0%,
-        color-mix(in srgb, var(--accent) 8%, transparent) 0%,
-        transparent 65%
-      ),
-      radial-gradient(
-        140% 140% at 50% 120%,
-        color-mix(in srgb, var(--secondary) 5%, transparent) 0%,
-        transparent 70%
-      );
-    background-repeat: no-repeat;
-  }
-
   .workspace-pattern::after {
     background-image: radial-gradient(
       circle,
-      color-mix(in srgb, var(--foreground) 10%, transparent) 2px,
+      color-mix(in srgb, var(--foreground) 5%, transparent) 2px,
       transparent 0
     );
     background-size: 20px 20px;

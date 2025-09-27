@@ -1,7 +1,7 @@
 "use client";
 
 import { type Preloaded, usePreloadedQuery } from "convex/react";
-import { AlertTriangle, ArrowLeft, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,37 +83,25 @@ export function PlanWorkspaceContent({
   }
 
   return (
-    <div className="flex flex-col gap-8 py-4">
-      <div className="flex flex-col gap-2">
-        <Button asChild variant="secondary" size="sm" className="self-start">
-          <Link href="/workspace">
-            <ArrowLeft className="size-4" />
-            Back to plans
-          </Link>
-        </Button>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-semibold">
-              {plan.title}
-            </CardTitle>
-          </CardHeader>
+    <div className="mx-auto flex flex-col w-full max-w-5xl gap-8 py-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold">{plan.title}</CardTitle>
+        </CardHeader>
 
-          <CardContent className="space-y-4">
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              {plan.summary}
-            </p>
+        <CardContent className="space-y-4">
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            {plan.summary}
+          </p>
 
-            <div className="flex flex-col gap-1 rounded-lg border p-3 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Initial idea</span>
-              <span className="text-muted-foreground/90">{plan.idea}</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="flex flex-col gap-1 rounded-lg border p-3 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Initial idea</span>
+            <span className="text-muted-foreground/90">{plan.idea}</span>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="mx-auto flex flex-col w-full max-w-5xl">
-        <PlanOutline plan={plan} />
-      </div>
+      <PlanOutline plan={plan} />
     </div>
   );
 }

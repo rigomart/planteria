@@ -2,8 +2,6 @@ import type { FunctionReturnType } from "convex/server";
 import type { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
-export type StatusValue = "todo" | "doing" | "done";
-
 export type StatusStyle = {
   label: string;
   dotClass: string;
@@ -35,3 +33,5 @@ export type DeliverableItemProps = {
   outcomeId: Id<"outcomes">;
   index: number;
 };
+
+export type StatusValue = LoadedPlan["outcomes"][number]["status"];
