@@ -3,17 +3,12 @@ import { useMemo, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ActionRow } from "./action-row";
+import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
 import type { DeliverableItemProps } from "./types";
@@ -36,29 +31,49 @@ export function DeliverableItem({
   const ToggleIcon = showActions ? ChevronDown : ChevronRight;
 
   return (
-    <Card className="border-l-2 border-l-primary/40">
-      <CardHeader>
+    <div className="bg-card p-3 flex flex-col gap-1 border-b">
+      <div className="flex flex-col gap-2 relative">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground">
             Deliverable {index + 1}
           </span>
           <StatusBadge status={deliverable.status} />
         </div>
-        <h3 className="text-base font-medium leading-tight">
-          {deliverable.title}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          Done when{" "}
-          <span className="text-foreground/90">{deliverable.doneWhen}</span>
-        </p>
-        {deliverable.notes ? (
-          <Alert>
-            <AlertTitle>Note</AlertTitle>
-            <AlertDescription>{deliverable.notes}</AlertDescription>
-          </Alert>
-        ) : null}
 
-        <CardAction className="flex flex-wrap items-center gap-1">
+        <div className="flex flex-col">
+          <EditableField
+            value={deliverable.title ?? ""}
+            onSave={(nextValue) =>
+              console.log("[UI] save deliverable title", {
+                deliverableId: deliverable.id,
+                value: nextValue,
+              })
+            }
+            placeholder="Add a deliverable title"
+            displayClassName="text-base font-medium leading-tight"
+            editorClassName="text-base font-medium leading-tight"
+          />
+          <EditableField
+            value={deliverable.doneWhen ?? ""}
+            onSave={(nextValue) =>
+              console.log("[UI] save deliverable doneWhen", {
+                deliverableId: deliverable.id,
+                value: nextValue,
+              })
+            }
+            placeholder="Add a deliverable doneWhen"
+            displayClassName="text-sm text-muted-foreground"
+            editorClassName="text-sm"
+          />
+          {deliverable.notes ? (
+            <Alert>
+              <AlertTitle>Note</AlertTitle>
+              <AlertDescription>{deliverable.notes}</AlertDescription>
+            </Alert>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1 absolute top-0 right-0">
           <NodeOptionsMenu
             onAiAdjust={() =>
               console.log(
@@ -71,9 +86,9 @@ export function DeliverableItem({
               console.log("[UI] delete deliverable", deliverable.id, outcomeId)
             }
           />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="space-y-4 border-t border-border/40">
+        </div>
+      </div>
+      <div className="space-y-4">
         <Collapsible open={showActions} onOpenChange={setShowActions}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <CollapsibleTrigger asChild>
@@ -100,7 +115,7 @@ export function DeliverableItem({
             )}
           </div>
           <CollapsibleContent>
-            <div className="mt-3 flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
               {totalActions > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {actions.map((action) => (
@@ -119,18 +134,17 @@ export function DeliverableItem({
               )}
               <Button
                 type="button"
-                variant="ghost"
+                variant="dashed"
                 onClick={() =>
                   console.log("[UI] add action", deliverable.id, outcomeId)
                 }
-                className="w-full border-dashed border border-primary/10"
               >
                 <Plus className="mr-2 size-4" /> Add action
               </Button>
             </div>
           </CollapsibleContent>
         </Collapsible>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -19,7 +19,7 @@ export function OutcomeSection({
   );
 
   return (
-    <div className="border border-primary/10 p-4 sm:p-6 bg-card/40">
+    <div className="border border-primary/10 p-2 sm:p-4 bg-card rounded">
       <div className="flex items-center gap-2 justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
@@ -35,7 +35,7 @@ export function OutcomeSection({
           }
         />
       </div>
-      <div className="flex flex-col gap-0">
+      <div className="flex flex-col">
         <EditableField
           value={outcome.title ?? ""}
           onSave={(nextValue) =>
@@ -64,8 +64,8 @@ export function OutcomeSection({
         />
       </div>
 
-      <div className="flex flex-col gap-4 mt-6">
-        <div className="flex flex-col gap-4">
+      <div className="flex flex-col mt-2 border border-primary/10 rounded">
+        <div className="flex flex-col">
           {deliverables.map((deliverable, deliverableIndex) => (
             <DeliverableItem
               key={deliverable.id}
@@ -75,16 +75,17 @@ export function OutcomeSection({
             />
           ))}
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() =>
-            console.log("[UI] add deliverable", outcome.id, "plan", planId)
-          }
-          className="w-full border-dashed border border-primary/10"
-        >
-          <Plus className="size-4" /> Add deliverable
-        </Button>
+        <div className="p-2">
+          <Button
+            type="button"
+            variant="dashed"
+            onClick={() =>
+              console.log("[UI] add deliverable", outcome.id, "plan", planId)
+            }
+          >
+            <Plus className="size-4" /> Add deliverable
+          </Button>
+        </div>
       </div>
     </div>
   );
