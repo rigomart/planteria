@@ -1,7 +1,7 @@
 "use client";
 
 import { type Preloaded, usePreloadedQuery } from "convex/react";
-import { AlertTriangle, Loader2, Plus, Sparkles } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -64,50 +64,11 @@ export function PlanWorkspaceContent({
       </div>
 
       {/* Right Column - Plan Outline */}
-      <div className="flex flex-col md:col-span-4 p-4">
+      <div className="flex flex-col md:col-span-4 p-2 sm:p-4 md:p-6 lg:p-8">
         <ScrollArea>
           <PlanOutline plan={plan} />
         </ScrollArea>
       </div>
-    </div>
-  );
-}
-
-function GeneratingPlanView({ idea }: { idea: string }) {
-  return (
-    <div className="flex flex-col items-start gap-4">
-      <div className="flex items-center gap-3">
-        <Loader2 className="size-5 animate-spin text-muted-foreground" />
-        <h2 className="text-lg font-semibold">Drafting your plan</h2>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        We’re turning your idea into outcomes, deliverables, and actions. This
-        usually takes less than a minute.
-      </p>
-      <div className="rounded-md bg-muted p-3 text-xs">
-        <p className="font-semibold text-muted-foreground">Idea</p>
-        <p>{idea}</p>
-      </div>
-    </div>
-  );
-}
-
-function PlanErrorView({ error }: { error: string | null }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 text-destructive">
-        <AlertTriangle className="size-5" />
-        <h2 className="text-lg font-semibold">Plan generation failed</h2>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Something went wrong while asking the planning agent for a draft. You
-        can return to the workspace and try again.
-      </p>
-      {error ? (
-        <div className="rounded-md bg-destructive/10 p-3 text-xs text-destructive">
-          {error}
-        </div>
-      ) : null}
     </div>
   );
 }

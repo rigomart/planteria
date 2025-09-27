@@ -14,8 +14,8 @@ export function PlanOutline({ plan }: PlanOutlineProps) {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-10">
         {outcomes.map((outcome, outcomeIndex) => (
           <OutcomeSection
             key={outcome.id}
@@ -24,15 +24,15 @@ export function PlanOutline({ plan }: PlanOutlineProps) {
             index={outcomeIndex}
           />
         ))}
-        <Button
-          type="button"
-          variant="ghost"
-          className="self-start"
-          onClick={() => console.log("[UI] add outcome", plan.id)}
-        >
-          <Plus className="mr-2 size-4" /> Add outcome
-        </Button>
       </div>
+      <Button
+        type="button"
+        variant="ghost"
+        className="self-start"
+        onClick={() => console.log("[UI] add outcome", plan.id)}
+      >
+        <Plus className="mr-2 size-4" /> Add outcome
+      </Button>
     </div>
   );
 }
