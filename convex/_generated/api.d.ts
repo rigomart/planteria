@@ -8,11 +8,14 @@
  * @module
  */
 
+import type * as actions from "../actions.js";
 import type * as agents_planning from "../agents/planning.js";
 import type * as auth from "../auth.js";
+import type * as deliverables from "../deliverables.js";
 import type * as http from "../http.js";
 import type * as lib_plan_schemas from "../lib/plan_schemas.js";
 import type * as lib_prompts from "../lib/prompts.js";
+import type * as outcomes from "../outcomes.js";
 import type * as plans_generation from "../plans/generation.js";
 import type * as plans_queries from "../plans/queries.js";
 import type * as users from "../users.js";
@@ -32,11 +35,14 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  actions: typeof actions;
   "agents/planning": typeof agents_planning;
   auth: typeof auth;
+  deliverables: typeof deliverables;
   http: typeof http;
   "lib/plan_schemas": typeof lib_plan_schemas;
   "lib/prompts": typeof lib_prompts;
+  outcomes: typeof outcomes;
   "plans/generation": typeof plans_generation;
   "plans/queries": typeof plans_queries;
   users: typeof users;
