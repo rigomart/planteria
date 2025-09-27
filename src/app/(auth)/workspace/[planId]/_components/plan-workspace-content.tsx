@@ -64,7 +64,7 @@ export function PlanWorkspaceContent({
       </div>
 
       {/* Right Column - Plan Outline */}
-      <div className="flex flex-col md:col-span-4 p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="flex flex-col md:col-span-4 p-2 sm:p-4 md:p-6 lg:p-8 bg-foreground/1">
         <ScrollArea>
           <PlanOutline plan={plan} />
         </ScrollArea>

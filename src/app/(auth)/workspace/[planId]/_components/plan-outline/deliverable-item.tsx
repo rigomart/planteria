@@ -1,4 +1,4 @@
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { Id } from "@/convex/_generated/dataModel";
-import { ActionRow } from "./action-row";
 import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
+import { PlanActions } from "./plan-actions";
 import { StatusBadge } from "./status-badge";
 import type { Deliverable } from "./types";
 import { sortByOrder } from "./utils";
@@ -29,7 +29,6 @@ export function DeliverableItem({
     () => sortByOrder(deliverable.actions ?? []),
     [deliverable.actions],
   );
-  const totalActions = actions.length;
 
   return (
     <div className="bg-card p-1 flex flex-col gap-1 border-b">
@@ -98,35 +97,7 @@ export function DeliverableItem({
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-2">
-              {totalActions > 0 ? (
-                <ul className="flex flex-col gap-2">
-                  {actions.map((action) => (
-                    <ActionRow
-                      key={action.id}
-                      action={action}
-                      deliverableId={deliverable.id}
-                    />
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No actions yet. Create a few to make this deliverable
-                  unambiguous.
-                </p>
-              )}
-              <Button
-                type="button"
-                variant="dashed"
-                size="sm"
-                onClick={() =>
-                  console.log("[UI] add action", deliverable.id, outcomeId)
-                }
-                className="self-start"
-              >
-                <Plus className="mr-2 size-4" /> Add action
-              </Button>
-            </div>
+            <PlanActions actions={actions} deliverableId={deliverable.id} />
           </CollapsibleContent>
         </div>
       </Collapsible>

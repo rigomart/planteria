@@ -26,7 +26,7 @@ export function OutcomeSection({
   );
 
   return (
-    <div className="p-2 sm:p-4 border rounded">
+    <div className="p-2 sm:p-4 border rounded bg-background">
       <div className="flex items-center gap-2 justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
