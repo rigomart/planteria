@@ -10,31 +10,17 @@ import {
   query,
 } from "./_generated/server";
 import { planningAgent } from "./agents/planning";
-import type { PlanDraft } from "./lib/plan_schemas";
 import { planDraftSchema, STATUS_VALUES } from "./lib/plan_schemas";
 import { buildPlanDraftPrompt } from "./lib/prompts";
 
 type StatusValue = (typeof STATUS_VALUES)[number];
 
 const GENERATING_SUMMARY = "Hang tight while we generate your plan.";
-const PLACEHOLDER_TITLE_FALLBACK = "New plan";
-const MAX_PLAN_TITLE_LENGTH = 80;
 const MAX_GENERATION_ERROR_LENGTH = 240;
 
-function derivePlaceholderTitle(idea: string) {
-  const trimmed = idea.trim();
-
-  if (trimmed.length >= 3 && trimmed.length <= MAX_PLAN_TITLE_LENGTH) {
-    return trimmed;
-  }
-
-  if (trimmed.length > MAX_PLAN_TITLE_LENGTH) {
-    return `${trimmed.slice(0, MAX_PLAN_TITLE_LENGTH - 3).trimEnd()}...`;
-  }
-
-  return PLACEHOLDER_TITLE_FALLBACK;
-}
-
+/**
+ * Convert unknown errors into a user-readable string so we can surface failures safely.
+ */
 function errorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
@@ -47,6 +33,9 @@ function errorMessage(error: unknown) {
   return "Unknown error";
 }
 
+/**
+ * Clamp error text to a reasonable length before persisting it on the plan document.
+ */
 function truncateError(message: string) {
   if (message.length <= MAX_GENERATION_ERROR_LENGTH) {
     return message;
@@ -55,6 +44,9 @@ function truncateError(message: string) {
   return `${message.slice(0, MAX_GENERATION_ERROR_LENGTH - 3)}...`;
 }
 
+/**
+ * Public entrypoint that creates a placeholder plan and schedules asynchronous generation.
+ */
 export const generatePlan = action({
   args: {
     idea: v.string(),
@@ -81,6 +73,9 @@ export const generatePlan = action({
   },
 });
 
+/**
+ * Internal helper that provisions the initial plan row with placeholder metadata.
+ */
 export const createPlanShell = internalMutation({
   args: {
     idea: v.string(),
@@ -91,7 +86,7 @@ export const createPlanShell = internalMutation({
     const planId = await ctx.db.insert("plans", {
       userId: args.userId,
       idea: args.idea,
-      title: derivePlaceholderTitle(args.idea),
+      title: "New plan",
       summary: GENERATING_SUMMARY,
       status: "generating",
       generationError: null,
@@ -103,6 +98,9 @@ export const createPlanShell = internalMutation({
   },
 });
 
+/**
+ * Internal action that drives the LLM workflow and persists the resulting draft structure.
+ */
 export const generatePlanInBackground = internalAction({
   args: {
     idea: v.string(),
@@ -130,7 +128,7 @@ export const generatePlanInBackground = internalAction({
 
       const parsedPlan = planDraftSchema.parse(aiResponse.object);
 
-      await ctx.runMutation(internal.plans.applyPlanDraft, {
+      await ctx.runMutation(internal.plans.initializePlan, {
         plan: parsedPlan,
         planId: args.planId,
       });
@@ -145,18 +143,70 @@ export const generatePlanInBackground = internalAction({
   },
 });
 
-export const applyPlanDraft = internalMutation({
+/**
+ * Internal mutation invoked after generation to populate the plan and its child records.
+ */
+export const initializePlan = internalMutation({
   args: {
     plan: v.any(),
     planId: v.id("plans"),
   },
   handler: async (ctx, args) => {
-    const parsed = planDraftSchema.parse(args.plan);
-    await replacePlanInternal(ctx, args.planId, parsed);
-    return { planId: args.planId };
+    const timestamp = Date.now();
+
+    await ctx.db.patch(args.planId, {
+      idea: args.plan.idea,
+      title: args.plan.title,
+      summary: args.plan.summary,
+      status: "ready",
+      generationError: null,
+      updatedAt: timestamp,
+    });
+
+    for (const [outcomeIndex, outcome] of args.plan.outcomes.entries()) {
+      const outcomeId = await ctx.db.insert("outcomes", {
+        planId: args.planId,
+        title: outcome.title,
+        summary: outcome.summary,
+        status: ensureStatus(outcome.status),
+        order: outcomeIndex,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+
+      for (const [
+        deliverableIndex,
+        deliverable,
+      ] of outcome.deliverables.entries()) {
+        const deliverableId = await ctx.db.insert("deliverables", {
+          outcomeId,
+          title: deliverable.title,
+          doneWhen: deliverable.doneWhen,
+          notes: deliverable.notes ?? null,
+          status: ensureStatus(deliverable.status),
+          order: deliverableIndex,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+
+        for (const [actionIndex, actionItem] of deliverable.actions.entries()) {
+          await ctx.db.insert("actions", {
+            deliverableId,
+            title: actionItem.title,
+            status: ensureStatus(actionItem.status),
+            order: actionIndex,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          });
+        }
+      }
+    }
   },
 });
 
+/**
+ * Internal mutation that records generation failures on the plan for UI surfacing.
+ */
 export const markPlanGenerationFailed = internalMutation({
   args: {
     error: v.string(),
@@ -171,6 +221,9 @@ export const markPlanGenerationFailed = internalMutation({
   },
 });
 
+/**
+ * Query returning the authenticated user's plans, newest first, for the workspace list view.
+ */
 export const listPlans = query({
   args: {},
   handler: async (ctx) => {
@@ -199,6 +252,9 @@ export const listPlans = query({
   },
 });
 
+/**
+ * Query that loads a single plan plus nested structure with an authorization check.
+ */
 export const getPlan = query({
   args: {
     planId: v.id("plans"),
@@ -218,83 +274,9 @@ export const getPlan = query({
   },
 });
 
-async function clearExistingStructure(ctx: MutationCtx, planId: Id<"plans">) {
-  const outcomes = await ctx.db
-    .query("outcomes")
-    .withIndex("by_plan", (q) => q.eq("planId", planId))
-    .collect();
-
-  for (const outcome of outcomes) {
-    const deliverables = await ctx.db
-      .query("deliverables")
-      .withIndex("by_outcome", (q) => q.eq("outcomeId", outcome._id))
-      .collect();
-
-    for (const deliverable of deliverables) {
-      const actions = await ctx.db
-        .query("actions")
-        .withIndex("by_deliverable", (q) =>
-          q.eq("deliverableId", deliverable._id),
-        )
-        .collect();
-
-      for (const actionDoc of actions) {
-        await ctx.db.delete(actionDoc._id);
-      }
-
-      await ctx.db.delete(deliverable._id);
-    }
-
-    await ctx.db.delete(outcome._id);
-  }
-}
-
-async function insertStructure(
-  ctx: MutationCtx,
-  planId: Id<"plans">,
-  plan: PlanDraft,
-  timestamp: number,
-) {
-  for (const [outcomeIndex, outcome] of plan.outcomes.entries()) {
-    const outcomeId = await ctx.db.insert("outcomes", {
-      planId,
-      title: outcome.title,
-      summary: outcome.summary,
-      status: ensureStatus(outcome.status),
-      order: outcomeIndex,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    });
-
-    for (const [
-      deliverableIndex,
-      deliverable,
-    ] of outcome.deliverables.entries()) {
-      const deliverableId = await ctx.db.insert("deliverables", {
-        outcomeId,
-        title: deliverable.title,
-        doneWhen: deliverable.doneWhen,
-        notes: deliverable.notes ?? null,
-        status: ensureStatus(deliverable.status),
-        order: deliverableIndex,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      });
-
-      for (const [actionIndex, actionItem] of deliverable.actions.entries()) {
-        await ctx.db.insert("actions", {
-          deliverableId,
-          title: actionItem.title,
-          status: ensureStatus(actionItem.status),
-          order: actionIndex,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-        });
-      }
-    }
-  }
-}
-
+/**
+ * Fall back to a known status value if the incoming string is missing or invalid.
+ */
 function ensureStatus(value: string | undefined): StatusValue {
   if (!value) {
     return STATUS_VALUES[0];
@@ -307,26 +289,9 @@ function ensureStatus(value: string | undefined): StatusValue {
   return STATUS_VALUES[0];
 }
 
-async function replacePlanInternal(
-  ctx: MutationCtx,
-  planId: Id<"plans">,
-  plan: PlanDraft,
-) {
-  const timestamp = Date.now();
-
-  await ctx.db.patch(planId, {
-    idea: plan.idea,
-    title: plan.title,
-    summary: plan.summary,
-    status: "ready",
-    generationError: null,
-    updatedAt: timestamp,
-  });
-
-  await clearExistingStructure(ctx, planId);
-  await insertStructure(ctx, planId, plan, timestamp);
-}
-
+/**
+ * Aggregate the plan document with its ordered outcomes, deliverables, and actions.
+ */
 async function loadPlanWithStructure(
   ctx: QueryCtx | MutationCtx,
   planId: Id<"plans">,
