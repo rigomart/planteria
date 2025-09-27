@@ -2,9 +2,9 @@
 
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
+import { VisuallyHiddenInput } from "@/components/visually-hidden-input";
 import { useComposedRefs } from "@/lib/compose-refs";
 import { cn } from "@/lib/utils";
-import { VisuallyHiddenInput } from "@/components/visually-hidden-input";
 
 const ROOT_NAME = "Editable";
 const LABEL_NAME = "EditableLabel";
@@ -403,6 +403,7 @@ function EditableArea(props: EditableAreaProps) {
   const AreaPrimitive = asChild ? Slot : "div";
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: we want to support arbitrary elements
     <AreaPrimitive
       role="group"
       data-disabled={context.disabled ? "" : undefined}
@@ -486,6 +487,7 @@ function EditablePreview(props: EditablePreviewProps) {
   if (editing || context.readOnly) return null;
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: we want to support arbitrary elements
     <PreviewPrimitive
       role="button"
       aria-disabled={context.disabled || context.readOnly}
