@@ -1,17 +1,24 @@
+import { useQuery } from "convex/react";
 import { Plus } from "lucide-react";
-import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { DeliverableItem } from "./deliverable-item";
 import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { StatusBadge } from "./status-badge";
-import type { Outcome } from "./types";
-import { sortByOrder } from "./utils";
 
 export type OutcomeSectionProps = {
   planId: Id<"plans">;
-  outcome: Outcome;
+  outcome: {
+    id: Id<"outcomes">;
+    title: string;
+    summary: string;
+    status: "todo" | "doing" | "done";
+    order: number;
+    createdAt: number;
+    updatedAt: number;
+  };
   index: number;
 };
 
@@ -20,10 +27,9 @@ export function OutcomeSection({
   outcome,
   index,
 }: OutcomeSectionProps) {
-  const deliverables = useMemo(
-    () => sortByOrder(outcome.deliverables ?? []),
-    [outcome.deliverables],
-  );
+  const deliverables = useQuery(api.deliverables.queries.listByOutcome, {
+    outcomeId: outcome.id,
+  });
 
   return (
     <div className="p-2 sm:p-4 border rounded bg-background">
@@ -73,14 +79,20 @@ export function OutcomeSection({
 
       <div className="flex flex-col mt-2 border border-primary/10 rounded">
         <div className="flex flex-col">
-          {deliverables.map((deliverable, deliverableIndex) => (
-            <DeliverableItem
-              key={deliverable.id}
-              outcomeId={outcome.id}
-              deliverable={deliverable}
-              index={deliverableIndex}
-            />
-          ))}
+          {deliverables === undefined ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              Loading deliverables...
+            </div>
+          ) : (
+            deliverables.map((deliverable, deliverableIndex) => (
+              <DeliverableItem
+                key={deliverable.id}
+                outcomeId={outcome.id}
+                deliverable={deliverable}
+                index={deliverableIndex}
+              />
+            ))
+          )}
         </div>
         <div className="p-2">
           <Button

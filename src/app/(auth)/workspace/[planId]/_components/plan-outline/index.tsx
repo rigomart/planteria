@@ -1,21 +1,24 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { Plus } from "lucide-react";
-import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { OutcomeSection } from "./outcome-section";
-import type { LoadedPlan } from "./types";
-import { sortByOrder } from "./utils";
 
 export type PlanOutlineProps = {
-  plan: LoadedPlan;
+  planId: Id<"plans">;
 };
 
-export function PlanOutline({ plan }: PlanOutlineProps) {
-  const outcomes = useMemo(
-    () => sortByOrder(plan.outcomes ?? []),
-    [plan.outcomes],
-  );
+export function PlanOutline({ planId }: PlanOutlineProps) {
+  const outcomes = useQuery(api.outcomes.queries.listByPlan, {
+    planId: planId,
+  });
+
+  if (outcomes === undefined) {
+    return <div>Loading outcomes...</div>;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -23,7 +26,7 @@ export function PlanOutline({ plan }: PlanOutlineProps) {
         {outcomes.map((outcome, outcomeIndex) => (
           <OutcomeSection
             key={outcome.id}
-            planId={plan.id}
+            planId={planId}
             outcome={outcome}
             index={outcomeIndex}
           />
@@ -33,7 +36,7 @@ export function PlanOutline({ plan }: PlanOutlineProps) {
         type="button"
         variant="ghost"
         className="self-start"
-        onClick={() => console.log("[UI] add outcome", plan.id)}
+        onClick={() => console.log("[UI] add outcome", planId)}
       >
         <Plus className="mr-2 size-4" /> Add outcome
       </Button>

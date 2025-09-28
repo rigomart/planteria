@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
+import { requireOutcomeOwnership, requirePlanOwnership } from "./lib/ownership";
 
 /**
  * Add a new outcome to a plan
@@ -17,10 +18,7 @@ export const addOutcome = mutation({
     }
 
     // Verify the plan belongs to the user
-    const plan = await ctx.db.get(args.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      throw new Error("Plan not found or access denied");
-    }
+    await requirePlanOwnership(ctx, args.planId, identity.subject);
 
     // Get the current max order for outcomes in this plan
     const existingOutcomes = await ctx.db
@@ -67,15 +65,11 @@ export const updateOutcome = mutation({
     }
 
     // Get the outcome and verify ownership through plan
-    const outcome = await ctx.db.get(args.outcomeId);
-    if (!outcome) {
-      throw new Error("Outcome not found");
-    }
-
-    const plan = await ctx.db.get(outcome.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      throw new Error("Access denied");
-    }
+    const { outcome } = await requireOutcomeOwnership(
+      ctx,
+      args.outcomeId,
+      identity.subject,
+    );
 
     const updates: Partial<typeof outcome> = {
       updatedAt: Date.now(),
@@ -111,15 +105,11 @@ export const deleteOutcome = mutation({
     }
 
     // Get the outcome and verify ownership
-    const outcome = await ctx.db.get(args.outcomeId);
-    if (!outcome) {
-      throw new Error("Outcome not found");
-    }
-
-    const plan = await ctx.db.get(outcome.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      throw new Error("Access denied");
-    }
+    const { outcome } = await requireOutcomeOwnership(
+      ctx,
+      args.outcomeId,
+      identity.subject,
+    );
 
     // Delete all deliverables and actions under this outcome first
     const deliverables = await ctx.db

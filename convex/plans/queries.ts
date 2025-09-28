@@ -1,7 +1,5 @@
 import { v } from "convex/values";
 
-import type { Id } from "../_generated/dataModel";
-import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { query } from "../_generated/server";
 
 /**
@@ -36,7 +34,39 @@ export const listPlans = query({
 });
 
 /**
+ * Query returning basic plan metadata (title, idea, summary, status) for a single plan.
+ */
+export const getPlanSummary = query({
+  args: {
+    planId: v.id("plans"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    const plan = await ctx.db.get(args.planId);
+    if (!plan || plan.userId !== identity.subject) {
+      return null;
+    }
+
+    return {
+      id: plan._id,
+      idea: plan.idea,
+      title: plan.title ?? plan.idea,
+      summary: plan.summary,
+      status: plan.status,
+      generationError: plan.generationError ?? null,
+      createdAt: plan.createdAt,
+      updatedAt: plan.updatedAt,
+    };
+  },
+});
+
+/**
  * Query that loads a single plan plus nested structure with an authorization check.
+ * @deprecated Use getPlanSummary along with slice-level queries (listByPlan, listByOutcome, listByDeliverable) instead
  */
 export const getPlan = query({
   args: {
@@ -53,76 +83,17 @@ export const getPlan = query({
       return null;
     }
 
-    return loadPlanWithStructure(ctx, plan._id);
+    // For now, just return the plan summary since we've moved to slice-level queries
+    return {
+      id: plan._id,
+      idea: plan.idea,
+      title: plan.title ?? plan.idea,
+      summary: plan.summary,
+      status: plan.status,
+      generationError: plan.generationError ?? null,
+      outcomes: [], // Empty since we're using slice-level queries now
+      createdAt: plan.createdAt,
+      updatedAt: plan.updatedAt,
+    };
   },
 });
-
-/**
- * Aggregate the plan document with its ordered outcomes, deliverables, and actions.
- */
-async function loadPlanWithStructure(
-  ctx: QueryCtx | MutationCtx,
-  planId: Id<"plans">,
-) {
-  const plan = await ctx.db.get(planId);
-  if (!plan) {
-    return null;
-  }
-
-  const outcomes = await ctx.db
-    .query("outcomes")
-    .withIndex("by_plan_order", (q) => q.eq("planId", planId))
-    .collect();
-
-  const outcomePayload = [];
-  for (const outcome of outcomes) {
-    const deliverables = await ctx.db
-      .query("deliverables")
-      .withIndex("by_outcome_order", (q) => q.eq("outcomeId", outcome._id))
-      .collect();
-
-    const deliverablePayload = [];
-    for (const deliverable of deliverables) {
-      const actions = await ctx.db
-        .query("actions")
-        .withIndex("by_deliverable_order", (q) =>
-          q.eq("deliverableId", deliverable._id),
-        )
-        .collect();
-
-      deliverablePayload.push({
-        id: deliverable._id,
-        title: deliverable.title,
-        doneWhen: deliverable.doneWhen,
-        notes: deliverable.notes ?? null,
-        status: deliverable.status,
-        order: deliverable.order,
-        actions: actions.map((actionDoc) => ({
-          id: actionDoc._id,
-          title: actionDoc.title,
-          status: actionDoc.status,
-          order: actionDoc.order,
-        })),
-      });
-    }
-
-    outcomePayload.push({
-      id: outcome._id,
-      title: outcome.title,
-      summary: outcome.summary,
-      status: outcome.status,
-      order: outcome.order,
-      deliverables: deliverablePayload,
-    });
-  }
-
-  return {
-    id: plan._id,
-    idea: plan.idea,
-    title: plan.title ?? plan.idea,
-    summary: plan.summary,
-    status: plan.status,
-    generationError: plan.generationError ?? null,
-    outcomes: outcomePayload,
-  };
-}
