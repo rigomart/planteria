@@ -1,5 +1,59 @@
 import { v } from "convex/values";
+import type { Doc, Id } from "./_generated/dataModel";
+import type { MutationCtx } from "./_generated/server";
 import { mutation } from "./_generated/server";
+
+type DeliverableHierarchy = {
+  deliverable: Doc<"deliverables">;
+  outcome: Doc<"outcomes">;
+  plan: Doc<"plans">;
+};
+
+type ActionHierarchy = DeliverableHierarchy & {
+  action: Doc<"actions">;
+};
+
+const requireDeliverableOwnership = async (
+  ctx: MutationCtx,
+  deliverableId: Id<"deliverables">,
+  userId: string,
+): Promise<DeliverableHierarchy> => {
+  const deliverable = await ctx.db.get(deliverableId);
+  if (!deliverable) {
+    throw new Error("Deliverable not found");
+  }
+
+  const outcome = await ctx.db.get(deliverable.outcomeId);
+  if (!outcome) {
+    throw new Error("Outcome not found");
+  }
+
+  const plan = await ctx.db.get(outcome.planId);
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Access denied");
+  }
+
+  return { deliverable, outcome, plan };
+};
+
+const requireActionOwnership = async (
+  ctx: MutationCtx,
+  actionId: Id<"actions">,
+  userId: string,
+): Promise<ActionHierarchy> => {
+  const action = await ctx.db.get(actionId);
+  if (!action) {
+    throw new Error("Action not found");
+  }
+
+  const hierarchy = await requireDeliverableOwnership(
+    ctx,
+    action.deliverableId,
+    userId,
+  );
+
+  return { ...hierarchy, action };
+};
 
 /**
  * Add a new action to a deliverable
@@ -16,26 +70,17 @@ export const addAction = mutation({
     }
 
     // Verify the deliverable exists and user owns the plan
-    const deliverable = await ctx.db.get(args.deliverableId);
-    if (!deliverable) {
-      throw new Error("Deliverable not found");
-    }
-
-    const outcome = await ctx.db.get(deliverable.outcomeId);
-    if (!outcome) {
-      throw new Error("Outcome not found");
-    }
-
-    const plan = await ctx.db.get(outcome.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      throw new Error("Access denied");
-    }
+    const { deliverable, outcome } = await requireDeliverableOwnership(
+      ctx,
+      args.deliverableId,
+      identity.subject,
+    );
 
     // Get the current max order for actions in this deliverable
     const existingActions = await ctx.db
       .query("actions")
       .withIndex("by_deliverable", (q) =>
-        q.eq("deliverableId", args.deliverableId),
+        q.eq("deliverableId", deliverable._id),
       )
       .collect();
 
@@ -46,7 +91,7 @@ export const addAction = mutation({
 
     const timestamp = Date.now();
     const actionId = await ctx.db.insert("actions", {
-      deliverableId: args.deliverableId,
+      deliverableId: deliverable._id,
       title: args.title,
       status: "todo",
       order: maxOrder + 1,
@@ -76,27 +121,13 @@ export const updateAction = mutation({
     }
 
     // Get the action and verify ownership through plan
-    const action = await ctx.db.get(args.actionId);
-    if (!action) {
-      throw new Error("Action not found");
-    }
+    const { action, outcome } = await requireActionOwnership(
+      ctx,
+      args.actionId,
+      identity.subject,
+    );
 
-    const deliverable = await ctx.db.get(action.deliverableId);
-    if (!deliverable) {
-      throw new Error("Deliverable not found");
-    }
-
-    const outcome = await ctx.db.get(deliverable.outcomeId);
-    if (!outcome) {
-      throw new Error("Outcome not found");
-    }
-
-    const plan = await ctx.db.get(outcome.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      throw new Error("Access denied");
-    }
-
-    await ctx.db.patch(args.actionId, {
+    await ctx.db.patch(action._id, {
       title: args.title,
       updatedAt: Date.now(),
     });
@@ -121,29 +152,14 @@ export const deleteAction = mutation({
       throw new Error("Unauthorized");
     }
 
-    // Get the action and verify ownership
-    const action = await ctx.db.get(args.actionId);
-    if (!action) {
-      throw new Error("Action not found");
-    }
-
-    const deliverable = await ctx.db.get(action.deliverableId);
-    if (!deliverable) {
-      throw new Error("Deliverable not found");
-    }
-
-    const outcome = await ctx.db.get(deliverable.outcomeId);
-    if (!outcome) {
-      throw new Error("Outcome not found");
-    }
-
-    const plan = await ctx.db.get(outcome.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      throw new Error("Access denied");
-    }
+    const { action, deliverable, outcome } = await requireActionOwnership(
+      ctx,
+      args.actionId,
+      identity.subject,
+    );
 
     // Delete the action
-    await ctx.db.delete(args.actionId);
+    await ctx.db.delete(action._id);
 
     // Rebalance orders for remaining actions in this deliverable
     const remainingActions = await ctx.db
