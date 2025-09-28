@@ -17,4 +17,5 @@ export type Deliverable = Outcome["deliverables"][number];
 
 export type ActionItem = Deliverable["actions"][number];
 
-export type StatusValue = LoadedPlan["outcomes"][number]["status"];
+// Define status values explicitly since the old getPlan query is deprecated
+export type StatusValue = "todo" | "doing" | "done";

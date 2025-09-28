@@ -1,59 +1,9 @@
 import { v } from "convex/values";
-import type { Doc, Id } from "./_generated/dataModel";
-import type { MutationCtx } from "./_generated/server";
-import { mutation } from "./_generated/server";
-
-type DeliverableHierarchy = {
-  deliverable: Doc<"deliverables">;
-  outcome: Doc<"outcomes">;
-  plan: Doc<"plans">;
-};
-
-type ActionHierarchy = DeliverableHierarchy & {
-  action: Doc<"actions">;
-};
-
-const requireDeliverableOwnership = async (
-  ctx: MutationCtx,
-  deliverableId: Id<"deliverables">,
-  userId: string,
-): Promise<DeliverableHierarchy> => {
-  const deliverable = await ctx.db.get(deliverableId);
-  if (!deliverable) {
-    throw new Error("Deliverable not found");
-  }
-
-  const outcome = await ctx.db.get(deliverable.outcomeId);
-  if (!outcome) {
-    throw new Error("Outcome not found");
-  }
-
-  const plan = await ctx.db.get(outcome.planId);
-  if (!plan || plan.userId !== userId) {
-    throw new Error("Access denied");
-  }
-
-  return { deliverable, outcome, plan };
-};
-
-const requireActionOwnership = async (
-  ctx: MutationCtx,
-  actionId: Id<"actions">,
-  userId: string,
-): Promise<ActionHierarchy> => {
-  const action = await ctx.db.get(actionId);
-  if (!action) {
-    throw new Error("Action not found");
-  }
-
-  const hierarchy = await requireDeliverableOwnership(
-    ctx,
-    action.deliverableId,
-    userId,
-  );
-
-  return { ...hierarchy, action };
-};
+import { mutation, query } from "./_generated/server";
+import {
+  requireActionOwnership,
+  requireDeliverableOwnership,
+} from "./lib/ownership";
 
 /**
  * Add a new action to a deliverable
@@ -181,5 +131,49 @@ export const deleteAction = mutation({
     await ctx.db.patch(outcome.planId, { updatedAt: Date.now() });
 
     return { success: true };
+  },
+});
+
+/**
+ * Query returning ordered actions for a specific deliverable.
+ */
+export const listByDeliverable = query({
+  args: {
+    deliverableId: v.id("deliverables"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    // Get the deliverable to verify ownership
+    const deliverable = await ctx.db.get(args.deliverableId);
+    if (!deliverable) {
+      return [];
+    }
+
+    // Verify plan ownership through the deliverable
+    await requireDeliverableOwnership(
+      ctx,
+      args.deliverableId,
+      identity.subject,
+    );
+
+    const actions = await ctx.db
+      .query("actions")
+      .withIndex("by_deliverable_order", (q) =>
+        q.eq("deliverableId", args.deliverableId),
+      )
+      .collect();
+
+    return actions.map((action) => ({
+      id: action._id,
+      title: action.title,
+      status: action.status,
+      order: action.order,
+      createdAt: action.createdAt,
+      updatedAt: action.updatedAt,
+    }));
   },
 });

@@ -1,5 +1,5 @@
+import { useQuery } from "convex/react";
 import { ChevronDown } from "lucide-react";
-import { useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,16 +7,24 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { PlanActions } from "./plan-actions";
 import { StatusBadge } from "./status-badge";
-import type { Deliverable } from "./types";
-import { sortByOrder } from "./utils";
 
 export type DeliverableItemProps = {
-  deliverable: Deliverable;
+  deliverable: {
+    id: Id<"deliverables">;
+    title: string;
+    doneWhen: string;
+    notes: string | null;
+    status: "todo" | "doing" | "done";
+    order: number;
+    createdAt: number;
+    updatedAt: number;
+  };
   outcomeId: Id<"outcomes">;
   index: number;
 };
@@ -25,10 +33,9 @@ export function DeliverableItem({
   deliverable,
   outcomeId,
 }: DeliverableItemProps) {
-  const actions = useMemo(
-    () => sortByOrder(deliverable.actions ?? []),
-    [deliverable.actions],
-  );
+  const actions = useQuery(api.actions.listByDeliverable, {
+    deliverableId: deliverable.id,
+  });
 
   return (
     <div className="bg-card p-1 flex flex-col gap-1 border-b">
@@ -97,7 +104,13 @@ export function DeliverableItem({
               ) : null}
             </div>
 
-            <PlanActions actions={actions} deliverableId={deliverable.id} />
+            {actions === undefined ? (
+              <div className="text-sm text-muted-foreground">
+                Loading actions...
+              </div>
+            ) : (
+              <PlanActions actions={actions} deliverableId={deliverable.id} />
+            )}
           </CollapsibleContent>
         </div>
       </Collapsible>

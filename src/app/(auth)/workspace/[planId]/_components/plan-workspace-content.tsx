@@ -9,13 +9,13 @@ import type { api } from "@/convex/_generated/api";
 import { PlanOutline } from "./plan-outline";
 
 type PlanWorkspaceContentProps = {
-  preloadedPlan: Preloaded<typeof api.plans.queries.getPlan>;
+  preloadedPlanSummary: Preloaded<typeof api.plans.queries.getPlanSummary>;
 };
 
 export function PlanWorkspaceContent({
-  preloadedPlan,
+  preloadedPlanSummary,
 }: PlanWorkspaceContentProps) {
-  const plan = usePreloadedQuery(preloadedPlan);
+  const plan = usePreloadedQuery(preloadedPlanSummary);
 
   if (!plan) {
     return null;
@@ -66,7 +66,7 @@ export function PlanWorkspaceContent({
       {/* Right Column - Plan Outline */}
       <div className="flex flex-col md:col-span-4 p-2 sm:p-4 md:p-6 lg:p-8 bg-foreground/1">
         <ScrollArea>
-          <PlanOutline plan={plan} />
+          <PlanOutline planId={plan.id} />
         </ScrollArea>
       </div>
     </div>

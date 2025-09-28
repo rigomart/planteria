@@ -5,17 +5,100 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { EditableField } from "./editable-field";
 import { StatusBadge } from "./status-badge";
-import type { ActionItem } from "./types";
+
+// Type for the action returned by the listByDeliverable query
+type QueryAction = {
+  id: Id<"actions">;
+  title: string;
+  status: "todo" | "doing" | "done";
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+};
 
 type PlanActionsProps = {
-  actions: ActionItem[];
+  actions: QueryAction[];
   deliverableId: Id<"deliverables">;
 };
 
 export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
-  const addAction = useMutation(api.actions.addAction);
-  const updateAction = useMutation(api.actions.updateAction);
-  const deleteAction = useMutation(api.actions.deleteAction);
+  const addAction = useMutation(api.actions.addAction).withOptimisticUpdate(
+    (localStore, args) => {
+      // Optimistically update the listByDeliverable query
+      const currentActions = localStore.getQuery(
+        api.actions.listByDeliverable,
+        {
+          deliverableId: args.deliverableId,
+        },
+      );
+      if (currentActions !== undefined) {
+        const maxOrder = currentActions.reduce(
+          (max: number, action: QueryAction) => Math.max(max, action.order),
+          -1,
+        );
+        const newAction: QueryAction = {
+          id: `temp-${Date.now()}` as Id<"actions">,
+          title: args.title,
+          status: "todo",
+          order: maxOrder + 1,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        localStore.setQuery(
+          api.actions.listByDeliverable,
+          { deliverableId: args.deliverableId },
+          [...currentActions, newAction],
+        );
+      }
+    },
+  );
+
+  const updateAction = useMutation(
+    api.actions.updateAction,
+  ).withOptimisticUpdate((localStore, args) => {
+    // Optimistically update the listByDeliverable query
+    const currentActions = localStore.getQuery(api.actions.listByDeliverable, {
+      deliverableId,
+    });
+    if (currentActions !== undefined) {
+      const updatedActions = currentActions.map((action: QueryAction) =>
+        action.id === args.actionId
+          ? { ...action, title: args.title, updatedAt: Date.now() }
+          : action,
+      );
+      localStore.setQuery(
+        api.actions.listByDeliverable,
+        { deliverableId },
+        updatedActions,
+      );
+    }
+  });
+
+  const deleteAction = useMutation(
+    api.actions.deleteAction,
+  ).withOptimisticUpdate((localStore, args) => {
+    // Optimistically update the listByDeliverable query
+    const currentActions = localStore.getQuery(api.actions.listByDeliverable, {
+      deliverableId,
+    });
+    if (currentActions !== undefined) {
+      const filteredActions = currentActions.filter(
+        (action: QueryAction) => action.id !== args.actionId,
+      );
+      // Reorder remaining actions
+      const reorderedActions = filteredActions.map(
+        (action: QueryAction, index: number) => ({
+          ...action,
+          order: index,
+        }),
+      );
+      localStore.setQuery(
+        api.actions.listByDeliverable,
+        { deliverableId },
+        reorderedActions,
+      );
+    }
+  });
 
   const handleAddAction = async () => {
     try {
@@ -70,7 +153,7 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
 }
 
 type ActionsListProps = {
-  actions: ActionItem[];
+  actions: QueryAction[];
   onUpdateAction: (actionId: Id<"actions">, title: string) => Promise<void>;
   onDeleteAction: (actionId: Id<"actions">) => Promise<void>;
 };

@@ -11,10 +11,13 @@
 import type * as actions from "../actions.js";
 import type * as agents_planning from "../agents/planning.js";
 import type * as auth from "../auth.js";
+import type * as deliverables_queries from "../deliverables/queries.js";
 import type * as deliverables from "../deliverables.js";
 import type * as http from "../http.js";
+import type * as lib_ownership from "../lib/ownership.js";
 import type * as lib_plan_schemas from "../lib/plan_schemas.js";
 import type * as lib_prompts from "../lib/prompts.js";
+import type * as outcomes_queries from "../outcomes/queries.js";
 import type * as outcomes from "../outcomes.js";
 import type * as plans_generation from "../plans/generation.js";
 import type * as plans_queries from "../plans/queries.js";
@@ -38,10 +41,13 @@ declare const fullApi: ApiFromModules<{
   actions: typeof actions;
   "agents/planning": typeof agents_planning;
   auth: typeof auth;
+  "deliverables/queries": typeof deliverables_queries;
   deliverables: typeof deliverables;
   http: typeof http;
+  "lib/ownership": typeof lib_ownership;
   "lib/plan_schemas": typeof lib_plan_schemas;
   "lib/prompts": typeof lib_prompts;
+  "outcomes/queries": typeof outcomes_queries;
   outcomes: typeof outcomes;
   "plans/generation": typeof plans_generation;
   "plans/queries": typeof plans_queries;
