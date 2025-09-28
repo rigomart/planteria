@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { ChevronDown } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,16 +16,9 @@ import { PlanActions } from "./plan-actions";
 import { StatusBadge } from "./status-badge";
 
 export type DeliverableItemProps = {
-  deliverable: {
-    id: Id<"deliverables">;
-    title: string;
-    doneWhen: string;
-    notes: string | null;
-    status: "todo" | "doing" | "done";
-    order: number;
-    createdAt: number;
-    updatedAt: number;
-  };
+  deliverable: FunctionReturnType<
+    typeof api.deliverables.queries.listByOutcome
+  >[number];
   outcomeId: Id<"outcomes">;
   index: number;
 };

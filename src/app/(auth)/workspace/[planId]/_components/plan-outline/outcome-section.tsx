@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
@@ -10,15 +11,7 @@ import { StatusBadge } from "./status-badge";
 
 export type OutcomeSectionProps = {
   planId: Id<"plans">;
-  outcome: {
-    id: Id<"outcomes">;
-    title: string;
-    summary: string;
-    status: "todo" | "doing" | "done";
-    order: number;
-    createdAt: number;
-    updatedAt: number;
-  };
+  outcome: FunctionReturnType<typeof api.outcomes.queries.listByPlan>[number];
   index: number;
 };
 

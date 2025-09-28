@@ -1,4 +1,5 @@
 import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
@@ -6,18 +7,10 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { EditableField } from "./editable-field";
 import { StatusBadge } from "./status-badge";
 
-// Type for the action returned by the listByDeliverable query
-type QueryAction = {
-  id: Id<"actions">;
-  title: string;
-  status: "todo" | "doing" | "done";
-  order: number;
-  createdAt: number;
-  updatedAt: number;
-};
+type Action = FunctionReturnType<typeof api.actions.listByDeliverable>[number];
 
 type PlanActionsProps = {
-  actions: QueryAction[];
+  actions: FunctionReturnType<typeof api.actions.listByDeliverable>;
   deliverableId: Id<"deliverables">;
 };
 
@@ -33,10 +26,10 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
       );
       if (currentActions !== undefined) {
         const maxOrder = currentActions.reduce(
-          (max: number, action: QueryAction) => Math.max(max, action.order),
+          (max, action) => Math.max(max, action.order),
           -1,
         );
-        const newAction: QueryAction = {
+        const newAction: Action = {
           id: `temp-${Date.now()}` as Id<"actions">,
           title: args.title,
           status: "todo",
@@ -61,7 +54,7 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
       deliverableId,
     });
     if (currentActions !== undefined) {
-      const updatedActions = currentActions.map((action: QueryAction) =>
+      const updatedActions = currentActions.map((action) =>
         action.id === args.actionId
           ? { ...action, title: args.title, updatedAt: Date.now() }
           : action,
@@ -83,15 +76,13 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
     });
     if (currentActions !== undefined) {
       const filteredActions = currentActions.filter(
-        (action: QueryAction) => action.id !== args.actionId,
+        (action) => action.id !== args.actionId,
       );
       // Reorder remaining actions
-      const reorderedActions = filteredActions.map(
-        (action: QueryAction, index: number) => ({
-          ...action,
-          order: index,
-        }),
-      );
+      const reorderedActions = filteredActions.map((action, index: number) => ({
+        ...action,
+        order: index,
+      }));
       localStore.setQuery(
         api.actions.listByDeliverable,
         { deliverableId },
@@ -153,7 +144,7 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
 }
 
 type ActionsListProps = {
-  actions: QueryAction[];
+  actions: FunctionReturnType<typeof api.actions.listByDeliverable>;
   onUpdateAction: (actionId: Id<"actions">, title: string) => Promise<void>;
   onDeleteAction: (actionId: Id<"actions">) => Promise<void>;
 };

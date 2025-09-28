@@ -1,4 +1,10 @@
-import type { StatusStyle, StatusValue } from "./types";
+import type { StatusValue } from "./types";
+
+export type StatusStyle = {
+  label: string;
+  dotClass: string;
+  badgeClass: string;
+};
 
 export const STATUS_STYLES: Record<StatusValue, StatusStyle> = {
   todo: {

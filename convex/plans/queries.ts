@@ -63,37 +63,3 @@ export const getPlanSummary = query({
     };
   },
 });
-
-/**
- * Query that loads a single plan plus nested structure with an authorization check.
- * @deprecated Use getPlanSummary along with slice-level queries (listByPlan, listByOutcome, listByDeliverable) instead
- */
-export const getPlan = query({
-  args: {
-    planId: v.id("plans"),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    const plan = await ctx.db.get(args.planId);
-    if (!plan || plan.userId !== identity.subject) {
-      return null;
-    }
-
-    // For now, just return the plan summary since we've moved to slice-level queries
-    return {
-      id: plan._id,
-      idea: plan.idea,
-      title: plan.title ?? plan.idea,
-      summary: plan.summary,
-      status: plan.status,
-      generationError: plan.generationError ?? null,
-      outcomes: [], // Empty since we're using slice-level queries now
-      createdAt: plan.createdAt,
-      updatedAt: plan.updatedAt,
-    };
-  },
-});

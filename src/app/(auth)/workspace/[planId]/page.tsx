@@ -18,19 +18,15 @@ export default async function PlanWorkspacePage({
 
   const { planId } = await params;
 
-  const preloadedPlanSummary = await preloadQuery(
+  const preloadedPlan = await preloadQuery(
     api.plans.queries.getPlanSummary,
     { planId },
     { token },
   );
 
-  if (!preloadedPlanSummary) {
+  if (!preloadedPlan) {
     notFound();
   }
 
-  return (
-    <div className="workspace-pattern">
-      <PlanWorkspaceContent preloadedPlanSummary={preloadedPlanSummary} />
-    </div>
-  );
+  return <PlanWorkspaceContent preloadedPlan={preloadedPlan} />;
 }

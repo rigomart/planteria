@@ -183,7 +183,7 @@
   .workspace-pattern::before,
   .workspace-pattern::after {
     content: "";
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
@@ -192,10 +192,10 @@
   .workspace-pattern::after {
     background-image: radial-gradient(
       circle,
-      color-mix(in srgb, var(--foreground) 10%, transparent) 2px,
+      color-mix(in srgb, var(--foreground) 25%, transparent) 1px,
       transparent 0
     );
-    background-size: 20px 20px;
-    opacity: 0.28;
+    background-size: 12px 12px;
+    opacity: 0.2;
   }
 }
