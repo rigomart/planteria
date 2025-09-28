@@ -9,7 +9,6 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { StripedPattern } from "@/components/ui/striped-pattern";
 import type { api } from "@/convex/_generated/api";
 import { PlanOutline } from "./plan-outline";
 
@@ -28,6 +27,7 @@ export function PlanWorkspaceContent({
 
   return (
     <SidebarProvider
+      className="h-full"
       style={
         {
           "--sidebar-width": "30rem",
@@ -36,7 +36,7 @@ export function PlanWorkspaceContent({
       }
     >
       <Sidebar side="left">
-        <SidebarContent className="p-2 pt-16">
+        <SidebarContent className="p-2 pt-16 overflow-y-auto">
           <div className="flex flex-col gap-3 bg-card">
             <div className="text-2xl font-semibold">{plan.title}</div>
 
@@ -75,17 +75,12 @@ export function PlanWorkspaceContent({
       </Sidebar>
 
       {/* Right Column - Plan Outline */}
-      <SidebarInset className="min-h-0 h-full overflow-hidden">
-        <div className="relative flex h-full flex-1 flex-col overflow-y-auto p-2 sm:p-4 md:p-6 lg:p-8">
-          <StripedPattern className="stroke-[0.1] text-primary" />
-          <div className="z-10">
-            <PlanOutline planId={plan.id} />
-          </div>
-        </div>
+      <SidebarInset className="min-h-0 h-full flex-1">
+        <PlanOutline planId={plan.id} />
       </SidebarInset>
 
       <Sidebar side="right">
-        <SidebarContent className="p-2 pt-16">
+        <SidebarContent className="p-2 pt-16 overflow-y-auto">
           <div className="flex flex-col gap-3 bg-card">
             <div className="text-2xl font-semibold">{plan.title}</div>
           </div>

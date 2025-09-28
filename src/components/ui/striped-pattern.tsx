@@ -10,8 +10,8 @@ interface StripedPatternProps extends React.SVGProps<SVGSVGElement> {
 export function StripedPattern({
   direction = "left",
   className,
-  width = 10,
-  height = 10,
+  width = 15,
+  height = 15,
   ...props
 }: StripedPatternProps) {
   const id = useId();

@@ -1,8 +1,6 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { OutcomeSection } from "./outcome-section";
@@ -21,25 +19,15 @@ export function PlanOutline({ planId }: PlanOutlineProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-10">
-        {outcomes.map((outcome, outcomeIndex) => (
-          <OutcomeSection
-            key={outcome.id}
-            planId={planId}
-            outcome={outcome}
-            index={outcomeIndex}
-          />
-        ))}
-      </div>
-      <Button
-        type="button"
-        variant="ghost"
-        className="self-start"
-        onClick={() => console.log("[UI] add outcome", planId)}
-      >
-        <Plus className="mr-2 size-4" /> Add outcome
-      </Button>
+    <div className="flex flex-col gap-8 overflow-auto">
+      {outcomes.map((outcome, outcomeIndex) => (
+        <OutcomeSection
+          key={outcome.id}
+          planId={planId}
+          outcome={outcome}
+          index={outcomeIndex}
+        />
+      ))}
     </div>
   );
 }

@@ -26,7 +26,7 @@ export default async function AuthLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex h-screen flex-col bg-background">
       <Header
         user={{
           email: currentUser.email,
@@ -34,7 +34,7 @@ export default async function AuthLayout({
           image: currentUser.image ?? undefined,
         }}
       />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-hidden">{children}</main>
     </div>
   );
 }
