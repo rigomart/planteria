@@ -34,7 +34,7 @@ export default async function AuthLayout({
           image: currentUser.image ?? undefined,
         }}
       />
-      <main className="flex-1 overflow-hidden">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function PlanOutline({ planId }: PlanOutlineProps) {
   }
 
   return (
-    <div className="flex flex-col gap-8 overflow-auto">
+    <div className="flex flex-col gap-8">
       {outcomes.map((outcome, outcomeIndex) => (
         <OutcomeSection
           key={outcome.id}
