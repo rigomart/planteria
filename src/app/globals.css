@@ -171,31 +171,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-@layer components {
-  .workspace-pattern {
-    position: relative;
-    min-height: 100vh;
-    overflow: hidden;
-    isolation: isolate;
-  }
-
-  .workspace-pattern::before,
-  .workspace-pattern::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  .workspace-pattern::after {
-    background-image: radial-gradient(
-      circle,
-      color-mix(in srgb, var(--foreground) 25%, transparent) 1px,
-      transparent 0
-    );
-    background-size: 12px 12px;
-    opacity: 0.2;
-  }
-}
