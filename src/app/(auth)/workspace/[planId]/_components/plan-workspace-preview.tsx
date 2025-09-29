@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import ReactMarkdown, {
   type Components as MarkdownComponents,
 } from "react-markdown";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
@@ -110,6 +111,8 @@ export function PlanWorkspacePreviewContent({
               size="sm"
               variant="outline"
               title="Copy markdown"
+              disabled={!hasContent || isLoading}
+              onClick={() => handleCopy(markdownText, hasContent)}
             >
               <Copy className="size-4" />
             </Button>
@@ -118,6 +121,8 @@ export function PlanWorkspacePreviewContent({
               size="sm"
               variant="outline"
               title="Export .md"
+              disabled={!hasContent || isLoading}
+              onClick={() => handleExport(markdownText, plan.title)}
             >
               <Download className="size-4" />
             </Button>
@@ -293,6 +298,58 @@ function checkboxForStatus(status: string): string {
     default:
       return "[ ]";
   }
+}
+
+function handleCopy(markdown: string, hasContent: boolean) {
+  if (!hasContent) {
+    return;
+  }
+
+  if (!navigator?.clipboard) {
+    toast.error("Clipboard API unavailable in this browser.");
+    return;
+  }
+
+  navigator.clipboard
+    .writeText(markdown)
+    .then(() => {
+      toast.success("Plan markdown copied to clipboard.");
+    })
+    .catch(() => {
+      toast.error("Failed to copy markdown.");
+    });
+}
+
+function handleExport(markdown: string, planTitle: string) {
+  if (!markdown.trim()) {
+    return;
+  }
+
+  try {
+    const filename = `${slugify(planTitle || "plan")}.md`;
+    const blob = new Blob([markdown], {
+      type: "text/markdown;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    toast.success("Plan markdown exported.");
+  } catch (error) {
+    console.error("Failed to export markdown", error);
+    toast.error("Failed to export markdown.");
+  }
+}
+
+function slugify(input: string): string {
+  const base = input.trim().toLowerCase();
+  const slug = base.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return slug || "plan";
 }
 
 const markdownComponents: MarkdownComponents = {
