@@ -1,4 +1,4 @@
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { MousePointerClick, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,39 @@ export function OutcomeSection({
     outcomeId: outcome.id,
   });
 
-  const { selectedNode, selectOutcome } = useOutlineSelection();
+  const { selectedNode, selectOutcome, selectDeliverable } =
+    useOutlineSelection();
+
+  const addDeliverable = useMutation(
+    api.deliverables.addDeliverable,
+  ).withOptimisticUpdate((localStore, args) => {
+    const current = localStore.getQuery(
+      api.deliverables.queries.listByOutcome,
+      {
+        outcomeId: args.outcomeId,
+      },
+    );
+
+    if (current !== undefined) {
+      const now = Date.now();
+      const tempDeliverable = {
+        id: `temp-${now}` as Id<"deliverables">,
+        title: args.title,
+        doneWhen: args.doneWhen,
+        notes: null,
+        status: "todo" as const,
+        order: current.length,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      localStore.setQuery(
+        api.deliverables.queries.listByOutcome,
+        { outcomeId: args.outcomeId },
+        [...current, tempDeliverable],
+      );
+    }
+  });
 
   const isSelected =
     selectedNode?.type === "outcome" && selectedNode.outcomeId === outcome.id;
@@ -119,9 +151,22 @@ export function OutcomeSection({
           <Button
             type="button"
             variant="dashed"
-            onClick={() =>
-              console.log("[UI] add deliverable", outcome.id, "plan", planId)
-            }
+            onClick={async () => {
+              try {
+                const result = await addDeliverable({
+                  outcomeId: outcome.id,
+                  title: "New deliverable",
+                  doneWhen: "",
+                });
+
+                const nextDeliverableId = result?.deliverableId;
+                if (nextDeliverableId) {
+                  selectDeliverable(outcome.id, nextDeliverableId);
+                }
+              } catch (error) {
+                console.error("Failed to add deliverable", error);
+              }
+            }}
           >
             <Plus className="size-4" /> Add deliverable
           </Button>
