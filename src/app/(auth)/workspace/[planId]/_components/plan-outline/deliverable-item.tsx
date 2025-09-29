@@ -32,7 +32,8 @@ export function DeliverableItem({
     deliverableId: deliverable.id,
   });
 
-  const { selectedNode, selectDeliverable } = useOutlineSelection();
+  const { selectedNode, selectDeliverable, clearSelection } =
+    useOutlineSelection();
 
   const isSelected =
     selectedNode?.type === "deliverable" &&
@@ -171,6 +172,12 @@ export function DeliverableItem({
   const handleDeleteDeliverable = async () => {
     try {
       await deleteDeliverable({ deliverableId: deliverable.id });
+      if (
+        selectedNode?.type === "deliverable" &&
+        selectedNode.deliverableId === deliverable.id
+      ) {
+        clearSelection();
+      }
     } catch (error) {
       console.error("Failed to delete deliverable", error);
     }

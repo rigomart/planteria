@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { requireOutcomeOwnership, requirePlanOwnership } from "./lib/ownership";
+import { status } from "./schema";
 
 /**
  * Add a new outcome to a plan
@@ -57,6 +58,7 @@ export const updateOutcome = mutation({
     outcomeId: v.id("outcomes"),
     title: v.optional(v.string()),
     summary: v.optional(v.string()),
+    status: v.optional(status),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -80,6 +82,9 @@ export const updateOutcome = mutation({
     }
     if (args.summary !== undefined) {
       updates.summary = args.summary;
+    }
+    if (args.status !== undefined) {
+      updates.status = args.status;
     }
 
     await ctx.db.patch(args.outcomeId, updates);
