@@ -10,6 +10,11 @@ import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
 import { useOutlineSelection } from "./outline-selection-context";
 import { StatusBadge } from "./status-badge";
+import {
+  Collapsible,
+  CollapsibleChevronTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
 export type OutcomeSectionProps = {
   planId: Id<"plans">;
@@ -130,48 +135,61 @@ export function OutcomeSection({
         />
       </div>
 
-      <div className="flex flex-col mt-2 border border-primary/10 rounded">
-        <div className="flex flex-col">
-          {deliverables === undefined ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              Loading deliverables...
-            </div>
-          ) : (
-            deliverables.map((deliverable, deliverableIndex) => (
-              <DeliverableItem
-                key={deliverable.id}
-                outcomeId={outcome.id}
-                deliverable={deliverable}
-                index={deliverableIndex}
-              />
-            ))
-          )}
+      <Collapsible className="mt-2 border border-primary/10 rounded">
+        <div className="flex items-center gap-2 border-b border-primary/10 px-3 py-2">
+          <CollapsibleChevronTrigger aria-label="Toggle deliverables" />
+          <div className="text-sm font-medium text-muted-foreground">
+            Deliverables
+          </div>
         </div>
-        <div className="p-2">
-          <Button
-            type="button"
-            variant="dashed"
-            onClick={async () => {
-              try {
-                const result = await addDeliverable({
-                  outcomeId: outcome.id,
-                  title: "New deliverable",
-                  doneWhen: "",
-                });
+        <CollapsibleContent>
+          <div className="flex flex-col">
+            {deliverables === undefined ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                Loading deliverables...
+              </div>
+            ) : deliverables.length === 0 ? (
+              <div className="p-4 text-sm text-muted-foreground">
+                No deliverables yet. Add one to break this outcome into concrete
+                pieces.
+              </div>
+            ) : (
+              deliverables.map((deliverable, deliverableIndex) => (
+                <DeliverableItem
+                  key={deliverable.id}
+                  outcomeId={outcome.id}
+                  deliverable={deliverable}
+                  index={deliverableIndex}
+                />
+              ))
+            )}
+          </div>
+          <div className="p-2">
+            <Button
+              type="button"
+              variant="dashed"
+              onClick={async () => {
+                try {
+                  const result = await addDeliverable({
+                    outcomeId: outcome.id,
+                    title: "New deliverable",
+                    doneWhen: "",
+                  });
 
-                const nextDeliverableId = result?.deliverableId;
-                if (nextDeliverableId) {
-                  selectDeliverable(outcome.id, nextDeliverableId);
+                  const nextDeliverableId = result?.deliverableId;
+                  if (nextDeliverableId) {
+                    selectDeliverable(outcome.id, nextDeliverableId);
+                  }
+                } catch (error) {
+                  console.error("Failed to add deliverable", error);
                 }
-              } catch (error) {
-                console.error("Failed to add deliverable", error);
-              }
-            }}
-          >
-            <Plus className="size-4" /> Add deliverable
-          </Button>
-        </div>
-      </div>
+              }}
+            >
+              <Plus className="size-4" /> Add deliverable
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
