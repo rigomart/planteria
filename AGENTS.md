@@ -4,6 +4,18 @@
 - Planteria helps solo builders break fuzzy ideas into structured plans—ideas, outcomes, deliverables, and actions—with AI guardrails enforcing clarity and scope.
 - The app pairs a Next.js frontend with Convex for realtime persistence so plans stay in sync across sessions and collaborators.
 
+## Core Product Intent (Repo‑Wide)
+- Audience: an indie developer arriving with a concrete product idea to ship.
+- Input expectation: users type specific build missions (not vague prompts or brainstorming). Treat the idea as already decided; our job is to scaffold a clear workflow.
+- Output: a structured plan with outcomes → deliverables → actions and concrete `doneWhen` acceptance, optimized for the smallest shippable slice.
+- Voice and UX: action‑first, opinionated guardrails, crisp copy. Avoid generic examples like “build a todo app” or broad requests like “brainstorm features.”
+- Example pattern templates (use as forms, not fixed strings):
+  - “Build [specific capability] that [measurable effect] when [signal/trigger].”
+  - “Turn [input type] into [artifact] with [constraints] to achieve [outcome].”
+  - “Detect [problem] and auto‑[remediation] so [user/business benefit].”
+- Repo‑wide rule: any sample prompts, docs, or UI microcopy should model that specificity. If in doubt, prefer concrete, outcome‑tied missions over exploratory text.
+- The primary entry point is a workspace hero where a solo indie developer types a concrete product idea (e.g. "Auto-expire feature flags..."); everything downstream assumes the prompt already describes a specific build target.
+
 ## Project Structure & Module Organization
 - Next.js App Router code lives in `src/app` (`layout.tsx`, `page.tsx`, shared providers) with global styles in `src/app/globals.css`.
 - Reusable UI primitives sit in `src/components/ui`; domain helpers belong in `src/lib`.
