@@ -1,19 +1,24 @@
 "use client";
 
 import { useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { Copy, Download, Eye, EyeOff, FileText, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
 type PlanSummary = NonNullable<
-  (typeof api.plans.queries.getPlanSummary)["_returnType"]
+  FunctionReturnType<typeof api.plans.queries.getPlanSummary>
 >;
 
 type PlanPreviewData = NonNullable<
-  (typeof api.plans.queries.getPlanPreview)["_returnType"]
+  FunctionReturnType<typeof api.plans.queries.getPlanPreview>
 >;
+
+type PreviewMode = "preview" | "markdown";
 
 type PlanWorkspacePreviewContentProps = {
   plan: PlanSummary;
@@ -24,37 +29,37 @@ export function PlanWorkspacePreviewContent({
   plan,
   className,
 }: PlanWorkspacePreviewContentProps) {
+  const [mode, setMode] = useState<PreviewMode>("preview");
   const previewData = useQuery(api.plans.queries.getPlanPreview, {
     planId: plan.id,
   });
 
   const isLoading = previewData === undefined;
-  const hierarchy: PlanPreviewData | null = previewData ?? null;
+  const hierarchy = previewData ?? null;
 
-  const totalOutcomes = hierarchy?.outcomes.length ?? 0;
-  const totalDeliverables = hierarchy
-    ? hierarchy.outcomes.reduce(
-        (count, outcome) => count + outcome.deliverables.length,
-        0,
-      )
-    : 0;
-  const totalActions = hierarchy
-    ? hierarchy.outcomes.reduce(
-        (actionTotal, outcome) =>
-          actionTotal +
-          outcome.deliverables.reduce(
-            (deliverableTotal, deliverable) =>
-              deliverableTotal + deliverable.actions.length,
-            0,
-          ),
-        0,
-      )
-    : 0;
+  const { markdown } = useMemo(() => {
+    if (!hierarchy) {
+      return {
+        markdown: null as string | null,
+        totals: { outcomes: 0, deliverables: 0, actions: 0 },
+      };
+    }
 
-  const summaryLine = `${totalOutcomes} outcomes • ${totalDeliverables} deliverables • ${totalActions} actions`;
+    return {
+      markdown: buildPlanMarkdown(hierarchy),
+    };
+  }, [hierarchy]);
+
+  const hasContent = Boolean(markdown && markdown.trim().length > 0);
+  const markdownText = markdown ?? "";
+  const emptyMessage = "Add outcomes and deliverables to see the plan preview.";
 
   return (
-    <Tabs className={cn("flex h-full min-h-0 flex-col gap-4", className)}>
+    <Tabs
+      value={mode}
+      onValueChange={(value) => setMode(value as PreviewMode)}
+      className={cn("flex h-full min-h-0 flex-col gap-4", className)}
+    >
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -65,29 +70,40 @@ export function PlanWorkspacePreviewContent({
           </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" size="sm" variant="outline">
-            <Copy className="mr-2 size-4" /> Copy markdown
-          </Button>
-          <Button type="button" size="sm" variant="outline">
-            <Download className="mr-2 size-4" /> Export .md
-          </Button>
+        <div className="flex items-center justify-between">
+          <TabsList className="w-fit">
+            <TabsTrigger value="preview">
+              <Eye className="size-4" />
+              Preview
+            </TabsTrigger>
+            <TabsTrigger value="markdown">
+              <FileText className="size-4" />
+              Markdown
+            </TabsTrigger>
+          </TabsList>
+          <div className="flex flex-wrap items-center gap-1">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              title="Copy markdown"
+            >
+              <Copy className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              title="Export .md"
+            >
+              <Download className="size-4" />
+            </Button>
+          </div>
         </div>
-
-        <TabsList className="w-fit">
-          <TabsTrigger value="preview">
-            <Eye className="size-4" />
-            Preview
-          </TabsTrigger>
-          <TabsTrigger value="markdown">
-            <FileText className="size-4" />
-            Markdown
-          </TabsTrigger>
-        </TabsList>
       </div>
 
       <div className="flex-1 overflow-hidden rounded-lg border bg-background/70">
-        <div className="flex h-full flex-col overflow-y-auto p-4 text-sm">
+        <div className="flex h-full flex-col p-4 text-sm">
           {isLoading ? (
             <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
               <Loader2 className="size-4 animate-spin" /> Loading plan overview…
@@ -96,21 +112,24 @@ export function PlanWorkspacePreviewContent({
             <>
               <TabsContent
                 value="preview"
-                className="space-y-3 text-muted-foreground"
+                className="flex-1 overflow-auto text-foreground cursor-text"
               >
-                <p>Rendered preview placeholder coming soon.</p>
+                {hasContent ? (
+                  <ReactMarkdown>{markdownText}</ReactMarkdown>
+                ) : (
+                  <p className="text-muted-foreground">{emptyMessage}</p>
+                )}
               </TabsContent>
 
-              <TabsContent
-                value="markdown"
-                className="space-y-3 text-muted-foreground"
-              >
-                <p>Markdown output placeholder coming soon.</p>
+              <TabsContent value="markdown" className="flex-1 overflow-auto">
+                {hasContent ? (
+                  <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed">
+                    {markdownText}
+                  </pre>
+                ) : (
+                  <p className="text-muted-foreground">{emptyMessage}</p>
+                )}
               </TabsContent>
-
-              <div className="mt-auto pt-4 text-xs text-muted-foreground">
-                {summaryLine}
-              </div>
             </>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-muted-foreground">
@@ -128,6 +147,7 @@ type PlanWorkspacePreviewProps = {
   plan: PlanSummary;
   className?: string;
 };
+
 export function PlanWorkspacePreview({
   plan,
   className,
@@ -142,4 +162,104 @@ export function PlanWorkspacePreview({
       <PlanWorkspacePreviewContent plan={plan} />
     </aside>
   );
+}
+
+function buildPlanMarkdown(preview: PlanPreviewData): string {
+  const { plan, outcomes } = preview;
+  const segments: string[] = [];
+
+  const planTitle = plan.title?.trim() || "Untitled plan";
+  segments.push(`# ${planTitle}`);
+
+  const summary = plan.summary?.trim();
+  if (summary) {
+    segments.push(summary);
+  }
+
+  const idea = plan.idea?.trim();
+  if (idea) {
+    segments.push(`> ${idea}`);
+  }
+
+  if (outcomes.length === 0) {
+    segments.push("_This plan does not include any outcomes yet._");
+    return segments.join("\n\n");
+  }
+
+  outcomes.forEach((outcome, outcomeIndex) => {
+    const title = outcome.title?.trim() || `Outcome ${outcomeIndex + 1}`;
+    segments.push(`## Outcome ${outcomeIndex + 1}: ${title}`);
+
+    const outcomeSummary = outcome.summary?.trim();
+    if (outcomeSummary) {
+      segments.push(outcomeSummary);
+    }
+
+    segments.push(`_Status: ${formatStatus(outcome.status)}_`);
+
+    if (outcome.deliverables.length === 0) {
+      segments.push("- _No deliverables yet._");
+      return;
+    }
+
+    const deliverableBlocks = outcome.deliverables.map(
+      (deliverable, deliverableIndex) => {
+        const deliverableTitle =
+          deliverable.title?.trim() || `Deliverable ${deliverableIndex + 1}`;
+        const header = `- **Deliverable ${deliverableIndex + 1}: ${deliverableTitle}** (_${formatStatus(deliverable.status)}_)`;
+        const details: string[] = [];
+
+        const doneWhen = deliverable.doneWhen?.trim();
+        if (doneWhen) {
+          details.push(`  - Done when: ${doneWhen}`);
+        }
+
+        const notes = deliverable.notes?.trim();
+        if (notes) {
+          details.push(`  - Notes: ${notes}`);
+        }
+
+        if (deliverable.actions.length === 0) {
+          details.push("  - No actions yet.");
+        } else {
+          deliverable.actions.forEach((action, actionIndex) => {
+            const actionTitle =
+              action.title?.trim() || `Action ${actionIndex + 1}`;
+            details.push(
+              `  - ${checkboxForStatus(action.status)} ${actionTitle}`,
+            );
+          });
+        }
+
+        return [header, ...details].join("\n");
+      },
+    );
+
+    segments.push(deliverableBlocks.join("\n"));
+  });
+
+  return segments.join("\n\n");
+}
+
+function formatStatus(status: string): string {
+  switch (status.trim().toLowerCase()) {
+    case "done":
+      return "Done";
+    case "doing":
+      return "In progress";
+    case "todo":
+    default:
+      return "To do";
+  }
+}
+
+function checkboxForStatus(status: string): string {
+  switch (status.trim().toLowerCase()) {
+    case "done":
+      return "[x]";
+    case "doing":
+      return "[-]";
+    default:
+      return "[ ]";
+  }
 }
