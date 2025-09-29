@@ -39,13 +39,6 @@ export function DeliverableItem({
     selectedNode?.type === "deliverable" &&
     selectedNode.deliverableId === deliverable.id;
 
-  const totalActions = actions?.length ?? 0;
-  const completedActions =
-    actions?.reduce(
-      (count, action) => (action.status === "done" ? count + 1 : count),
-      0,
-    ) ?? 0;
-
   const updateDeliverable = useMutation(
     api.deliverables.updateDeliverable,
   ).withOptimisticUpdate((localStore, args) => {
@@ -217,11 +210,6 @@ export function DeliverableItem({
             />
 
             <div className="flex items-center gap-1">
-              {totalActions > 0 ? (
-                <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-                  {completedActions}/{totalActions} done
-                </span>
-              ) : null}
               <StatusBadge
                 status={deliverable.status}
                 onChange={handleUpdateStatus}

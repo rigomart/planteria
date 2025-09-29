@@ -2,6 +2,11 @@ import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleChevronTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { EditableField } from "./editable-field";
@@ -159,24 +164,47 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
     }
   };
 
+  const totalActions = actions.length;
+  const completedActions = actions.reduce(
+    (count, action) => (action.status === "done" ? count + 1 : count),
+    0,
+  );
+
   return (
-    <div className="flex flex-col gap-2">
-      <ActionsList
-        actions={actions}
-        onUpdateAction={handleUpdateAction}
-        onDeleteAction={handleDeleteAction}
-        onUpdateStatus={handleUpdateStatus}
-      />
-      <Button
-        type="button"
-        variant="dashed"
-        size="sm"
-        onClick={handleAddAction}
-        className="self-start"
-      >
-        <Plus className="mr-2 size-4" /> Add action
-      </Button>
-    </div>
+    <Collapsible className="border border-primary/10 rounded">
+      <div className="flex items-center border-b border-primary/10 px-3 py-2">
+        <CollapsibleChevronTrigger aria-label="Toggle actions" />
+        <div className="flex w-full items-center justify-between gap-2 text-sm font-medium text-muted-foreground">
+          <span>Actions</span>
+          {totalActions > 0 ? (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {completedActions}/{totalActions} done
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground/80">None yet</span>
+          )}
+        </div>
+      </div>
+      <CollapsibleContent>
+        <div className="flex flex-col gap-3 p-3">
+          <ActionsList
+            actions={actions}
+            onUpdateAction={handleUpdateAction}
+            onDeleteAction={handleDeleteAction}
+            onUpdateStatus={handleUpdateStatus}
+          />
+          <Button
+            type="button"
+            variant="dashed"
+            size="sm"
+            onClick={handleAddAction}
+            className="self-start"
+          >
+            <Plus className="mr-2 size-4" /> Add action
+          </Button>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
