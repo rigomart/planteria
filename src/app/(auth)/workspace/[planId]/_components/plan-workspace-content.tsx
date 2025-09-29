@@ -80,8 +80,10 @@ function MobileWorkspaceSection({
           className="text-muted-foreground"
         />
       </div>
-      <CollapsibleContent className="border-t px-4 pb-4 pt-3 data-[state=closed]:border-transparent">
-        {children}
+      <CollapsibleContent className="border-t data-[state=closed]:border-transparent">
+        <div className="max-h-[75vh] overflow-y-auto px-4 pb-4 pt-3">
+          {children}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );

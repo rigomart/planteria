@@ -77,7 +77,7 @@ export function PlanWorkspacePreviewContent({
     <Tabs
       value={mode}
       onValueChange={(value) => setMode(value as PreviewMode)}
-      className={cn("flex h-full min-h-0 flex-col gap-4", className)}
+      className={cn("flex flex-col gap-4 h-full min-h-0", className)}
     >
       <div className="flex flex-col gap-3">
         <div className="space-y-1">
@@ -130,7 +130,9 @@ export function PlanWorkspacePreviewContent({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden rounded-lg border bg-background">
+      <div
+        className={cn("overflow-hidden rounded-lg border bg-background flex-1")}
+      >
         <div className="flex h-full flex-col">
           {isLoading ? (
             <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
