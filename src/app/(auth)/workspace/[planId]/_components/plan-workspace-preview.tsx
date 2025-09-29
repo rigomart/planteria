@@ -4,7 +4,9 @@ import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Copy, Download, Eye, EyeOff, FileText, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, {
+  type Components as MarkdownComponents,
+} from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
@@ -37,7 +39,7 @@ export function PlanWorkspacePreviewContent({
   const isLoading = previewData === undefined;
   const hierarchy = previewData ?? null;
 
-  const { markdown } = useMemo(() => {
+  const { markdown, totals } = useMemo(() => {
     if (!hierarchy) {
       return {
         markdown: null as string | null,
@@ -45,14 +47,30 @@ export function PlanWorkspacePreviewContent({
       };
     }
 
+    let deliverableCount = 0;
+    let actionCount = 0;
+
+    for (const outcome of hierarchy.outcomes) {
+      deliverableCount += outcome.deliverables.length;
+      for (const deliverable of outcome.deliverables) {
+        actionCount += deliverable.actions.length;
+      }
+    }
+
     return {
       markdown: buildPlanMarkdown(hierarchy),
+      totals: {
+        outcomes: hierarchy.outcomes.length,
+        deliverables: deliverableCount,
+        actions: actionCount,
+      },
     };
   }, [hierarchy]);
 
   const hasContent = Boolean(markdown && markdown.trim().length > 0);
   const markdownText = markdown ?? "";
   const emptyMessage = "Add outcomes and deliverables to see the plan preview.";
+  const summaryLine = `${totals.outcomes} outcomes • ${totals.deliverables} deliverables • ${totals.actions} actions`;
 
   return (
     <Tabs
@@ -61,17 +79,21 @@ export function PlanWorkspacePreviewContent({
       className={cn("flex h-full min-h-0 flex-col gap-4", className)}
     >
       <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="space-y-1">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Plan preview
           </span>
           <h2 className="text-2xl font-semibold text-foreground">
             {plan.title}
           </h2>
+
+          {plan.summary ? (
+            <p className="text-sm text-muted-foreground">{plan.summary}</p>
+          ) : null}
         </div>
 
-        <div className="flex items-center justify-between">
-          <TabsList className="w-fit">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <TabsList className="w-fit shadow-sm">
             <TabsTrigger value="preview">
               <Eye className="size-4" />
               Preview
@@ -81,6 +103,7 @@ export function PlanWorkspacePreviewContent({
               Markdown
             </TabsTrigger>
           </TabsList>
+
           <div className="flex flex-wrap items-center gap-1">
             <Button
               type="button"
@@ -102,8 +125,8 @@ export function PlanWorkspacePreviewContent({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden rounded-lg border bg-background/70">
-        <div className="flex h-full flex-col p-4 text-sm">
+      <div className="flex-1 overflow-hidden rounded-lg border bg-background">
+        <div className="flex h-full flex-col">
           {isLoading ? (
             <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
               <Loader2 className="size-4 animate-spin" /> Loading plan overview…
@@ -112,24 +135,33 @@ export function PlanWorkspacePreviewContent({
             <>
               <TabsContent
                 value="preview"
-                className="flex-1 overflow-auto text-foreground cursor-text"
+                className="flex-1 overflow-auto px-6 pb-10 pt-6 text-foreground"
               >
                 {hasContent ? (
-                  <ReactMarkdown>{markdownText}</ReactMarkdown>
+                  <ReactMarkdown components={markdownComponents}>
+                    {markdownText}
+                  </ReactMarkdown>
                 ) : (
                   <p className="text-muted-foreground">{emptyMessage}</p>
                 )}
               </TabsContent>
 
-              <TabsContent value="markdown" className="flex-1 overflow-auto">
+              <TabsContent
+                value="markdown"
+                className="flex-1 overflow-auto px-6 pb-10 pt-6"
+              >
                 {hasContent ? (
-                  <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed">
+                  <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-muted-foreground">
                     {markdownText}
                   </pre>
                 ) : (
                   <p className="text-muted-foreground">{emptyMessage}</p>
                 )}
               </TabsContent>
+
+              <div className="border-t px-6 py-3 text-xs text-muted-foreground">
+                {summaryLine}
+              </div>
             </>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-muted-foreground">
@@ -211,7 +243,7 @@ function buildPlanMarkdown(preview: PlanPreviewData): string {
 
         const doneWhen = deliverable.doneWhen?.trim();
         if (doneWhen) {
-          details.push(`  - Done when: ${doneWhen}`);
+          details.push(`\n  Done when: ${doneWhen}`);
         }
 
         const notes = deliverable.notes?.trim();
@@ -262,3 +294,69 @@ function checkboxForStatus(status: string): string {
       return "[ ]";
   }
 }
+
+const markdownComponents: MarkdownComponents = {
+  h1: ({ node, className, ...props }) => (
+    <h1
+      className={cn(
+        "text-3xl font-semibold tracking-tight text-foreground",
+        className,
+      )}
+      {...props}
+    />
+  ),
+  h2: ({ node, className, ...props }) => (
+    <h2
+      className={cn(
+        "mt-8 text-2xl font-semibold text-foreground first:mt-0",
+        className,
+      )}
+      {...props}
+    />
+  ),
+  h3: ({ node, className, ...props }) => (
+    <h3
+      className={cn(
+        "mt-6 text-xl font-medium text-foreground first:mt-0",
+        className,
+      )}
+      {...props}
+    />
+  ),
+  p: ({ node, className, ...props }) => (
+    <p
+      className={cn("leading-7 text-muted-foreground", className)}
+      {...props}
+    />
+  ),
+  ul: ({ node, className, ...props }) => (
+    <ul className={cn("ml-5 list-disc space-y-2", className)} {...props} />
+  ),
+  ol: ({ node, className, ...props }) => (
+    <ol className={cn("ml-5 list-decimal space-y-2", className)} {...props} />
+  ),
+  li: ({ node, className, ...props }) => (
+    <li
+      className={cn("leading-6 text-muted-foreground", className)}
+      {...props}
+    />
+  ),
+  blockquote: ({ node, className, ...props }) => (
+    <blockquote
+      className={cn(
+        "border-l-2 border-muted-foreground/40 pl-3 italic text-muted-foreground",
+        className,
+      )}
+      {...props}
+    />
+  ),
+  code: ({ node, className, ...props }) => (
+    <code
+      className={cn(
+        "rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground",
+        className,
+      )}
+      {...props}
+    />
+  ),
+};
