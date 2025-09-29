@@ -3,12 +3,6 @@
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import { Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
 import type { api } from "@/convex/_generated/api";
 import { PlanOutline } from "./plan-outline";
 
@@ -26,66 +20,47 @@ export function PlanWorkspaceContent({
   }
 
   return (
-    <SidebarProvider
-      className="h-full"
-      style={
-        {
-          "--sidebar-width": "30rem",
-          "--sidebar-width-mobile": "20rem",
-        } as React.CSSProperties
-      }
-    >
-      <Sidebar side="left">
-        <SidebarContent className="p-2 pt-16 overflow-y-auto">
-          <div className="flex flex-col gap-3 bg-card">
-            <div className="text-2xl font-semibold">{plan.title}</div>
+    <div className="flex h-full min-h-0 gap-2 pb-6 pt-2">
+      <aside className="flex w-80 min-w-[18rem] flex-col gap-4 overflow-y-auto rounded-lg border bg-card p-4">
+        <div className="flex flex-col gap-3">
+          <div className="text-2xl font-semibold">{plan.title}</div>
 
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">{plan.summary}</p>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">{plan.summary}</p>
 
-              <div className="flex flex-col gap-1 rounded-lg border p-3 text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">
-                  Initial idea
-                </span>
-                <span className="text-muted-foreground/90">{plan.idea}</span>
-              </div>
+            <div className="flex flex-col gap-1 rounded-lg border p-3 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Initial idea</span>
+              <span className="text-muted-foreground/90">{plan.idea}</span>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="secondary"
-                onClick={() => console.log("[UI] refine plan with AI")}
-              >
-                <Sparkles className="mr-2 size-4" /> AI adjust plan
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => console.log("[UI] add outcome", "toolbar")}
-              >
-                <Plus className="mr-2 size-4" /> Add outcome
-              </Button>
-            </div>
-          </div>
-        </SidebarContent>
-      </Sidebar>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => console.log("[UI] refine plan with AI")}
+          >
+            <Sparkles className="mr-2 size-4" /> AI adjust plan
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => console.log("[UI] add outcome", "toolbar")}
+          >
+            <Plus className="mr-2 size-4" /> Add outcome
+          </Button>
+        </div>
+      </aside>
 
-      {/* Right Column - Plan Outline */}
-      <SidebarInset className="min-h-0 h-full flex-1">
+      <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <PlanOutline planId={plan.id} />
-      </SidebarInset>
+      </section>
 
-      <Sidebar side="right">
-        <SidebarContent className="p-2 pt-16 overflow-y-auto">
-          <div className="flex flex-col gap-3 bg-card">
-            <div className="text-2xl font-semibold">{plan.title}</div>
-          </div>
-        </SidebarContent>
-      </Sidebar>
-    </SidebarProvider>
+      <aside className="flex w-72 min-w-[16rem] flex-col gap-4 overflow-y-auto rounded-lg border bg-card p-4">
+        <div className="text-2xl font-semibold">{plan.title}</div>
+      </aside>
+    </div>
   );
 }
