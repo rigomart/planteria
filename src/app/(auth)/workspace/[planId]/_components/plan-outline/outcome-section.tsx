@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
+import { useEffect, useRef } from "react";
 import { MousePointerClick, Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,12 +20,16 @@ export type OutcomeSectionProps = {
   planId: Id<"plans">;
   outcome: FunctionReturnType<typeof api.outcomes.queries.listByPlan>[number];
   index: number;
+  shouldScrollIntoView?: boolean;
+  onScrollHandled?: () => void;
 };
 
 export function OutcomeSection({
   planId,
   outcome,
   index,
+  shouldScrollIntoView = false,
+  onScrollHandled,
 }: OutcomeSectionProps) {
   const deliverables = useQuery(api.deliverables.queries.listByOutcome, {
     outcomeId: outcome.id,
@@ -32,6 +37,7 @@ export function OutcomeSection({
 
   const { selectedNode, selectOutcome, selectDeliverable, clearSelection } =
     useOutlineSelection();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const updateOutcome = useMutation(
     api.outcomes.updateOutcome,
@@ -135,8 +141,19 @@ export function OutcomeSection({
       0,
     ) ?? 0;
 
+  useEffect(() => {
+    if (shouldScrollIntoView && containerRef.current) {
+      containerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      onScrollHandled?.();
+    }
+  }, [shouldScrollIntoView, onScrollHandled]);
+
   return (
     <div
+      ref={containerRef}
       className={cn(
         "p-2 sm:p-4 border rounded bg-background transition-colors",
         isSelected ? "border-primary/60 bg-primary/5" : "border-border/60",
