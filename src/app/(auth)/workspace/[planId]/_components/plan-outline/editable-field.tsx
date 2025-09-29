@@ -37,12 +37,13 @@ export function EditableField({
         value={value}
         onSubmit={onSave}
         placeholder={placeholder}
-        autosize
         className="flex flex-row"
         submitOnBlur={false}
       >
-        <EditableArea className="flex flex-row w-full">
-          <EditablePreview className={displayClassName} />
+        <EditableArea className="flex flex-row">
+          <EditablePreview
+            className={cn(displayClassName, "whitespace-pre-wrap")}
+          />
           <EditableInput className={cn(editorClassName, "flex-1")} />
         </EditableArea>
         <EditableToolbar>

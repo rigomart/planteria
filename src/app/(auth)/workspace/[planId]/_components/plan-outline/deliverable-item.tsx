@@ -40,7 +40,7 @@ export function DeliverableItem({
           </Button>
         </CollapsibleTrigger>
         <div className="flex flex-col flex-1">
-          <div className="flex gap-2 relative w-full justify-between items-center">
+          <div className="flex gap-2 relative justify-between items-center">
             <EditableField
               value={deliverable.title ?? ""}
               onSave={(nextValue) =>
@@ -50,8 +50,8 @@ export function DeliverableItem({
                 })
               }
               placeholder="Add a deliverable title"
-              displayClassName="text-sm font-medium leading-tight"
-              editorClassName="text-sm font-medium leading-tight"
+              displayClassName="text-base font-medium leading-tight"
+              editorClassName="text-base font-medium leading-tight"
             />
 
             <div className="flex items-center gap-1">
