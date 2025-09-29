@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
+import type { ReactNode } from "react";
 import {
   Collapsible,
   CollapsibleChevronTrigger,
@@ -65,7 +65,10 @@ type MobileWorkspaceSectionProps = {
   children: ReactNode;
 };
 
-function MobileWorkspaceSection({ title, children }: MobileWorkspaceSectionProps) {
+function MobileWorkspaceSection({
+  title,
+  children,
+}: MobileWorkspaceSectionProps) {
   return (
     <Collapsible defaultOpen={false} className="rounded-lg border bg-card">
       <div className="flex items-center justify-between px-4 py-3">

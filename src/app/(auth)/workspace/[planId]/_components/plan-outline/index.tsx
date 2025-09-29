@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useCallback, useState } from "react";
 import { Plus } from "lucide-react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -40,9 +40,8 @@ type PlanOutlineContentProps = {
 
 function PlanOutlineContent({ planId, outcomes }: PlanOutlineContentProps) {
   const { selectOutcome } = useOutlineSelection();
-  const [pendingScrollOutcomeId, setPendingScrollOutcomeId] = useState<
-    Id<"outcomes">
-  | null>(null);
+  const [pendingScrollOutcomeId, setPendingScrollOutcomeId] =
+    useState<Id<"outcomes"> | null>(null);
 
   const addOutcome = useMutation(api.outcomes.addOutcome);
 
@@ -87,8 +86,8 @@ function PlanOutlineContent({ planId, outcomes }: PlanOutlineContentProps) {
 
       {outcomes.length === 0 ? (
         <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-          No outcomes yet. Start by adding one to capture a major result you want
-          from this plan.
+          No outcomes yet. Start by adding one to capture a major result you
+          want from this plan.
         </div>
       ) : (
         <div className="flex flex-col gap-8">

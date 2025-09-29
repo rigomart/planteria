@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 type SelectedNode =
   | { type: "outcome"; outcomeId: string }
@@ -14,9 +20,8 @@ type OutlineSelectionContextValue = {
   clearSelection: () => void;
 };
 
-const OutlineSelectionContext = createContext<OutlineSelectionContextValue | null>(
-  null,
-);
+const OutlineSelectionContext =
+  createContext<OutlineSelectionContextValue | null>(null);
 
 export function OutlineSelectionProvider({
   children,
@@ -63,4 +68,3 @@ export function useOutlineSelection() {
 
   return context;
 }
-

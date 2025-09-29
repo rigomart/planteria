@@ -20,9 +20,7 @@ export function PlanWorkspacePreviewContent({
     <div className={cn("flex flex-col gap-4", className)}>
       <div className="text-2xl font-semibold">{plan.title}</div>
 
-      <p className="text-sm text-muted-foreground">
-        Plan preview placeholder
-      </p>
+      <p className="text-sm text-muted-foreground">Plan preview placeholder</p>
     </div>
   );
 }
