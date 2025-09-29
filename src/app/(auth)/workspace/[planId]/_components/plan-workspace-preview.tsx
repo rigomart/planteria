@@ -214,7 +214,7 @@ function buildPlanMarkdown(preview: PlanPreviewData): string {
   }
 
   if (outcomes.length === 0) {
-    segments.push("_This plan does not include any outcomes yet._");
+    segments.push("This plan does not include any outcomes yet.");
     return segments.join("\n\n");
   }
 
@@ -227,10 +227,10 @@ function buildPlanMarkdown(preview: PlanPreviewData): string {
       segments.push(outcomeSummary);
     }
 
-    segments.push(`_Status: ${formatStatus(outcome.status)}_`);
+    segments.push(`Status: ${formatStatus(outcome.status)}`);
 
     if (outcome.deliverables.length === 0) {
-      segments.push("- _No deliverables yet._");
+      segments.push("- No deliverables yet.");
       return;
     }
 
@@ -238,7 +238,7 @@ function buildPlanMarkdown(preview: PlanPreviewData): string {
       (deliverable, deliverableIndex) => {
         const deliverableTitle =
           deliverable.title?.trim() || `Deliverable ${deliverableIndex + 1}`;
-        const header = `- **Deliverable ${deliverableIndex + 1}: ${deliverableTitle}** (_${formatStatus(deliverable.status)}_)`;
+        const header = `- **Deliverable ${deliverableIndex + 1}: ${deliverableTitle}** (${formatStatus(deliverable.status)})`;
         const details: string[] = [];
 
         const doneWhen = deliverable.doneWhen?.trim();
@@ -252,7 +252,7 @@ function buildPlanMarkdown(preview: PlanPreviewData): string {
         }
 
         if (deliverable.actions.length === 0) {
-          details.push("  - No actions yet.");
+          details.push("  No actions yet.");
         } else {
           deliverable.actions.forEach((action, actionIndex) => {
             const actionTitle =
@@ -296,7 +296,7 @@ function checkboxForStatus(status: string): string {
 }
 
 const markdownComponents: MarkdownComponents = {
-  h1: ({ node, className, ...props }) => (
+  h1: ({ className, ...props }) => (
     <h1
       className={cn(
         "text-3xl font-semibold tracking-tight text-foreground",
@@ -305,7 +305,7 @@ const markdownComponents: MarkdownComponents = {
       {...props}
     />
   ),
-  h2: ({ node, className, ...props }) => (
+  h2: ({ className, ...props }) => (
     <h2
       className={cn(
         "mt-8 text-2xl font-semibold text-foreground first:mt-0",
@@ -314,7 +314,7 @@ const markdownComponents: MarkdownComponents = {
       {...props}
     />
   ),
-  h3: ({ node, className, ...props }) => (
+  h3: ({ className, ...props }) => (
     <h3
       className={cn(
         "mt-6 text-xl font-medium text-foreground first:mt-0",
@@ -323,25 +323,25 @@ const markdownComponents: MarkdownComponents = {
       {...props}
     />
   ),
-  p: ({ node, className, ...props }) => (
+  p: ({ className, ...props }) => (
     <p
       className={cn("leading-7 text-muted-foreground", className)}
       {...props}
     />
   ),
-  ul: ({ node, className, ...props }) => (
+  ul: ({ className, ...props }) => (
     <ul className={cn("ml-5 list-disc space-y-2", className)} {...props} />
   ),
-  ol: ({ node, className, ...props }) => (
+  ol: ({ className, ...props }) => (
     <ol className={cn("ml-5 list-decimal space-y-2", className)} {...props} />
   ),
-  li: ({ node, className, ...props }) => (
+  li: ({ className, ...props }) => (
     <li
       className={cn("leading-6 text-muted-foreground", className)}
       {...props}
     />
   ),
-  blockquote: ({ node, className, ...props }) => (
+  blockquote: ({ className, ...props }) => (
     <blockquote
       className={cn(
         "border-l-2 border-muted-foreground/40 pl-3 italic text-muted-foreground",
@@ -350,7 +350,7 @@ const markdownComponents: MarkdownComponents = {
       {...props}
     />
   ),
-  code: ({ node, className, ...props }) => (
+  code: ({ className, ...props }) => (
     <code
       className={cn(
         "rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground",
