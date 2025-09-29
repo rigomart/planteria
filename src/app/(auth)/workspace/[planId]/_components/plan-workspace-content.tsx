@@ -32,17 +32,19 @@ export function PlanWorkspaceContent({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 pb-6 pt-2">
-      <div className="grid h-full min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)_18rem] xl:grid-cols-[22rem_minmax(0,1fr)_20rem]">
-        <div className="hidden h-full min-h-0 w-full lg:flex">
+    <div className="flex h-full min-h-0 flex-col lg:overflow-hidden">
+      <div className="grid min-h-0 grid-cols-1 lg:h-full lg:flex-1 lg:grid-cols-12 lg:overflow-hidden">
+        <div className="hidden w-full overflow-hidden lg:flex lg:h-full lg:min-h-0 lg:col-span-3">
           <PlanWorkspaceAssistant plan={plan} />
         </div>
 
-        <section className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-          <PlanOutline planId={plan.id} />
+        <section className="flex min-h-0 min-w-0 flex-col lg:h-full lg:min-h-0 lg:overflow-hidden lg:col-span-5">
+          <div className="flex-1 overflow-y-auto">
+            <PlanOutline planId={plan.id} />
+          </div>
         </section>
 
-        <div className="hidden h-full min-h-0 w-full lg:flex">
+        <div className="hidden w-full overflow-hidden lg:flex lg:h-full lg:min-h-0 lg:col-span-4">
           <PlanWorkspacePreview plan={plan} />
         </div>
       </div>
