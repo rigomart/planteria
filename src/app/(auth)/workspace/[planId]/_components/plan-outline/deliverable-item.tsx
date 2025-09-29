@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
+import { Trash } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleChevronTrigger,
@@ -9,7 +11,6 @@ import {
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { EditableField } from "./editable-field";
-import { NodeOptionsMenu } from "./node-options-menu";
 import { PlanActions } from "./plan-actions";
 import { StatusBadge } from "./status-badge";
 
@@ -180,16 +181,16 @@ export function DeliverableItem({
                 onChange={handleUpdateStatus}
               />
 
-              <NodeOptionsMenu
-                onAiAdjust={() =>
-                  console.log(
-                    "[UI] AI adjust deliverable",
-                    deliverable.id,
-                    outcomeId,
-                  )
-                }
-                onDelete={handleDeleteDeliverable}
-              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={handleDeleteDeliverable}
+                aria-label="Delete deliverable"
+              >
+                <Trash className="size-4" />
+              </Button>
             </div>
           </div>
 
