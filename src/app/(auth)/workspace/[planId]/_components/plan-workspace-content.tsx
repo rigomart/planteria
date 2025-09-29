@@ -1,7 +1,7 @@
 "use client";
 
 import { type Preloaded, usePreloadedQuery } from "convex/react";
-import { Plus, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
 import { PlanOutline } from "./plan-outline";
@@ -43,13 +43,6 @@ export function PlanWorkspaceContent({
             onClick={() => console.log("[UI] refine plan with AI")}
           >
             <Sparkles className="mr-2 size-4" /> AI adjust plan
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => console.log("[UI] add outcome", "toolbar")}
-          >
-            <Plus className="mr-2 size-4" /> Add outcome
           </Button>
         </div>
       </aside>
