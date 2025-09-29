@@ -199,7 +199,8 @@ function ActionsList({
   if (actions.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No actions yet. Create a few to make this deliverable unambiguous.
+        No actions listed yet. Add steps if this deliverable would benefit from
+        extra clarity.
       </p>
     );
   }

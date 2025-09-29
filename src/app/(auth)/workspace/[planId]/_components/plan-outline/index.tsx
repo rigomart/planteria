@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { OutcomeSection } from "./outcome-section";
+import { OutlineSelectionProvider } from "./outline-selection-context";
 
 export type PlanOutlineProps = {
   planId: Id<"plans">;
@@ -19,15 +20,17 @@ export function PlanOutline({ planId }: PlanOutlineProps) {
   }
 
   return (
-    <div className="flex flex-col gap-8 p-2 md:p-6">
-      {outcomes.map((outcome, outcomeIndex) => (
-        <OutcomeSection
-          key={outcome.id}
-          planId={planId}
-          outcome={outcome}
-          index={outcomeIndex}
-        />
-      ))}
-    </div>
+    <OutlineSelectionProvider>
+      <div className="flex flex-col gap-8 p-2 md:p-6">
+        {outcomes.map((outcome, outcomeIndex) => (
+          <OutcomeSection
+            key={outcome.id}
+            planId={planId}
+            outcome={outcome}
+            index={outcomeIndex}
+          />
+        ))}
+      </div>
+    </OutlineSelectionProvider>
   );
 }

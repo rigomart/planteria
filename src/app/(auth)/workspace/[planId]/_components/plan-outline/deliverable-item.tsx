@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Trash } from "lucide-react";
+import { MousePointerClick, Trash } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/collapsible";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
 import { EditableField } from "./editable-field";
+import { useOutlineSelection } from "./outline-selection-context";
 import { PlanActions } from "./plan-actions";
 import { StatusBadge } from "./status-badge";
 
@@ -29,6 +31,19 @@ export function DeliverableItem({
   const actions = useQuery(api.actions.listByDeliverable, {
     deliverableId: deliverable.id,
   });
+
+  const { selectedNode, selectDeliverable } = useOutlineSelection();
+
+  const isSelected =
+    selectedNode?.type === "deliverable" &&
+    selectedNode.deliverableId === deliverable.id;
+
+  const totalActions = actions?.length ?? 0;
+  const completedActions =
+    actions?.reduce(
+      (count, action) => (action.status === "done" ? count + 1 : count),
+      0,
+    ) ?? 0;
 
   const updateDeliverable = useMutation(
     api.deliverables.updateDeliverable,
@@ -162,9 +177,28 @@ export function DeliverableItem({
   };
 
   return (
-    <div className="bg-card p-1 flex flex-col gap-1 border-b">
-      <Collapsible className="w-full flex gap-1">
+    <div
+      className={cn(
+        "bg-card p-1 flex flex-col gap-1 border-b transition-colors",
+        isSelected ? "border-primary/60 bg-primary/5" : "border-border/60",
+      )}
+    >
+      <Collapsible className="w-full flex gap-1 items-start">
         <CollapsibleChevronTrigger aria-label="Toggle deliverable" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={(event) => {
+            event.stopPropagation();
+            selectDeliverable(outcomeId, deliverable.id);
+          }}
+          aria-pressed={isSelected}
+          aria-label="Select deliverable"
+          className={cn("text-muted-foreground", isSelected && "text-primary")}
+        >
+          <MousePointerClick className="size-4" />
+        </Button>
         <div className="flex flex-col flex-1">
           <div className="flex gap-2 relative justify-between items-center">
             <EditableField
@@ -176,6 +210,11 @@ export function DeliverableItem({
             />
 
             <div className="flex items-center gap-1">
+              {totalActions > 0 ? (
+                <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
+                  {completedActions}/{totalActions} done
+                </span>
+              ) : null}
               <StatusBadge
                 status={deliverable.status}
                 onChange={handleUpdateStatus}

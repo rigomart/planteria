@@ -1,12 +1,14 @@
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Plus } from "lucide-react";
+import { MousePointerClick, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
 import { DeliverableItem } from "./deliverable-item";
 import { EditableField } from "./editable-field";
 import { NodeOptionsMenu } from "./node-options-menu";
+import { useOutlineSelection } from "./outline-selection-context";
 import { StatusBadge } from "./status-badge";
 
 export type OutcomeSectionProps = {
@@ -24,8 +26,18 @@ export function OutcomeSection({
     outcomeId: outcome.id,
   });
 
+  const { selectedNode, selectOutcome } = useOutlineSelection();
+
+  const isSelected =
+    selectedNode?.type === "outcome" && selectedNode.outcomeId === outcome.id;
+
   return (
-    <div className="p-2 sm:p-4 border rounded bg-background">
+    <div
+      className={cn(
+        "p-2 sm:p-4 border rounded bg-background transition-colors",
+        isSelected ? "border-primary/60 bg-primary/5" : "border-border/60",
+      )}
+    >
       <div className="flex items-center gap-2 justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
@@ -34,12 +46,28 @@ export function OutcomeSection({
           <StatusBadge status={outcome.status} />
         </div>
 
-        <NodeOptionsMenu
-          onAiAdjust={() => console.log("[UI] AI adjust outcome", outcome.id)}
-          onDelete={() =>
-            console.log("[UI] delete outcome", outcome.id, "plan", planId)
-          }
-        />
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => selectOutcome(outcome.id)}
+            aria-pressed={isSelected}
+            aria-label="Select outcome"
+            className={cn(
+              "text-muted-foreground",
+              isSelected && "text-primary",
+            )}
+          >
+            <MousePointerClick className="size-4" />
+          </Button>
+          <NodeOptionsMenu
+            onAiAdjust={() => console.log("[UI] AI adjust outcome", outcome.id)}
+            onDelete={() =>
+              console.log("[UI] delete outcome", outcome.id, "plan", planId)
+            }
+          />
+        </div>
       </div>
       <div className="flex flex-col">
         <EditableField
