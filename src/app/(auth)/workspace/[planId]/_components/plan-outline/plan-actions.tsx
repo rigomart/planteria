@@ -91,6 +91,28 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
     }
   });
 
+  const updateActionStatus = useMutation(
+    api.actions.updateActionStatus,
+  ).withOptimisticUpdate((localStore, args) => {
+    const currentActions = localStore.getQuery(api.actions.listByDeliverable, {
+      deliverableId,
+    });
+
+    if (currentActions !== undefined) {
+      const updatedActions = currentActions.map((action) =>
+        action.id === args.actionId
+          ? { ...action, status: args.status, updatedAt: Date.now() }
+          : action,
+      );
+
+      localStore.setQuery(
+        api.actions.listByDeliverable,
+        { deliverableId },
+        updatedActions,
+      );
+    }
+  });
+
   const handleAddAction = async () => {
     try {
       await addAction({
@@ -123,12 +145,27 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
     }
   };
 
+  const handleUpdateStatus = async (
+    actionId: Id<"actions">,
+    status: Action["status"],
+  ) => {
+    try {
+      await updateActionStatus({
+        actionId,
+        status,
+      });
+    } catch (error) {
+      console.error("Failed to update action status:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <ActionsList
         actions={actions}
         onUpdateAction={handleUpdateAction}
         onDeleteAction={handleDeleteAction}
+        onUpdateStatus={handleUpdateStatus}
       />
       <Button
         type="button"
@@ -147,12 +184,17 @@ type ActionsListProps = {
   actions: FunctionReturnType<typeof api.actions.listByDeliverable>;
   onUpdateAction: (actionId: Id<"actions">, title: string) => Promise<void>;
   onDeleteAction: (actionId: Id<"actions">) => Promise<void>;
+  onUpdateStatus: (
+    actionId: Id<"actions">,
+    status: Action["status"],
+  ) => Promise<void>;
 };
 
 function ActionsList({
   actions,
   onUpdateAction,
   onDeleteAction,
+  onUpdateStatus,
 }: ActionsListProps) {
   if (actions.length === 0) {
     return (
@@ -179,7 +221,10 @@ function ActionsList({
             />
 
             <div className="flex items-center gap-1">
-              <StatusBadge status={action.status} />
+              <StatusBadge
+                status={action.status}
+                onChange={(nextStatus) => onUpdateStatus(action.id, nextStatus)}
+              />
 
               <Button
                 variant="ghost"

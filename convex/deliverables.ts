@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { requireOutcomeOwnership } from "./lib/ownership";
+import { status } from "./schema";
 
 /**
  * Add a new deliverable to an outcome
@@ -96,6 +97,44 @@ export const updateDeliverable = mutation({
 
     // Update plan's updatedAt
     await ctx.db.patch(outcome.planId, { updatedAt: Date.now() });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Update the status for a deliverable
+ */
+export const updateDeliverableStatus = mutation({
+  args: {
+    deliverableId: v.id("deliverables"),
+    status,
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    const deliverable = await ctx.db.get(args.deliverableId);
+    if (!deliverable) {
+      throw new Error("Deliverable not found");
+    }
+
+    const { outcome } = await requireOutcomeOwnership(
+      ctx,
+      deliverable.outcomeId,
+      identity.subject,
+    );
+
+    const timestamp = Date.now();
+
+    await ctx.db.patch(args.deliverableId, {
+      status: args.status,
+      updatedAt: timestamp,
+    });
+
+    await ctx.db.patch(outcome.planId, { updatedAt: timestamp });
 
     return { success: true };
   },

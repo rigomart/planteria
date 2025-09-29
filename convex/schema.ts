@@ -1,7 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const status = v.union(
+export const status = v.union(
   v.literal("todo"),
   v.literal("doing"),
   v.literal("done"),

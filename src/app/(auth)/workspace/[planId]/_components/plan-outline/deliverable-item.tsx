@@ -1,12 +1,10 @@
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { ChevronDown } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import {
   Collapsible,
+  CollapsibleChevronTrigger,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -34,11 +32,7 @@ export function DeliverableItem({
   return (
     <div className="bg-card p-1 flex flex-col gap-1 border-b">
       <Collapsible className="w-full flex gap-1">
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <ChevronDown className="size-4" />
-          </Button>
-        </CollapsibleTrigger>
+        <CollapsibleChevronTrigger aria-label="Toggle deliverable" />
         <div className="flex flex-col flex-1">
           <div className="flex gap-2 relative justify-between items-center">
             <EditableField

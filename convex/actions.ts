@@ -4,6 +4,7 @@ import {
   requireActionOwnership,
   requireDeliverableOwnership,
 } from "./lib/ownership";
+import { status } from "./schema";
 
 /**
  * Add a new action to a deliverable
@@ -175,5 +176,38 @@ export const listByDeliverable = query({
       createdAt: action.createdAt,
       updatedAt: action.updatedAt,
     }));
+  },
+});
+
+/**
+ * Update the status for a given action.
+ */
+export const updateActionStatus = mutation({
+  args: {
+    actionId: v.id("actions"),
+    status,
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    const { action, outcome } = await requireActionOwnership(
+      ctx,
+      args.actionId,
+      identity.subject,
+    );
+
+    const timestamp = Date.now();
+
+    await ctx.db.patch(action._id, {
+      status: args.status,
+      updatedAt: timestamp,
+    });
+
+    await ctx.db.patch(outcome.planId, { updatedAt: timestamp });
+
+    return { success: true };
   },
 });
