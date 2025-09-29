@@ -34,3 +34,9 @@
 ## Configuration & Environment
 - Local runs need `NEXT_PUBLIC_CONVEX_URL` defined; `ConvexClientProvider` throws if it is missing.
 - Keep secrets in `.env.local` (never commit). Regenerate Convex types with `npx convex codegen` after editing schema or functions.
+
+## Collaboration Notes
+- Expect iterative validation: changes are exercised immediately and errors drive follow-up work.
+- Small UX refinements (button placement, auto-scroll, inline feedback) are high priority.
+- Surface primary actions near their context; avoid relying on distant/global controls.
+- Present trade-offs, then implement the simplest solution that keeps the workflow intuitive.
