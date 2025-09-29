@@ -63,6 +63,7 @@ export const updateDeliverable = mutation({
     deliverableId: v.id("deliverables"),
     title: v.optional(v.string()),
     doneWhen: v.optional(v.string()),
+    notes: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -91,6 +92,9 @@ export const updateDeliverable = mutation({
     }
     if (args.doneWhen !== undefined) {
       updates.doneWhen = args.doneWhen;
+    }
+    if (args.notes !== undefined) {
+      updates.notes = args.notes;
     }
 
     await ctx.db.patch(args.deliverableId, updates);
