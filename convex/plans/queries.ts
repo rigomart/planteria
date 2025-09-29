@@ -93,9 +93,7 @@ export const getPlanPreview = query({
       outcomes.map(async (outcome) => {
         const deliverables = await ctx.db
           .query("deliverables")
-          .withIndex("by_outcome_order", (q) =>
-            q.eq("outcomeId", outcome._id),
-          )
+          .withIndex("by_outcome_order", (q) => q.eq("outcomeId", outcome._id))
           .collect();
 
         const deliverablesWithActions = await Promise.all(

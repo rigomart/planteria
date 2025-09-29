@@ -247,7 +247,6 @@ function formatStatus(status: string): string {
       return "Done";
     case "doing":
       return "In progress";
-    case "todo":
     default:
       return "To do";
   }
