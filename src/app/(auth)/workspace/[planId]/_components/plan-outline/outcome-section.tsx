@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { MousePointerClick, Plus, Trash } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -20,16 +20,12 @@ export type OutcomeSectionProps = {
   planId: Id<"plans">;
   outcome: FunctionReturnType<typeof api.outcomes.queries.listByPlan>[number];
   index: number;
-  shouldScrollIntoView?: boolean;
-  onScrollHandled?: () => void;
 };
 
 export function OutcomeSection({
   planId,
   outcome,
   index,
-  shouldScrollIntoView = false,
-  onScrollHandled,
 }: OutcomeSectionProps) {
   const deliverables = useQuery(api.deliverables.queries.listByOutcome, {
     outcomeId: outcome.id,
@@ -140,16 +136,6 @@ export function OutcomeSection({
       (count, item) => (item.status === "done" ? count + 1 : count),
       0,
     ) ?? 0;
-
-  useEffect(() => {
-    if (shouldScrollIntoView && containerRef.current) {
-      containerRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-      onScrollHandled?.();
-    }
-  }, [shouldScrollIntoView, onScrollHandled]);
 
   return (
     <div

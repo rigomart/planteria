@@ -40,9 +40,9 @@ export function PlanWorkspaceContent({
         </div>
 
         <section className="flex min-h-0 min-w-0 flex-col md:col-span-7 lg:col-span-8 lg:h-full lg:min-h-0 lg:overflow-hidden relative ">
-          <StripedPattern className="text-muted/50" />
+          <StripedPattern className="text-muted/70" width={10} height={10} />
 
-          <div className="z-20 absolute right-8 top-2">
+          <div className="z-20 absolute right-8 top-2 hidden md:block">
             <PlanWorkspacePreview plan={plan} />
           </div>
 

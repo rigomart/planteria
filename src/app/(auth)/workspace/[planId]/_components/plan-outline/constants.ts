@@ -1,4 +1,4 @@
-import type { StatusValue } from "./types";
+export type StatusValue = "todo" | "doing" | "done";
 
 export type StatusStyle = {
   label: string;

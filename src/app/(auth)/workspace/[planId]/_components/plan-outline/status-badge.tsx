@@ -14,8 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { STATUS_STYLES } from "./constants";
-import type { StatusValue } from "./types";
+import { STATUS_STYLES, type StatusValue } from "./constants";
 
 type StatusBadgeProps = {
   status: StatusValue;

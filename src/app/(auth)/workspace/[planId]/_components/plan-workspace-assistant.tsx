@@ -4,7 +4,6 @@ import type { FunctionReturnType } from "convex/server";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import type { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
@@ -111,15 +110,16 @@ export function PlanWorkspaceAssistantContent({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border/60 bg-background/90 shadow-lg">
-        <Textarea
+      <section className="rounded-xl border bg-background/90 shadow-lg">
+        <textarea
           placeholder="Ex: Highlight quality assurance and tighten release milestones across outcomes."
           onChange={() => {
             console.log("Textarea change – wiring coming soon");
           }}
-          className="min-h-24 max-h-32 text-sm rounded-2xl border-0 bg-transparent"
+          className="h-24 w-full rounded-xl border-0 bg-transparent p-3 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"
+          required
         />
-        <div className="flex justify-end">
+        <div className="flex flex-col border-t border-border/60 p-2 text-xs text-muted-foreground">
           <Button
             type="button"
             onClick={() => {
