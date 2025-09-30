@@ -97,48 +97,19 @@ function PlanWorkspacePreviewContent({
     <Tabs
       value={mode}
       onValueChange={(value) => setMode(value as PreviewMode)}
-      className="flex flex-col gap-4 h-full min-h-0"
+      className="flex flex-col gap-2 h-full min-h-0 w-full p-2 md:p-3"
     >
-      <div className="flex flex-col gap-3">
-        <div className="text-lg font-semibold uppercase tracking-wider text-muted-foreground">
-          Plan preview
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <TabsList className="w-fit shadow-sm">
-            <TabsTrigger value="preview">
-              <Eye className="size-4" />
-              Preview
-            </TabsTrigger>
-            <TabsTrigger value="markdown">
-              <FileText className="size-4" />
-              Markdown
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="flex flex-wrap items-center gap-1">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              title="Copy markdown"
-              disabled={!hasContent || isLoading}
-              onClick={() => handleCopy(markdownText, hasContent)}
-            >
-              <Copy className="size-4" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              title="Export .md"
-              disabled={!hasContent || isLoading}
-              onClick={() => handleExport(markdownText, plan.title)}
-            >
-              <Download className="size-4" />
-            </Button>
-          </div>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-12">
+        <TabsList className="w-fit shadow-sm">
+          <TabsTrigger value="preview">
+            <Eye className="size-4" />
+            Preview
+          </TabsTrigger>
+          <TabsTrigger value="markdown">
+            <FileText className="size-4" />
+            Markdown
+          </TabsTrigger>
+        </TabsList>
       </div>
 
       <div
@@ -177,8 +148,31 @@ function PlanWorkspacePreviewContent({
                 )}
               </TabsContent>
 
-              <div className="border-t px-6 py-3 text-xs text-muted-foreground">
-                {summaryLine}
+              <div className="border-t px-6 py-3 flex justify-between items-center">
+                <div className="text-xs text-muted-foreground">
+                  {summaryLine}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    title="Copy markdown"
+                    disabled={!hasContent || isLoading}
+                    onClick={() => handleCopy(markdownText, hasContent)}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    title="Export .md"
+                    disabled={!hasContent || isLoading}
+                    onClick={() => handleExport(markdownText, plan.title)}
+                  >
+                    <Download className="size-4" />
+                  </Button>
+                </div>
               </div>
             </>
           ) : (
