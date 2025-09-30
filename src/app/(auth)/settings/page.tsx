@@ -1,22 +1,25 @@
 import { Suspense } from "react";
-
+import { Header } from "../_components/header";
 import { OpenAIKeyManager } from "./_components/openai-key-manager";
 
 export default function SettingsPage() {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-8">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Connect your own OpenAI account so plan generation and adjustments run
-          under your usage.
-        </p>
-      </header>
+    <>
+      <Header />
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-8">
+        <section className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+          <p className="text-sm text-muted-foreground">
+            Connect your own OpenAI account so plan generation and adjustments
+            run under your usage.
+          </p>
+        </section>
 
-      <Suspense fallback={<SettingsSkeleton />}>
-        <OpenAIKeyManager />
-      </Suspense>
-    </div>
+        <Suspense fallback={<SettingsSkeleton />}>
+          <OpenAIKeyManager />
+        </Suspense>
+      </div>
+    </>
   );
 }
 
