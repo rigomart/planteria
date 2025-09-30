@@ -21,6 +21,8 @@ import type * as lib_prompts from "../lib/prompts.js";
 import type * as outcomes_queries from "../outcomes/queries.js";
 import type * as outcomes from "../outcomes.js";
 import type * as planAi from "../planAi.js";
+import type * as planAiEvents from "../planAiEvents.js";
+import type * as planAiHistory from "../planAiHistory.js";
 import type * as planThreads from "../planThreads.js";
 import type * as plans_generation from "../plans/generation.js";
 import type * as plans_queries from "../plans/queries.js";
@@ -54,6 +56,8 @@ declare const fullApi: ApiFromModules<{
   "outcomes/queries": typeof outcomes_queries;
   outcomes: typeof outcomes;
   planAi: typeof planAi;
+  planAiEvents: typeof planAiEvents;
+  planAiHistory: typeof planAiHistory;
   planThreads: typeof planThreads;
   "plans/generation": typeof plans_generation;
   "plans/queries": typeof plans_queries;

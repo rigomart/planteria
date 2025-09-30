@@ -13,6 +13,12 @@ const planLifecycleStatus = v.union(
   v.literal("error"),
 );
 
+const planAiEventStatus = v.union(
+  v.literal("pending"),
+  v.literal("applied"),
+  v.literal("error"),
+);
+
 export default defineSchema({
   plans: defineTable({
     userId: v.string(),
@@ -68,4 +74,18 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_plan", ["planId"]),
+
+  plan_ai_events: defineTable({
+    planId: v.id("plans"),
+    userId: v.string(),
+    threadId: v.string(),
+    prompt: v.string(),
+    summary: v.optional(v.union(v.string(), v.null())),
+    status: planAiEventStatus,
+    error: v.optional(v.union(v.string(), v.null())),
+    appliedAt: v.optional(v.union(v.number(), v.null())),
+    latencyMs: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_plan_createdAt", ["planId", "createdAt"]),
 });

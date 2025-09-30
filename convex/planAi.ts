@@ -1,7 +1,7 @@
 import type { FunctionReturnType } from "convex/server";
 import { v } from "convex/values";
 
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { action, mutation } from "./_generated/server";
 import { planningAgent } from "./agents/planning";
 import { requirePlanOwnership } from "./lib/ownership";
@@ -68,32 +68,57 @@ export const adjustPlan = action({
 
     const currentPlan = toAdjustmentInput(plan as PlanPreview);
 
-    const prompt = buildPlanAdjustmentPrompt({
-      ...currentPlan,
-      instruction: args.prompt,
-    });
-
-    const aiResponse = await planningAgent.generateObject(
-      ctx,
-      { threadId },
-      {
-        schema: planDraftSchema,
-        prompt,
-      },
-    );
-
-    const proposal = planDraftSchema.parse(aiResponse.object);
-
-    await ctx.runMutation(api.planAi.applyPlanAdjustment, {
+    const { eventId } = await ctx.runMutation(internal.planAiEvents.logEvent, {
       planId: args.planId,
-      proposal,
+      userId: identity.subject,
+      threadId,
+      prompt: args.prompt,
     });
 
-    return {
-      plan: proposal,
-    } satisfies {
-      plan: PlanDraft;
-    };
+    const startedAt = Date.now();
+
+    try {
+      const prompt = buildPlanAdjustmentPrompt({
+        ...currentPlan,
+        instruction: args.prompt,
+      });
+
+      const aiResponse = await planningAgent.generateObject(
+        ctx,
+        { threadId },
+        {
+          schema: planDraftSchema,
+          prompt,
+        },
+      );
+
+      const proposal = planDraftSchema.parse(aiResponse.object);
+
+      await ctx.runMutation(api.planAi.applyPlanAdjustment, {
+        planId: args.planId,
+        proposal,
+      });
+
+      await ctx.runMutation(internal.planAiEvents.markEventApplied, {
+        eventId,
+        summary: proposal.summary,
+        appliedAt: Date.now(),
+        latencyMs: Date.now() - startedAt,
+      });
+
+      return {
+        plan: proposal,
+      } satisfies {
+        plan: PlanDraft;
+      };
+    } catch (error) {
+      await ctx.runMutation(internal.planAiEvents.markEventFailed, {
+        eventId,
+        error: formatErrorMessage(error),
+      });
+
+      throw error;
+    }
   },
 });
 
@@ -201,3 +226,15 @@ export const applyPlanAdjustment = mutation({
     return { success: true };
   },
 });
+
+function formatErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return "Unknown error";
+}
