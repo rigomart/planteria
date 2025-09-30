@@ -92,7 +92,9 @@ export default defineSchema({
   user_api_keys: defineTable({
     userId: v.string(),
     provider: v.string(),
-    ciphertext: v.string(),
+    ciphertext: v.optional(v.string()),
+    hash: v.optional(v.string()),
+    salt: v.optional(v.string()),
     lastFour: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),

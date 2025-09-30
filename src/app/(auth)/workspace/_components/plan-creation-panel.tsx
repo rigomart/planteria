@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -23,8 +24,8 @@ export function PlanCreationPanel() {
   );
   const keyStatus = useQuery(api.userApiKeys.getOpenAIKeyStatus);
 
-  const hasKey = keyStatus?.hasKey ?? false;
   const isKeyLoading = keyStatus === undefined;
+  const hasKey = keyStatus?.hasKey ?? false;
   const showKeyWarning = !isKeyLoading && !hasKey;
 
   return (
@@ -63,7 +64,7 @@ export function PlanCreationPanel() {
               className="h-32 w-full rounded-2xl border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"
               value={idea}
               onChange={(event) => setIdea(event.target.value)}
-              disabled={pending}
+              disabled={pending || showKeyWarning || isKeyLoading}
               required
             />
             <div className="flex flex-col gap-3 border-t border-border/60 py-2 px-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
@@ -93,7 +94,7 @@ export function PlanCreationPanel() {
                 size="sm"
                 className="rounded-full bg-muted/60 text-muted-foreground transition hover:bg-muted text-xs"
                 onClick={() => setIdea(prompt)}
-                disabled={pending}
+                disabled={pending || showKeyWarning || isKeyLoading}
               >
                 {prompt}
               </Button>
@@ -105,13 +106,16 @@ export function PlanCreationPanel() {
             </p>
           ) : null}
           {showKeyWarning ? (
-            <Alert className="border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-100">
-              <AlertCircle className="size-4" />
+            <Alert className="flex items-start gap-2 border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-100">
+              <AlertCircle className="mt-0.5 size-4" />
               <AlertDescription className="text-sm">
                 Add your OpenAI API key in{" "}
-                <a href="/settings" className="underline underline-offset-2">
+                <Link
+                  href="/settings"
+                  className="font-medium underline underline-offset-2"
+                >
                   Settings
-                </a>{" "}
+                </Link>{" "}
                 to generate plans.
               </AlertDescription>
             </Alert>

@@ -1,36 +1,21 @@
-import { Suspense } from "react";
 import { Header } from "../_components/header";
-import { OpenAIKeyManager } from "./_components/openai-key-manager";
+import { SettingsContent } from "./_components/settings-content";
 
 export default function SettingsPage() {
   return (
     <>
       <Header />
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-8">
-        <section className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
           <p className="text-sm text-muted-foreground">
-            Connect your own OpenAI account so plan generation and adjustments
-            run under your usage.
+            Manage the credentials Planteria uses to generate and share your
+            plans.
           </p>
-        </section>
+        </div>
 
-        <Suspense fallback={<SettingsSkeleton />}>
-          <OpenAIKeyManager />
-        </Suspense>
+        <SettingsContent />
       </div>
     </>
-  );
-}
-
-function SettingsSkeleton() {
-  return (
-    <div className="rounded-2xl border border-border/50 bg-muted/10 p-6">
-      <div className="space-y-4">
-        <div className="h-4 w-48 rounded bg-muted" />
-        <div className="h-12 w-full rounded bg-muted/60" />
-        <div className="h-10 w-32 rounded bg-muted" />
-      </div>
-    </div>
   );
 }
