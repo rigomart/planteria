@@ -141,16 +141,14 @@ export function OutcomeSection({
     <div
       ref={containerRef}
       className={cn(
-        "p-2 sm:p-4 border rounded-xl bg-card transition-colors",
+        "p-2 sm:p-3 border rounded-xl bg-card transition-colors",
         isSelected ? "border-primary/60 bg-primary/5" : "border-primary/5",
       )}
     >
-      <div className="flex items-center gap-2 justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
-            Outcome {index + 1}
-          </span>
-        </div>
+      <div className="flex items-center gap-1 justify-between">
+        <span className="text-xs uppercase tracking-wide text-muted-foreground/50">
+          Outcome {index + 1}
+        </span>
 
         <div className="flex items-center gap-1">
           <StatusBadge

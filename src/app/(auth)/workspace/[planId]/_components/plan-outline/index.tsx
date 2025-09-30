@@ -2,9 +2,14 @@
 
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { OutcomeSection } from "./outcome-section";
@@ -86,48 +91,40 @@ function PlanOutlineContent({
   const planSummary = plan.summary?.trim();
   const planIdea = plan.idea?.trim() ?? "";
   const hasSummary = Boolean(planSummary && planSummary.length > 0);
-  const hasIdea = planIdea.length > 0;
-  const showIdeaDetails = hasSummary || hasIdea;
 
   return (
     <div className="flex flex-col">
       <section className="p-2 md:p-4 bg-background border-b border-border/60">
-        {showIdeaDetails ? (
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {planTitle}
-            </h1>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            {planTitle}
+          </h1>
 
-            <div className="space-y-2  px-4 py-4">
-              {hasSummary && (
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Plan summary
-                  </p>
-                  <p className="rounded-md border border-border/60 bg-muted/40 px-3 py-2 text-sm leading-relaxed text-muted-foreground">
-                    {planSummary}
-                  </p>
-                </div>
-              )}
-              {hasIdea && (
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Initial idea
-                  </p>
-                  <p className="rounded-md border border-primary/40 bg-primary/5 px-3 py-3 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-                    {planIdea}
-                  </p>
-                </div>
-              )}
-            </div>
+          <div className="space-y-1">
+            <Collapsible>
+              <CollapsibleTrigger>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  className="rounded-full text-xs border border-primary"
+                >
+                  Initial idea
+                  <ChevronDown className="size-4" />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="p-2 bg-primary/5 rounded-xl">
+                <p className="rounded-full text-xs leading-relaxed text-foreground">
+                  {planIdea}
+                </p>
+              </CollapsibleContent>
+            </Collapsible>
+            {hasSummary && (
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {planSummary}
+              </p>
+            )}
           </div>
-        ) : (
-          <div className="rounded-lg border border-border/60 bg-background/80 px-4 py-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {planTitle}
-            </h1>
-          </div>
-        )}
+        </div>
       </section>
 
       <div className=" flex flex-col gap-6 p-2 md:p-6">

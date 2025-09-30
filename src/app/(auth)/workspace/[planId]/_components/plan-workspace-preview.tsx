@@ -182,13 +182,9 @@ export function PlanWorkspacePreviewContent({
 
 type PlanWorkspacePreviewProps = {
   plan: PlanSummary;
-  className?: string;
 };
 
-export function PlanWorkspacePreview({
-  plan,
-  className,
-}: PlanWorkspacePreviewProps) {
+export function PlanWorkspacePreview({ plan }: PlanWorkspacePreviewProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
