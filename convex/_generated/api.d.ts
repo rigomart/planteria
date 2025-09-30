@@ -25,6 +25,7 @@ import type * as planAiEvents from "../planAiEvents.js";
 import type * as planAiHistory from "../planAiHistory.js";
 import type * as planThreads from "../planThreads.js";
 import type * as plans_generation from "../plans/generation.js";
+import type * as plans_mutations from "../plans/mutations.js";
 import type * as plans_queries from "../plans/queries.js";
 import type * as users from "../users.js";
 
@@ -60,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   planAiHistory: typeof planAiHistory;
   planThreads: typeof planThreads;
   "plans/generation": typeof plans_generation;
+  "plans/mutations": typeof plans_mutations;
   "plans/queries": typeof plans_queries;
   users: typeof users;
 }>;

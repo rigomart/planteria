@@ -102,7 +102,7 @@ function PlanOutlineContent({
 
           <div className="space-y-1">
             <Collapsible>
-              <CollapsibleTrigger>
+              <CollapsibleTrigger asChild>
                 <Button
                   size="xs"
                   variant="outline"
