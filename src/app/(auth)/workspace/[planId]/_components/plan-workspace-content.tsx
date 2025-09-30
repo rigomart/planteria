@@ -33,23 +33,23 @@ export function PlanWorkspaceContent({
 
   return (
     <div className="flex h-full min-h-0 flex-col lg:overflow-hidden">
-      <div className="grid min-h-0 grid-cols-1 lg:h-full lg:flex-1 lg:grid-cols-12 lg:overflow-hidden">
-        <div className="hidden w-full overflow-hidden lg:flex lg:h-full lg:min-h-0 lg:col-span-3">
+      <div className="grid min-h-0 grid-cols-1 lg:h-full lg:flex-1 md:grid-cols-12 lg:overflow-hidden">
+        <div className="hidden w-full overflow-hidden md:col-span-5 md:flex md:h-full lg:min-h-0">
           <PlanWorkspaceAssistant plan={plan} />
         </div>
 
-        <section className="flex min-h-0 min-w-0 flex-col lg:h-full lg:min-h-0 lg:overflow-hidden lg:col-span-5">
+        <section className="flex min-h-0 min-w-0 flex-col md:col-span-7 lg:h-full lg:min-h-0 lg:overflow-hidden">
+          <div className="hidden items-center justify-end gap-2 px-4 pt-4 lg:flex">
+            <PlanWorkspacePreview plan={plan} />
+          </div>
+
           <div className="flex-1 overflow-y-auto">
             <PlanOutline planId={plan.id} />
           </div>
         </section>
-
-        <div className="hidden w-full overflow-hidden lg:flex lg:h-full lg:min-h-0 lg:col-span-4">
-          <PlanWorkspacePreview plan={plan} />
-        </div>
       </div>
 
-      <div className="flex flex-col gap-4 lg:hidden">
+      <div className="flex flex-col gap-4 md:hidden">
         <MobileWorkspaceSection title="AI assistant">
           <PlanWorkspaceAssistantContent plan={plan} />
         </MobileWorkspaceSection>

@@ -9,6 +9,13 @@ import ReactMarkdown, {
 } from "react-markdown";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
@@ -80,17 +87,8 @@ export function PlanWorkspacePreviewContent({
       className={cn("flex flex-col gap-4 h-full min-h-0", className)}
     >
       <div className="flex flex-col gap-3">
-        <div className="space-y-1">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Plan preview
-          </span>
-          <h2 className="text-2xl font-semibold text-foreground">
-            {plan.title}
-          </h2>
-
-          {plan.summary ? (
-            <p className="text-sm text-muted-foreground">{plan.summary}</p>
-          ) : null}
+        <div className="text-lg font-semibold uppercase tracking-wider text-muted-foreground">
+          Plan preview
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -192,14 +190,29 @@ export function PlanWorkspacePreview({
   className,
 }: PlanWorkspacePreviewProps) {
   return (
-    <aside
-      className={cn(
-        "flex h-full min-h-0 w-full flex-col gap-4 overflow-hidden rounded-lg border bg-card p-4",
-        className,
-      )}
-    >
-      <PlanWorkspacePreviewContent plan={plan} />
-    </aside>
+    <div className={cn("flex items-center", className)}>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="shadow-sm"
+          >
+            <Eye className="size-5" />
+            <span className="sr-only">Open plan preview</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="gap-0 p-0 sm:max-w-xl">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Plan preview</SheetTitle>
+          </SheetHeader>
+          <div className="flex h-full flex-col overflow-hidden">
+            <PlanWorkspacePreviewContent plan={plan} className="h-full" />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }
 
