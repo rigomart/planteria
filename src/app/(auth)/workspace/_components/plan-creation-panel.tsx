@@ -20,16 +20,16 @@ export function PlanCreationPanel() {
   );
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/80 shadow-xl">
-      <div className="pointer-events-none absolute -left-24 top-8 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-      <div className="pointer-events-none absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-muted/40 blur-3xl" />
+    <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/80 shadow">
+      <div className="pointer-events-none absolute -left-24 top-8 h-64 w-64 rounded-xl bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-10 bottom-0 h-56 w-56 rounded-xl bg-muted/40 blur-3xl" />
 
       <form
         action={formAction}
         className="relative flex flex-col gap-8 px-6 py-6 sm:px-8"
       >
         <div className="mx-auto max-w-2xl text-center">
-          <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-primary/60 bg-primary/5 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
+          <div className="mb-6 inline-flex items-center gap-1 rounded-xl border border-primary/60 bg-primary/5 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
             <Sparkles className="size-3" />
             Guided planning
           </div>
@@ -51,7 +51,7 @@ export function PlanCreationPanel() {
             <textarea
               id="idea"
               name="idea"
-              placeholder="Example: Turn my indie planner concept into a 4-week roadmap with weekly deliverables and launch checkpoints."
+              placeholder="e.g. Platform for private communities with posts, chat, and member billing"
               className="h-32 w-full rounded-2xl border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"
               value={idea}
               onChange={(event) => setIdea(event.target.value)}

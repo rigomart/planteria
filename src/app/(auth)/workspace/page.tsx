@@ -4,16 +4,13 @@ import { PlansList } from "./_components/plans-list";
 
 export default function WorkspaceIndexPage() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-10">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-6 overflow-y-auto">
       <PlanCreationPanel />
 
       <section className="flex flex-col gap-6">
         <header className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Recent plans</h2>
-            <p className="text-sm text-muted-foreground">
-              Jump back into an existing plan or explore a different idea.
-            </p>
           </div>
         </header>
 
