@@ -61,4 +61,11 @@ export default defineSchema({
   })
     .index("by_deliverable", ["deliverableId"])
     .index("by_deliverable_order", ["deliverableId", "order"]),
+
+  plan_threads: defineTable({
+    planId: v.id("plans"),
+    threadId: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_plan", ["planId"]),
 });

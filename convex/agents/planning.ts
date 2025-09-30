@@ -9,7 +9,7 @@ const PLAN_SYSTEM_PROMPT =
 
 export const planningAgent = new Agent(components.agent, {
   name: "Planteria Planning Agent",
-  languageModel: openai.chat("gpt-4o-mini"),
+  languageModel: openai.chat("gpt-5-mini"),
   instructions: PLAN_SYSTEM_PROMPT,
   maxSteps: 3,
 });

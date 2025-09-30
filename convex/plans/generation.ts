@@ -114,6 +114,12 @@ export const generatePlanInBackground = internalAction({
         summary: "Generating plan draft",
       });
 
+      await ctx.runMutation(internal.planThreads.savePlanThread, {
+        planId: args.planId,
+        userId: args.userId,
+        threadId,
+      });
+
       const aiResponse = await planningAgent.generateObject(
         ctx,
         { threadId },
