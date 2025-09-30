@@ -107,6 +107,9 @@ export const generatePlanInBackground = internalAction({
     userId: v.string(),
   },
   handler: async (ctx, args) => {
+    const startedAt = Date.now();
+    let eventId: Id<"plan_ai_events"> | null = null;
+
     try {
       const threadId = await createThread(ctx, components.agent, {
         userId: args.userId,
@@ -119,6 +122,15 @@ export const generatePlanInBackground = internalAction({
         userId: args.userId,
         threadId,
       });
+
+      const logResult = await ctx.runMutation(internal.planAiEvents.logEvent, {
+        planId: args.planId,
+        userId: args.userId,
+        threadId,
+        prompt: args.idea,
+      });
+
+      eventId = logResult.eventId;
 
       const aiResponse = await planningAgent.generateObject(
         ctx,
@@ -137,7 +149,25 @@ export const generatePlanInBackground = internalAction({
         plan: parsedPlan,
         planId: args.planId,
       });
+
+      if (eventId) {
+        const appliedAt = Date.now();
+
+        await ctx.runMutation(internal.planAiEvents.markEventApplied, {
+          eventId,
+          summary: parsedPlan.summary,
+          appliedAt,
+          latencyMs: appliedAt - startedAt,
+        });
+      }
     } catch (error) {
+      if (eventId) {
+        await ctx.runMutation(internal.planAiEvents.markEventFailed, {
+          eventId,
+          error: errorMessage(error),
+        });
+      }
+
       await ctx.runMutation(
         internal.plans.generation.markPlanGenerationFailed,
         {
