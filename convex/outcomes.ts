@@ -89,6 +89,40 @@ export const updateOutcome = mutation({
 
     await ctx.db.patch(args.outcomeId, updates);
 
+    // If marking the outcome as done, cascade to all deliverables and actions
+    if (args.status === "done") {
+      const deliverables = await ctx.db
+        .query("deliverables")
+        .withIndex("by_outcome", (q) => q.eq("outcomeId", args.outcomeId))
+        .collect();
+
+      const timestamp = Date.now();
+      for (const deliverable of deliverables) {
+        if (deliverable.status !== "done") {
+          await ctx.db.patch(deliverable._id, {
+            status: "done",
+            updatedAt: timestamp,
+          });
+        }
+
+        const actions = await ctx.db
+          .query("actions")
+          .withIndex("by_deliverable", (q) =>
+            q.eq("deliverableId", deliverable._id),
+          )
+          .collect();
+
+        for (const action of actions) {
+          if (action.status !== "done") {
+            await ctx.db.patch(action._id, {
+              status: "done",
+              updatedAt: timestamp,
+            });
+          }
+        }
+      }
+    }
+
     // Update plan's updatedAt
     await ctx.db.patch(outcome.planId, { updatedAt: Date.now() });
 

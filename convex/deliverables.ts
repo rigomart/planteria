@@ -138,6 +138,25 @@ export const updateDeliverableStatus = mutation({
       updatedAt: timestamp,
     });
 
+    // If marking the deliverable as done, cascade to all related actions
+    if (args.status === "done") {
+      const actions = await ctx.db
+        .query("actions")
+        .withIndex("by_deliverable", (q) =>
+          q.eq("deliverableId", args.deliverableId),
+        )
+        .collect();
+
+      for (const action of actions) {
+        if (action.status !== "done") {
+          await ctx.db.patch(action._id, {
+            status: "done",
+            updatedAt: timestamp,
+          });
+        }
+      }
+    }
+
     await ctx.db.patch(outcome.planId, { updatedAt: timestamp });
 
     return { success: true };
