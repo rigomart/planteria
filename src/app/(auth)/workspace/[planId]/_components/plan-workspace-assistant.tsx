@@ -3,153 +3,108 @@
 import type { FunctionReturnType } from "convex/server";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import type { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
 type PlanSummary = FunctionReturnType<typeof api.plans.queries.getPlanSummary>;
 
-type AdjustmentExample = {
-  id: string;
-  prompt: string;
-  summary: string;
-  timestamp: string;
-};
-
-const adjustmentExamples: AdjustmentExample[] = [
-  {
-    id: "adj-1",
-    prompt: "Make the plan emphasize a crisp release narrative",
-    summary: "Summary refreshed and outcomes reordered",
-    timestamp: "Sep 28 • 2:12 PM",
-  },
-  {
-    id: "adj-2",
-    prompt: "Ensure timeline balances design and engineering effort",
-    summary: "Suggested redistributing outcome workload",
-    timestamp: "Sep 27 • 4:46 PM",
-  },
-  {
-    id: "adj-3",
-    prompt: "Tighten deliverables to remove marketing tasks",
-    summary: "No marketing deliverables detected",
-    timestamp: "Sep 26 • 11:18 AM",
-  },
-];
-
-function ScopeBadge() {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-foreground/80">
-      Whole plan
-    </span>
-  );
-}
-
-function AdjustmentExampleCard({
-  adjustment,
-}: {
-  adjustment: AdjustmentExample;
-}) {
-  return (
-    <article className="rounded-lg border border-border/60 bg-card/60 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-foreground/90">
-          {adjustment.summary}
-        </p>
-      </div>
-      <p className="mt-1 text-xs text-muted-foreground/80">
-        {adjustment.prompt}
-      </p>
-      <p className="mt-2 text-[11px] text-muted-foreground/70">
-        {adjustment.timestamp}
-      </p>
-    </article>
-  );
-}
-
-type PlanWorkspaceAssistantContentProps = {
-  plan?: PlanSummary;
-  className?: string;
-};
-
-export function PlanWorkspaceAssistantContent({
-  plan: _plan,
-  className,
-}: PlanWorkspaceAssistantContentProps) {
-  return (
-    <div className={cn("flex h-full flex-col gap-4", className)}>
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-semibold uppercase text-muted-foreground">
-          AI Assistant
-        </span>
-        <p className="text-xs text-muted-foreground">
-          Write instructions and let Planteria adjust the plan for you.
-        </p>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
-          <span>Target:</span>
-          <ScopeBadge />
-        </div>
-      </div>
-
-      <Separator />
-
-      <section className="flex flex-col gap-2 flex-1">
-        <h3 className="text-sm font-semibold text-foreground">
-          Recent changes
-        </h3>
-
-        <div className="flex flex-col gap-2">
-          {adjustmentExamples.map((adjustment) => (
-            <AdjustmentExampleCard
-              key={adjustment.id}
-              adjustment={adjustment}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-xl border bg-background/90 shadow-lg">
-        <textarea
-          placeholder="Ex: Highlight quality assurance and tighten release milestones across outcomes."
-          onChange={() => {
-            console.log("Textarea change – wiring coming soon");
-          }}
-          className="h-24 w-full rounded-xl border-0 bg-transparent p-3 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"
-          required
-        />
-        <div className="flex flex-col border-t border-border/60 p-2 text-xs text-muted-foreground">
-          <Button
-            type="button"
-            onClick={() => {
-              console.log("Generate plan adjustment");
-            }}
-          >
-            <Sparkles className="size-3.5" />
-            Adjust
-          </Button>
-        </div>
-      </section>
-    </div>
-  );
-}
+type AssistantLayout = "sidebar" | "card";
 
 type PlanWorkspaceAssistantProps = {
   plan?: PlanSummary;
+  layout?: AssistantLayout;
   className?: string;
 };
 
 export function PlanWorkspaceAssistant({
   plan,
+  layout = "sidebar",
   className,
 }: PlanWorkspaceAssistantProps) {
   return (
-    <aside
+    <div className={cn(containerClassName(layout), className)}>
+      <AssistantHeader plan={plan} />
+      <AssistantHistoryPlaceholder />
+      <AssistantComposer layout={layout} />
+    </div>
+  );
+}
+
+function AssistantHeader({ plan }: { plan?: PlanSummary }) {
+  const title = plan?.title?.trim() || plan?.idea?.trim() || "Plan adjustments";
+
+  return (
+    <header className="flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold uppercase text-muted-foreground">
+          Plan AI
+        </h2>
+        <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-foreground/80">
+          Whole plan
+        </span>
+      </div>
+      <div className="space-y-1">
+        <p className="text-base font-medium text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground">
+          Apply guided adjustments across outcomes, deliverables, and actions.
+        </p>
+      </div>
+    </header>
+  );
+}
+
+function AssistantHistoryPlaceholder() {
+  return (
+    <section className="flex flex-col gap-2 rounded-lg border border-dashed border-border/60 bg-background/80 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-foreground">
+          Recent adjustments
+        </h3>
+        <span className="text-[11px] text-muted-foreground">
+          No entries yet
+        </span>
+      </div>
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Adjustments you run will appear here with status, summary, and timing.
+      </p>
+    </section>
+  );
+}
+
+function AssistantComposer({ layout }: { layout: AssistantLayout }) {
+  return (
+    <section
       className={cn(
-        "flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto border p-3",
-        className,
+        "flex flex-col gap-3 rounded-lg border border-border/60 bg-background/90 p-4",
+        layout === "sidebar" ? "mt-auto" : null,
       )}
     >
-      <PlanWorkspaceAssistantContent plan={plan} />
-    </aside>
+      <div className="space-y-1">
+        <h3 className="text-sm font-semibold text-foreground">
+          New instruction
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          Share what needs to shift. We’ll update the full plan. Wiring coming
+          soon.
+        </p>
+      </div>
+      <textarea
+        placeholder="Ex: Tighten release milestones and balance QA coverage across outcomes."
+        disabled
+        className="h-28 w-full rounded-md border border-border/60 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"
+      />
+      <Button type="button" disabled>
+        <Sparkles className="size-3.5" />
+        Adjust plan
+      </Button>
+    </section>
   );
+}
+
+function containerClassName(layout: AssistantLayout) {
+  if (layout === "card") {
+    return "flex flex-col gap-5 rounded-xl border border-border/60 bg-card/80 p-4 shadow-sm";
+  }
+
+  return "flex h-full min-h-0 w-full flex-col gap-5 overflow-y-auto border border-border/60 bg-card/70 p-4";
 }

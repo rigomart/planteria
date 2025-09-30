@@ -11,10 +11,7 @@ import { StripedPattern } from "@/components/ui/striped-pattern";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { PlanOutline } from "./plan-outline";
-import {
-  PlanWorkspaceAssistant,
-  PlanWorkspaceAssistantContent,
-} from "./plan-workspace-assistant";
+import { PlanWorkspaceAssistant } from "./plan-workspace-assistant";
 import {
   PlanWorkspacePreview,
   PlanWorkspacePreviewContentWrapper,
@@ -49,7 +46,7 @@ export function PlanWorkspaceContent({ planId }: PlanWorkspaceContentProps) {
 
       <div className="flex flex-col gap-4 md:hidden">
         <MobileWorkspaceSection title="AI assistant">
-          <PlanWorkspaceAssistantContent plan={plan} />
+          <PlanWorkspaceAssistant plan={plan} layout="card" />
         </MobileWorkspaceSection>
 
         <MobileWorkspaceSection title="Plan preview">
