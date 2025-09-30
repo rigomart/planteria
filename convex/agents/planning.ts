@@ -68,6 +68,6 @@ Return exactly the JSON object required by the schema.
 
 export const planningAgent = new Agent(components.agent, {
   name: "Planteria Planning Agent",
-  languageModel: openai.chat("gpt-5-mini"),
+  languageModel: openai.chat("gpt-5"),
   instructions: PLAN_SYSTEM_PROMPT,
 });
