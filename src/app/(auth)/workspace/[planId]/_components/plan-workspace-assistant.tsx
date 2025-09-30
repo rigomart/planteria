@@ -1,10 +1,15 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Sparkles } from "lucide-react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { AlertTriangle, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { api } from "@/convex/_generated/api";
+import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
+
+dayjs.extend(relativeTime);
 
 type PlanSummary = FunctionReturnType<typeof api.plans.queries.getPlanSummary>;
 
@@ -23,88 +28,188 @@ export function PlanWorkspaceAssistant({
 }: PlanWorkspaceAssistantProps) {
   return (
     <div className={cn(containerClassName(layout), className)}>
-      <AssistantHeader plan={plan} />
-      <AssistantHistoryPlaceholder />
+      <AssistantHeader />
+      <AssistanHistoryWrapper plan={plan} layout={layout} />
       <AssistantComposer layout={layout} />
     </div>
   );
 }
 
-function AssistantHeader({ plan }: { plan?: PlanSummary }) {
-  const title = plan?.title?.trim() || plan?.idea?.trim() || "Plan adjustments";
-
+function AssistantHeader() {
   return (
-    <header className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase text-muted-foreground">
-          Plan AI
-        </h2>
-        <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-foreground/80">
-          Whole plan
-        </span>
+    <header className="flex items-center gap-2 pb-1">
+      <div className="flex-shrink-0 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 p-1.5">
+        <Wand2 className="size-4 text-primary" />
       </div>
-      <div className="space-y-1">
-        <p className="text-base font-medium text-foreground">{title}</p>
-        <p className="text-xs text-muted-foreground">
-          Apply guided adjustments across outcomes, deliverables, and actions.
+      <div className="flex-1 min-w-0">
+        <h2 className="text-sm font-semibold text-foreground">Plan AI</h2>
+        <p className="text-xs text-muted-foreground truncate">
+          Guided plan adjustments
         </p>
       </div>
     </header>
   );
 }
 
-function AssistantHistoryPlaceholder() {
+function AssistanHistoryWrapper({
+  plan,
+  layout,
+}: {
+  plan?: PlanSummary;
+  layout: AssistantLayout;
+}) {
+  if (!plan) {
+    return (
+      <div className="flex items-center gap-2 rounded-xl bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        <span>Loading...</span>
+      </div>
+    );
+  }
+
+  return <AssistantHistory plan={plan} layout={layout} />;
+}
+
+type HistoryEntry = FunctionReturnType<typeof api.planAiHistory.list>[number];
+
+function AssistantHistory({
+  plan,
+  layout,
+}: {
+  plan: PlanSummary;
+  layout: AssistantLayout;
+}) {
+  const history = useQuery(api.planAiHistory.list, {
+    planId: plan.id,
+    limit: layout === "sidebar" ? 25 : 10,
+  });
+
+  if (history === undefined) {
+    return (
+      <div className="flex items-center gap-2 rounded-xl bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        <span>Loading...</span>
+      </div>
+    );
+  }
+
+  if (!history || history.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-border/40 bg-muted/20 px-4 py-8 text-center">
+        <p className="text-sm text-muted-foreground">
+          Adjustments will appear here
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <section className="flex flex-col gap-2 rounded-lg border border-dashed border-border/60 bg-background/80 p-4">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-foreground">
-          Recent adjustments
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between px-1">
+        <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Recent changes
         </h3>
-        <span className="text-[11px] text-muted-foreground">
-          No entries yet
+        <span className="text-xs text-muted-foreground/70">
+          {history.length}
         </span>
       </div>
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        Adjustments you run will appear here with status, summary, and timing.
-      </p>
-    </section>
+
+      <div className="relative flex flex-col">
+        {/* Timeline vertical line */}
+        <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border/60" />
+
+        {/* Timeline entries */}
+        <div className="flex flex-col">
+          {history.map((entry) => (
+            <HistoryRow key={entry.id} entry={entry} />
+          ))}
+        </div>
+      </div>
+    </div>
   );
+}
+
+function HistoryRow({ entry }: { entry: HistoryEntry }) {
+  const { status, prompt, summary, error, createdAt } = entry;
+  const timestamp = dayjs(createdAt).fromNow();
+
+  return (
+    <article className="group relative flex gap-3 pb-4 last:pb-0">
+      {/* Timeline bullet point */}
+      <div className="relative z-10 flex-shrink-0">
+        <TimelineBullet status={status} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0 pt-0.5">
+        <div className="space-y-1">
+          <p className="text-sm text-foreground/90 leading-relaxed">
+            {summary?.trim() || prompt.trim()}
+          </p>
+          <p className="text-xs text-muted-foreground">{timestamp}</p>
+          {error && (
+            <p className="flex items-center gap-1 text-xs text-destructive mt-1.5">
+              <AlertTriangle className="size-3" />
+              {error}
+            </p>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function TimelineBullet({ status }: { status: HistoryEntry["status"] }) {
+  switch (status) {
+    case "pending":
+      return (
+        <div className="flex size-4 items-center justify-center rounded-full bg-primary/20 ring-2 ring-background">
+          <Loader2 className="size-2.5 text-primary animate-spin" />
+        </div>
+      );
+    case "error":
+      return (
+        <div className="flex size-4 items-center justify-center rounded-full bg-destructive/20 ring-2 ring-background">
+          <div className="size-2 rounded-full bg-destructive" />
+        </div>
+      );
+    default:
+      return (
+        <div className="flex size-4 items-center justify-center rounded-full bg-primary/20 ring-2 ring-background">
+          <div className="size-2 rounded-full bg-primary" />
+        </div>
+      );
+  }
 }
 
 function AssistantComposer({ layout }: { layout: AssistantLayout }) {
   return (
-    <section
+    <div
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-border/60 bg-background/90 p-4",
+        "flex flex-col gap-3 rounded-2xl border border-border/60 bg-background/90 p-4 shadow-sm",
         layout === "sidebar" ? "mt-auto" : null,
       )}
     >
-      <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-foreground">
-          New instruction
-        </h3>
-        <p className="text-xs text-muted-foreground">
-          Share what needs to shift. We’ll update the full plan. Wiring coming
-          soon.
-        </p>
-      </div>
       <textarea
-        placeholder="Ex: Tighten release milestones and balance QA coverage across outcomes."
+        placeholder="Describe what needs to change..."
         disabled
-        className="h-28 w-full rounded-md border border-border/60 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"
+        className="h-24 w-full resize-none rounded-xl border border-border/40 bg-muted/30 px-3 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
       />
-      <Button type="button" disabled>
+      <Button type="button" disabled className="w-full">
         <Sparkles className="size-3.5" />
         Adjust plan
       </Button>
-    </section>
+      <p className="text-center text-xs text-muted-foreground/70">
+        Coming soon
+      </p>
+    </div>
   );
 }
 
 function containerClassName(layout: AssistantLayout) {
   if (layout === "card") {
-    return "flex flex-col gap-5 rounded-xl border border-border/60 bg-card/80 p-4 shadow-sm";
+    return "flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm";
   }
 
-  return "flex h-full min-h-0 w-full flex-col gap-5 overflow-y-auto border border-border/60 bg-card/70 p-4";
+  return "flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto border border-border/60 bg-card/70 p-5";
 }
