@@ -1,13 +1,7 @@
 "use client";
 
 import type { FunctionReturnType } from "convex/server";
-import { ChevronDown, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Sparkles } from "lucide-react";
 import type { api } from "@/convex/_generated/api";
 import { OutlineSelectionProvider } from "./outline-selection-context";
 import { PlanOutcomes } from "./plan-outcomes";
@@ -95,7 +89,6 @@ type PlanOutlineContentProps = {
 };
 
 function PlanOutlineContent({ plan }: PlanOutlineContentProps) {
-  const planTitle = plan.title?.trim() ?? plan.idea;
   const planSummary = plan.summary?.trim();
   const planIdea = plan.idea?.trim() ?? "";
   const hasSummary = Boolean(planSummary && planSummary.length > 0);
@@ -104,28 +97,11 @@ function PlanOutlineContent({ plan }: PlanOutlineContentProps) {
     <div className="flex flex-col">
       <section className="p-2 md:p-4 bg-background border-b border-border/60">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {planTitle}
-          </h1>
-
           <div className="space-y-1">
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  className="rounded-full text-xs border border-primary"
-                >
-                  Initial idea
-                  <ChevronDown className="size-4" />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="p-2 bg-primary/5 rounded-xl">
-                <p className="rounded-full text-xs leading-relaxed text-foreground">
-                  {planIdea}
-                </p>
-              </CollapsibleContent>
-            </Collapsible>
+            <p className="rounded-full text-xs leading-relaxed text-foreground">
+              Initial idea: {planIdea}
+            </p>
+
             {hasSummary && (
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {planSummary}

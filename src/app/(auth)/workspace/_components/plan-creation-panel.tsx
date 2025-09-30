@@ -1,8 +1,11 @@
 "use client";
 
-import { Loader2, Sparkles } from "lucide-react";
+import { useQuery } from "convex/react";
+import { AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { useActionState, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { api } from "@/convex/_generated/api";
 import { createPlanForIdea } from "../actions";
 
 const initialState = { message: "" };
@@ -18,6 +21,11 @@ export function PlanCreationPanel() {
     createPlanForIdea,
     initialState,
   );
+  const keyStatus = useQuery(api.userApiKeys.getOpenAIKeyStatus);
+
+  const hasKey = keyStatus?.hasKey ?? false;
+  const isKeyLoading = keyStatus === undefined;
+  const showKeyWarning = !isKeyLoading && !hasKey;
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/80 shadow">
@@ -62,7 +70,11 @@ export function PlanCreationPanel() {
               <span>
                 We'll turn this into a sequenced plan you can iterate on.
               </span>
-              <Button type="submit" disabled={pending} size="sm">
+              <Button
+                type="submit"
+                disabled={pending || showKeyWarning || isKeyLoading}
+                size="sm"
+              >
                 {pending ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
@@ -91,6 +103,18 @@ export function PlanCreationPanel() {
             <p className="text-sm font-medium text-destructive">
               {state.message}
             </p>
+          ) : null}
+          {showKeyWarning ? (
+            <Alert className="border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-100">
+              <AlertCircle className="size-4" />
+              <AlertDescription className="text-sm">
+                Add your OpenAI API key in{" "}
+                <a href="/settings" className="underline underline-offset-2">
+                  Settings
+                </a>{" "}
+                to generate plans.
+              </AlertDescription>
+            </Alert>
           ) : null}
         </div>
       </form>

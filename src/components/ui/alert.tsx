@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const alertVariants = cva("relative w-full rounded-lg border p-4 text-sm", {
+const alertVariants = cva("relative w-full rounded-xl border p-2 text-sm", {
   variants: {
     variant: {
       default: "border-border/60 bg-muted/10 text-foreground",

@@ -26,11 +26,19 @@ export async function createPlanForIdea(
     return { message: validatedFields.error.message };
   }
 
-  const { planId } = await fetchAction(
-    api.plans.generation.generatePlan,
-    { idea: validatedFields.data.idea },
-    { token },
-  );
+  try {
+    const { planId } = await fetchAction(
+      api.plans.generation.generatePlan,
+      { idea: validatedFields.data.idea },
+      { token },
+    );
 
-  redirect(`/workspace/${planId}`);
+    redirect(`/workspace/${planId}`);
+  } catch (error) {
+    console.error("Failed to generate plan", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to generate plan.";
+
+    return { message };
+  }
 }
