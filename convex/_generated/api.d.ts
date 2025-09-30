@@ -18,6 +18,7 @@ import type * as lib_ownership from "../lib/ownership.js";
 import type * as lib_planThreads from "../lib/planThreads.js";
 import type * as lib_plan_schemas from "../lib/plan_schemas.js";
 import type * as lib_prompts from "../lib/prompts.js";
+import type * as lib_secretVault from "../lib/secretVault.js";
 import type * as outcomes_queries from "../outcomes/queries.js";
 import type * as outcomes from "../outcomes.js";
 import type * as planAi from "../planAi.js";
@@ -27,6 +28,7 @@ import type * as planThreads from "../planThreads.js";
 import type * as plans_generation from "../plans/generation.js";
 import type * as plans_mutations from "../plans/mutations.js";
 import type * as plans_queries from "../plans/queries.js";
+import type * as userApiKeys from "../userApiKeys.js";
 import type * as users from "../users.js";
 
 import type {
@@ -54,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "lib/planThreads": typeof lib_planThreads;
   "lib/plan_schemas": typeof lib_plan_schemas;
   "lib/prompts": typeof lib_prompts;
+  "lib/secretVault": typeof lib_secretVault;
   "outcomes/queries": typeof outcomes_queries;
   outcomes: typeof outcomes;
   planAi: typeof planAi;
@@ -63,6 +66,7 @@ declare const fullApi: ApiFromModules<{
   "plans/generation": typeof plans_generation;
   "plans/mutations": typeof plans_mutations;
   "plans/queries": typeof plans_queries;
+  userApiKeys: typeof userApiKeys;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

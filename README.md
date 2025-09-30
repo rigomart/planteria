@@ -22,3 +22,7 @@ At its core, Planteria is about **maximizing user speed and clarity** while keep
 ### Workspace entry experience
 
 Indie builders land in the workspace hero and type a concrete product idea or job-to-be-done statement (e.g. "Detect production–schema drift and generate safe migration PRs instantly"). Every generated plan assumes the input already describes a specific build target, so sample prompts in the UI should model that level of specificity.
+
+### Environment configuration
+
+- `NEXT_PUBLIC_CONVEX_URL` – public Convex deployment URL (required by the client provider).

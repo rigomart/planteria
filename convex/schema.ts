@@ -88,4 +88,13 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_plan_createdAt", ["planId", "createdAt"]),
+
+  user_api_keys: defineTable({
+    userId: v.string(),
+    provider: v.string(),
+    ciphertext: v.string(),
+    lastFour: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user_provider", ["userId", "provider"]),
 });

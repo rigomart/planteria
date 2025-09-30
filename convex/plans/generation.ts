@@ -3,12 +3,14 @@ import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action, internalAction, internalMutation } from "../_generated/server";
-import { planningAgent } from "../agents/planning";
+import { createPlanningAgent } from "../agents/planning";
 import { planDraftSchema, STATUS_VALUES } from "../lib/plan_schemas";
 import { buildPlanDraftPrompt } from "../lib/prompts";
 
 const GENERATING_SUMMARY = "Hang tight while we generate your plan.";
 const MAX_GENERATION_ERROR_LENGTH = 240;
+const MISSING_OPENAI_KEY_ERROR =
+  "OpenAI API key required. Add one from Settings.";
 
 /**
  * Convert unknown errors into a user-readable string so we can surface failures safely.
@@ -48,6 +50,14 @@ export const generatePlan = action({
 
     if (!identity) {
       throw new Error("Unauthorized");
+    }
+
+    const userKey = await ctx.runQuery(internal.userApiKeys.getOpenAIKey, {
+      userId: identity.subject,
+    });
+
+    if (!userKey) {
+      throw new Error(MISSING_OPENAI_KEY_ERROR);
     }
 
     const { planId } = await ctx.runMutation(
@@ -111,6 +121,16 @@ export const generatePlanInBackground = internalAction({
     let eventId: Id<"plan_ai_events"> | null = null;
 
     try {
+      const userKey = await ctx.runQuery(internal.userApiKeys.getOpenAIKey, {
+        userId: args.userId,
+      });
+
+      if (!userKey) {
+        throw new Error(MISSING_OPENAI_KEY_ERROR);
+      }
+
+      const planningAgent = createPlanningAgent(userKey.apiKey);
+
       const threadId = await createThread(ctx, components.agent, {
         userId: args.userId,
         title: "Plan generation",

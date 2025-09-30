@@ -3,11 +3,14 @@ import { v } from "convex/values";
 
 import { api, internal } from "./_generated/api";
 import { action, mutation } from "./_generated/server";
-import { planningAgent } from "./agents/planning";
+import { createPlanningAgent } from "./agents/planning";
 import { requirePlanOwnership } from "./lib/ownership";
 import { type PlanDraft, planDraftSchema } from "./lib/plan_schemas";
 import { getOrCreatePlanThread } from "./lib/planThreads";
 import { buildPlanAdjustmentPrompt } from "./lib/prompts";
+
+const MISSING_OPENAI_KEY_ERROR =
+  "OpenAI API key required. Add one from Settings.";
 
 type PlanPreview = NonNullable<
   Awaited<FunctionReturnType<typeof api.plans.queries.getPlanPreview>>
@@ -53,6 +56,14 @@ export const adjustPlan = action({
       throw new Error("Unauthorized");
     }
 
+    const userKey = await ctx.runQuery(internal.userApiKeys.getOpenAIKey, {
+      userId: identity.subject,
+    });
+
+    if (!userKey) {
+      throw new Error(MISSING_OPENAI_KEY_ERROR);
+    }
+
     const plan = await ctx.runQuery(api.plans.queries.getPlanPreview, {
       planId: args.planId,
     });
@@ -78,6 +89,7 @@ export const adjustPlan = action({
     const startedAt = Date.now();
 
     try {
+      const planningAgent = createPlanningAgent(userKey.apiKey);
       const prompt = buildPlanAdjustmentPrompt({
         ...currentPlan,
         instruction: args.prompt,

@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { Agent } from "@convex-dev/agent";
 import { components } from "../_generated/api";
 
@@ -66,8 +66,16 @@ Principles:
 Return exactly the JSON object required by the schema.
 `;
 
-export const planningAgent = new Agent(components.agent, {
-  name: "Planteria Planning Agent",
-  languageModel: openai.chat("gpt-5"),
-  instructions: PLAN_SYSTEM_PROMPT,
-});
+const MODEL_ID = "gpt-5";
+
+export function createPlanningAgent(apiKey: string) {
+  const provider = createOpenAI({ apiKey });
+
+  return new Agent(components.agent, {
+    name: "Planteria Planning Agent",
+    languageModel: provider.chat(MODEL_ID),
+    instructions: PLAN_SYSTEM_PROMPT,
+  });
+}
+
+export const PLANNING_MODEL_ID = MODEL_ID;
