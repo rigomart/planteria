@@ -233,7 +233,7 @@ export function DeliverableItem({
               <EditableField
                 value={deliverable.doneWhen ?? ""}
                 onSave={handleUpdateDoneWhen}
-                placeholder="Add a deliverable doneWhen"
+                placeholder="Add a deliverable done when"
                 displayClassName="text-sm text-muted-foreground"
                 editorClassName="text-sm"
               />

@@ -155,7 +155,7 @@ export function OutcomeSection({
     <div
       ref={containerRef}
       className={cn(
-        "p-2 sm:p-4 border rounded bg-background transition-colors",
+        "p-2 sm:p-4 border rounded-xl bg-background transition-colors",
         isSelected ? "border-primary/60 bg-primary/5" : "border-border/60",
       )}
     >
@@ -253,8 +253,8 @@ export function OutcomeSection({
         />
       </div>
 
-      <Collapsible className="mt-2 border border-primary/10 rounded">
-        <div className="flex items-center border-b border-primary/10 px-3 py-2">
+      <Collapsible className="mt-2 border border-primary/10 rounded-xl">
+        <div className="flex items-center p-1 gap-1">
           <CollapsibleChevronTrigger aria-label="Toggle deliverables" />
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground justify-between w-full">
             <span>Deliverables</span>
@@ -293,6 +293,7 @@ export function OutcomeSection({
             <Button
               type="button"
               variant="dashed"
+              size="sm"
               onClick={async () => {
                 try {
                   const result = await addDeliverable({

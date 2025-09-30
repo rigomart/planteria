@@ -171,8 +171,8 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
   );
 
   return (
-    <Collapsible className="border border-primary/10 rounded">
-      <div className="flex items-center border-b border-primary/10 px-3 py-2">
+    <Collapsible className="border rounded-xl">
+      <div className="flex items-center p-1 gap-1">
         <CollapsibleChevronTrigger aria-label="Toggle actions" />
         <div className="flex w-full items-center justify-between gap-2 text-sm font-medium text-muted-foreground">
           <span>Actions</span>
