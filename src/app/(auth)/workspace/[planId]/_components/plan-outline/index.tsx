@@ -17,28 +17,50 @@ export type PlanOutlineProps = {
   planId: Id<"plans">;
 };
 
+type PlanSummary = NonNullable<
+  FunctionReturnType<typeof api.plans.queries.getPlanSummary>
+>;
+
 export function PlanOutline({ planId }: PlanOutlineProps) {
+  const plan = useQuery(api.plans.queries.getPlanSummary, { planId });
   const outcomes = useQuery(api.outcomes.queries.listByPlan, {
-    planId: planId,
+    planId,
   });
 
-  if (outcomes === undefined) {
-    return <div>Loading outcomes...</div>;
+  if (plan === undefined || outcomes === undefined) {
+    return (
+      <div className="px-4 py-3 text-sm text-muted-foreground">
+        Loading plan…
+      </div>
+    );
+  }
+
+  if (!plan) {
+    return (
+      <div className="px-4 py-3 text-sm text-muted-foreground">
+        Plan unavailable.
+      </div>
+    );
   }
 
   return (
     <OutlineSelectionProvider>
-      <PlanOutlineContent planId={planId} outcomes={outcomes} />
+      <PlanOutlineContent planId={planId} plan={plan} outcomes={outcomes} />
     </OutlineSelectionProvider>
   );
 }
 
 type PlanOutlineContentProps = {
   planId: Id<"plans">;
+  plan: PlanSummary;
   outcomes: FunctionReturnType<typeof api.outcomes.queries.listByPlan>;
 };
 
-function PlanOutlineContent({ planId, outcomes }: PlanOutlineContentProps) {
+function PlanOutlineContent({
+  planId,
+  plan,
+  outcomes,
+}: PlanOutlineContentProps) {
   const { selectOutcome } = useOutlineSelection();
   const [pendingScrollOutcomeId, setPendingScrollOutcomeId] =
     useState<Id<"outcomes"> | null>(null);
@@ -67,21 +89,27 @@ function PlanOutlineContent({ planId, outcomes }: PlanOutlineContentProps) {
     setPendingScrollOutcomeId(null);
   }, []);
 
-  const totalOutcomes = outcomes.length;
+  const planTitle = plan.title?.trim() ?? plan.idea;
+  const planSummary = plan.summary?.trim();
+  const planIdea = plan.idea?.trim() ?? "";
+  const planDescription =
+    planSummary && planSummary.length > 0
+      ? planSummary
+      : planIdea !== planTitle
+        ? planIdea
+        : null;
 
   return (
     <div className="flex flex-col gap-6 p-2 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col">
-          <h2 className="text-lg font-semibold">Plan Outline</h2>
-          <span className="text-sm text-muted-foreground">
-            {totalOutcomes} {totalOutcomes === 1 ? "outcome" : "outcomes"}
-          </span>
-        </div>
-
-        <Button type="button" size="sm" onClick={handleAddOutcome}>
-          <Plus className="mr-2 size-4" /> Add outcome
-        </Button>
+      <div className="flex flex-col gap-2 border-b border-border/60 pb-5">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          {planTitle}
+        </h1>
+        {planDescription && (
+          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            {planDescription}
+          </p>
+        )}
       </div>
 
       {outcomes.length === 0 ? (
@@ -103,6 +131,15 @@ function PlanOutlineContent({ planId, outcomes }: PlanOutlineContentProps) {
           ))}
         </div>
       )}
+
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={handleAddOutcome}
+      >
+        <Plus className="mr-2 size-4" /> Add outcome
+      </Button>
     </div>
   );
 }

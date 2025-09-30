@@ -7,6 +7,7 @@ import {
   CollapsibleChevronTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
+import { StripedPattern } from "@/components/ui/striped-pattern";
 import type { api } from "@/convex/_generated/api";
 import { PlanOutline } from "./plan-outline";
 import {
@@ -34,16 +35,18 @@ export function PlanWorkspaceContent({
   return (
     <div className="flex h-full min-h-0 flex-col lg:overflow-hidden">
       <div className="grid min-h-0 grid-cols-1 lg:h-full lg:flex-1 md:grid-cols-12 lg:overflow-hidden">
-        <div className="hidden w-full overflow-hidden md:col-span-5 md:flex md:h-full lg:min-h-0">
+        <div className="hidden w-full overflow-hidden md:col-span-5 lg:col-span-4 md:flex md:h-full lg:min-h-0">
           <PlanWorkspaceAssistant plan={plan} />
         </div>
 
-        <section className="flex min-h-0 min-w-0 flex-col md:col-span-7 lg:h-full lg:min-h-0 lg:overflow-hidden">
-          <div className="hidden items-center justify-end gap-2 px-4 pt-4 lg:flex">
+        <section className="flex min-h-0 min-w-0 flex-col md:col-span-7 lg:col-span-8 lg:h-full lg:min-h-0 lg:overflow-hidden relative ">
+          <StripedPattern className="text-muted/50" />
+
+          <div className="z-20 absolute right-8 top-2">
             <PlanWorkspacePreview plan={plan} />
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto z-10">
             <PlanOutline planId={plan.id} />
           </div>
         </section>

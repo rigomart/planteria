@@ -155,8 +155,8 @@ export function OutcomeSection({
     <div
       ref={containerRef}
       className={cn(
-        "p-2 sm:p-4 border rounded-xl bg-background transition-colors",
-        isSelected ? "border-primary/60 bg-primary/5" : "border-border/60",
+        "p-2 sm:p-4 border rounded-xl bg-card transition-colors",
+        isSelected ? "border-primary/60 bg-primary/5" : "border-primary/5",
       )}
     >
       <div className="flex items-center gap-2 justify-between mb-2">

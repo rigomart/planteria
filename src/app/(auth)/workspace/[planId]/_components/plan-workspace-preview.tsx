@@ -190,29 +190,22 @@ export function PlanWorkspacePreview({
   className,
 }: PlanWorkspacePreviewProps) {
   return (
-    <div className={cn("flex items-center", className)}>
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="shadow-sm"
-          >
-            <Eye className="size-5" />
-            <span className="sr-only">Open plan preview</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right" className="gap-0 p-0 sm:max-w-xl">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Plan preview</SheetTitle>
-          </SheetHeader>
-          <div className="flex h-full flex-col overflow-hidden">
-            <PlanWorkspacePreviewContent plan={plan} className="h-full" />
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button type="button" variant="outline" size="sm">
+          Plan preview
+          <Eye className="size-4" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="gap-0 p-0 sm:max-w-xl">
+        <SheetHeader className="sr-only">
+          <SheetTitle>Plan preview</SheetTitle>
+        </SheetHeader>
+        <div className="flex h-full flex-col overflow-hidden">
+          <PlanWorkspacePreviewContent plan={plan} className="h-full" />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
