@@ -8,11 +8,9 @@ export default function WorkspaceIndexPage() {
       <PlanCreationPanel />
 
       <section className="flex flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Recent plans</h2>
-          </div>
-        </header>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Recent plans</h2>
+        </div>
 
         <Suspense fallback={<PlansSkeleton />}>
           <PlansList />

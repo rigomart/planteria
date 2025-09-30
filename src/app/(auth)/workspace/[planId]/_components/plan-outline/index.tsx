@@ -3,6 +3,7 @@
 import type { FunctionReturnType } from "convex/server";
 import { Sparkles } from "lucide-react";
 import type { api } from "@/convex/_generated/api";
+import { PlanWorkspacePreview } from "../plan-workspace-preview";
 import { OutlineSelectionProvider } from "./outline-selection-context";
 import { PlanOutcomes } from "./plan-outcomes";
 
@@ -89,28 +90,12 @@ type PlanOutlineContentProps = {
 };
 
 function PlanOutlineContent({ plan }: PlanOutlineContentProps) {
-  const planSummary = plan.summary?.trim();
-  const planIdea = plan.idea?.trim() ?? "";
-  const hasSummary = Boolean(planSummary && planSummary.length > 0);
-
   return (
     <div className="flex flex-col">
-      <section className="p-2 md:p-4 bg-background border-b border-border/60">
-        <div className="space-y-2">
-          <div className="space-y-1">
-            <p className="rounded-full text-xs leading-relaxed text-foreground">
-              Initial idea: {planIdea}
-            </p>
-
-            {hasSummary && (
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {planSummary}
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
-
+      <div className="flex gap-2 justify-between px-6 pt-4">
+        <h2 className="text-lg font-semibold">Plan outline</h2>
+        <PlanWorkspacePreview plan={plan} />
+      </div>
       <PlanOutcomes planId={plan.id} />
     </div>
   );

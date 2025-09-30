@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { api } from "@/convex/_generated/api";
 import type { safeGetUser } from "@/convex/users";
 import { getToken } from "@/lib/auth-server";
-import { Header } from "./_components/header";
 
 type CurrentUser = NonNullable<Awaited<ReturnType<typeof safeGetUser>>>;
 
@@ -27,13 +26,6 @@ export default async function AuthLayout({
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <Header
-        user={{
-          email: currentUser.email,
-          name: currentUser.name,
-          image: currentUser.image ?? undefined,
-        }}
-      />
       <main className="flex-1 min-h-0">{children}</main>
     </div>
   );
