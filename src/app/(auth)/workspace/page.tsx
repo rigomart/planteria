@@ -1,22 +1,26 @@
 import { Suspense } from "react";
+import { Header } from "../_components/header";
 import { PlanCreationPanel } from "./_components/plan-creation-panel";
 import { PlansList } from "./_components/plans-list";
 
 export default function WorkspaceIndexPage() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-6 overflow-y-auto">
-      <PlanCreationPanel />
+    <>
+      <Header />
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-6 overflow-y-auto">
+        <PlanCreationPanel />
 
-      <section className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Recent plans</h2>
-        </div>
+        <section className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Recent plans</h2>
+          </div>
 
-        <Suspense fallback={<PlansSkeleton />}>
-          <PlansList />
-        </Suspense>
-      </section>
-    </div>
+          <Suspense fallback={<PlansSkeleton />}>
+            <PlansList />
+          </Suspense>
+        </section>
+      </div>
+    </>
   );
 }
 

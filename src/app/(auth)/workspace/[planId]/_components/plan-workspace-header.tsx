@@ -1,10 +1,9 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { NotebookText } from "lucide-react";
 import { UserMenu } from "@/app/(auth)/_components/user-menu";
-import { api } from "@/convex/_generated/api";
+import type { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
 type PlanSummary = FunctionReturnType<typeof api.plans.queries.getPlanSummary>;
@@ -20,8 +19,6 @@ export function PlanWorkspaceHeader({
 }: PlanWorkspaceHeaderProps) {
   const title = plan?.title?.trim() || plan?.idea?.trim() || "Plan";
   const status = plan?.status ?? "generating";
-
-  const user = useQuery(api.users.getCurrentUser);
 
   return (
     <header
@@ -55,15 +52,7 @@ export function PlanWorkspaceHeader({
           </div>
         </div>
 
-        {user && (
-          <UserMenu
-            user={{
-              name: user.name,
-              email: user.email,
-              image: user.image ?? undefined,
-            }}
-          />
-        )}
+        <UserMenu />
       </div>
     </header>
   );

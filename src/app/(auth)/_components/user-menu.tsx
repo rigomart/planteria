@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import { LogOutIcon, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,20 +13,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { api } from "@/convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
 
-type BaseUser = {
-  name?: string;
-  email?: string;
-  image?: string;
-};
-
-export type UserMenuProps = {
-  user: BaseUser;
-};
-
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu() {
   const router = useRouter();
+  const user = useQuery(api.users.getCurrentUser);
   const [signingOut, setSigningOut] = useState(false);
 
   const displayName = user?.name?.trim() || "User";
@@ -46,6 +39,10 @@ export function UserMenu({ user }: UserMenuProps) {
     }
   };
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={signingOut}>
@@ -54,11 +51,11 @@ export function UserMenu({ user }: UserMenuProps) {
           className="cursor-pointer flex items-center gap-2 rounded-none p-2 transition-all duration-100 hover:bg-accent"
         >
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image} />
+            <AvatarImage src={user.image ?? undefined} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight max-w-32">
-            <span className="truncate font-medium">{user.name}</span>
+            <span className="truncate font-medium">{user?.name}</span>
           </div>
         </button>
       </DropdownMenuTrigger>
@@ -66,7 +63,7 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarImage src={user.image} alt={user.name} />
+              <AvatarImage src={user.image ?? undefined} alt={user.name} />
               <AvatarFallback className="rounded-lg">CN</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
