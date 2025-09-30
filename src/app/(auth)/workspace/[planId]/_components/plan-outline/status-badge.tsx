@@ -35,20 +35,21 @@ export function StatusBadge({ status, onChange, className }: StatusBadgeProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium h-auto border-0 shadow-none hover:bg-muted/50",
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium h-auto transition-colors",
             style.badgeClass,
+            "hover:opacity-80",
             className,
           )}
         >
-          <span className={cn("size-2.5 rounded-full", style.dotClass)} />
+          <span className={cn("size-1.5 rounded-full", style.dotClass)} />
           {style.label}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[100px] p-0" align="start">
+      <PopoverContent className="w-[110px] p-1" align="start">
         <Command>
           <CommandList>
             <CommandGroup>
@@ -61,10 +62,11 @@ export function StatusBadge({ status, onChange, className }: StatusBadgeProps) {
                     onChange?.(newStatus);
                     setOpen(false);
                   }}
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs"
                 >
                   <span
                     className={cn(
-                      "size-2.5 rounded-full mr-1",
+                      "size-1.5 rounded-full",
                       STATUS_STYLES[option.value].dotClass,
                     )}
                   />

@@ -1,14 +1,16 @@
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Plus, Trash } from "lucide-react";
+import { MoreHorizontal, Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Collapsible,
-  CollapsibleChevronTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
 import { EditableField } from "./editable-field";
 import { StatusBadge } from "./status-badge";
 
@@ -22,7 +24,6 @@ type PlanActionsProps = {
 export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
   const addAction = useMutation(api.actions.addAction).withOptimisticUpdate(
     (localStore, args) => {
-      // Optimistically update the listByDeliverable query
       const currentActions = localStore.getQuery(
         api.actions.listByDeliverable,
         {
@@ -54,7 +55,6 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
   const updateAction = useMutation(
     api.actions.updateAction,
   ).withOptimisticUpdate((localStore, args) => {
-    // Optimistically update the listByDeliverable query
     const currentActions = localStore.getQuery(api.actions.listByDeliverable, {
       deliverableId,
     });
@@ -75,7 +75,6 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
   const deleteAction = useMutation(
     api.actions.deleteAction,
   ).withOptimisticUpdate((localStore, args) => {
-    // Optimistically update the listByDeliverable query
     const currentActions = localStore.getQuery(api.actions.listByDeliverable, {
       deliverableId,
     });
@@ -83,7 +82,6 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
       const filteredActions = currentActions.filter(
         (action) => action.id !== args.actionId,
       );
-      // Reorder remaining actions
       const reorderedActions = filteredActions.map((action, index: number) => ({
         ...action,
         order: index,
@@ -171,101 +169,84 @@ export function PlanActions({ actions, deliverableId }: PlanActionsProps) {
   );
 
   return (
-    <Collapsible className="border rounded-xl">
-      <div className="flex items-center p-1 gap-1">
-        <CollapsibleChevronTrigger aria-label="Toggle actions" />
-        <div className="flex w-full items-center justify-between gap-2 text-sm font-medium text-muted-foreground">
-          <span>Actions</span>
-          {totalActions > 0 ? (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-              {completedActions}/{totalActions} done
+    <div className="space-y-2">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">
+            Actions
+          </span>
+          {totalActions > 0 && (
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              {completedActions}/{totalActions}
             </span>
-          ) : (
-            <span className="text-xs text-muted-foreground/80">None yet</span>
           )}
         </div>
       </div>
-      <CollapsibleContent>
-        <div className="flex flex-col gap-3 p-3">
-          <ActionsList
-            actions={actions}
-            onUpdateAction={handleUpdateAction}
-            onDeleteAction={handleDeleteAction}
-            onUpdateStatus={handleUpdateStatus}
-          />
-          <Button
-            type="button"
-            variant="dashed"
-            size="sm"
-            onClick={handleAddAction}
-            className="self-start"
-          >
-            <Plus className="mr-2 size-4" /> Add action
-          </Button>
+
+      {actions.length === 0 ? (
+        <div className="rounded-lg bg-muted/20 py-4 text-center">
+          <p className="text-xs text-muted-foreground">No actions yet</p>
         </div>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
-
-type ActionsListProps = {
-  actions: FunctionReturnType<typeof api.actions.listByDeliverable>;
-  onUpdateAction: (actionId: Id<"actions">, title: string) => Promise<void>;
-  onDeleteAction: (actionId: Id<"actions">) => Promise<void>;
-  onUpdateStatus: (
-    actionId: Id<"actions">,
-    status: Action["status"],
-  ) => Promise<void>;
-};
-
-function ActionsList({
-  actions,
-  onUpdateAction,
-  onDeleteAction,
-  onUpdateStatus,
-}: ActionsListProps) {
-  if (actions.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No actions listed yet. Add steps if this deliverable would benefit from
-        extra clarity.
-      </p>
-    );
-  }
-
-  return (
-    <ul className="flex flex-col gap-2">
-      {actions.map((action) => (
-        <li
-          key={action.id}
-          className="group flex items-center justify-between rounded-lg border border-transparent bg-background/40 px-3 py-2 text-sm transition hover:border-border/60 hover:bg-muted/20"
-        >
-          <div className="flex items-center gap-3 justify-between w-full">
-            <EditableField
-              value={action.title ?? ""}
-              onSave={(nextValue) => onUpdateAction(action.id, nextValue)}
-              placeholder="Add a brief action title"
-              displayClassName="text-xs text-muted-foreground"
-              editorClassName="text-xs"
-            />
-
-            <div className="flex items-center gap-1">
+      ) : (
+        <ul className="space-y-1.5">
+          {actions.map((action) => (
+            <li
+              key={action.id}
+              className={cn(
+                "group flex items-center gap-2 rounded-lg border px-2.5 py-2 transition-colors",
+                "border-border/30 bg-background/40 hover:bg-muted/20",
+              )}
+            >
               <StatusBadge
                 status={action.status}
-                onChange={(nextStatus) => onUpdateStatus(action.id, nextStatus)}
+                onChange={(nextStatus) =>
+                  handleUpdateStatus(action.id, nextStatus)
+                }
+                className="text-[10px] px-2 py-0.5"
               />
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDeleteAction(action.id)}
-              >
-                <Trash className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </li>
-      ))}
-    </ul>
+              <EditableField
+                value={action.title ?? ""}
+                onSave={(nextValue) => handleUpdateAction(action.id, nextValue)}
+                placeholder="Action title"
+                displayClassName="text-xs text-foreground flex-1"
+                editorClassName="text-xs flex-1"
+              />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-6 flex-shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <MoreHorizontal className="size-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => handleDeleteAction(action.id)}
+                  >
+                    <Trash className="mr-2 size-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={handleAddAction}
+        className="text-xs"
+      >
+        <Plus className="size-3.5" /> Add action
+      </Button>
+    </div>
   );
 }

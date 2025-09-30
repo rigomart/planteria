@@ -11,7 +11,7 @@ import { decryptSecret, encryptSecret } from "./lib/secretVault";
 
 const PROVIDER = "openai";
 
-const API_KEY_PATTERN = /^sk-[A-Za-z0-9]{20,}$/;
+const API_KEY_PATTERN = /^sk-[A-Za-z0-9_-]{21,}$/;
 
 function validateApiKey(value: string) {
   const trimmed = value.trim();

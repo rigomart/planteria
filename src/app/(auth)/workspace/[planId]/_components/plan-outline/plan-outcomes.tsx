@@ -41,16 +41,17 @@ export function PlanOutcomes({ planId }: OutcomesProps) {
 
   if (!outcomes) {
     return (
-      <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-        No outcomes yet. Start by adding one to capture a major result you want
-        from this plan.
+      <div className="mx-4 mt-4 mb-6 rounded-xl border border-dashed border-border/40 bg-muted/20 p-8 text-center">
+        <p className="text-sm text-muted-foreground">
+          No outcomes yet. Add one to define a major result.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className=" flex flex-col gap-6 p-2 md:p-6">
-      <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 p-4 md:px-6">
+      <div className="flex flex-col gap-3">
         {outcomes.map((outcome, outcomeIndex) => (
           <OutcomeSection
             key={outcome.id}
@@ -61,8 +62,14 @@ export function PlanOutcomes({ planId }: OutcomesProps) {
         ))}
       </div>
 
-      <Button type="button" variant="outline" onClick={handleAddOutcome}>
-        <Plus className="mr-2 size-4" /> Add outcome
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleAddOutcome}
+        className="self-start"
+      >
+        <Plus className="size-4" /> Add outcome
       </Button>
     </div>
   );

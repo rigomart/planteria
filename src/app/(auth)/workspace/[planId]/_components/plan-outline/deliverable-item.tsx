@@ -1,13 +1,18 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { MousePointerClick, Trash } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ChevronDown, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
-  CollapsibleChevronTrigger,
   CollapsibleContent,
+  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
@@ -32,8 +37,7 @@ export function DeliverableItem({
     deliverableId: deliverable.id,
   });
 
-  const { selectedNode, selectDeliverable, clearSelection } =
-    useOutlineSelection();
+  const { selectedNode, clearSelection } = useOutlineSelection();
 
   const isSelected =
     selectedNode?.type === "deliverable" &&
@@ -125,28 +129,6 @@ export function DeliverableItem({
     }
   });
 
-  const handleUpdateTitle = async (nextValue: string) => {
-    try {
-      await updateDeliverable({
-        deliverableId: deliverable.id,
-        title: nextValue,
-      });
-    } catch (error) {
-      console.error("Failed to update deliverable title", error);
-    }
-  };
-
-  const handleUpdateDoneWhen = async (nextValue: string) => {
-    try {
-      await updateDeliverable({
-        deliverableId: deliverable.id,
-        doneWhen: nextValue,
-      });
-    } catch (error) {
-      console.error("Failed to update deliverable doneWhen", error);
-    }
-  };
-
   const handleUpdateStatus = async (
     nextStatus: FunctionReturnType<
       typeof api.deliverables.queries.listByOutcome
@@ -179,81 +161,99 @@ export function DeliverableItem({
   return (
     <div
       className={cn(
-        "bg-card p-1 flex flex-col gap-1 border-b transition-colors",
-        isSelected ? "border-primary/60 bg-primary/5" : "border-border/60",
+        "group rounded-lg border bg-card/50 transition-colors",
+        isSelected ? "border-primary/60 bg-primary/5" : "border-border/30",
       )}
     >
-      <Collapsible className="w-full flex gap-1 items-start">
-        <CollapsibleChevronTrigger aria-label="Toggle deliverable" />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={(event) => {
-            event.stopPropagation();
-            selectDeliverable(outcomeId, deliverable.id);
-          }}
-          aria-pressed={isSelected}
-          aria-label="Select deliverable"
-          className={cn("text-muted-foreground", isSelected && "text-primary")}
-        >
-          <MousePointerClick className="size-4" />
-        </Button>
-        <div className="flex flex-col flex-1">
-          <div className="flex gap-2 relative justify-between items-center">
+      <Collapsible defaultOpen={false}>
+        <div className="flex items-start gap-2 p-3">
+          <CollapsibleTrigger className="flex-shrink-0 mt-1">
+            <ChevronDown className="size-4 text-muted-foreground transition-transform [[data-state=closed]_&]:rotate-[-90deg]" />
+          </CollapsibleTrigger>
+
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <div className="flex items-start justify-between gap-2">
+              <EditableField
+                value={deliverable.title ?? ""}
+                onSave={async (nextValue) => {
+                  try {
+                    await updateDeliverable({
+                      deliverableId: deliverable.id,
+                      title: nextValue,
+                    });
+                  } catch (error) {
+                    console.error("Failed to update deliverable title", error);
+                  }
+                }}
+                placeholder="Deliverable title"
+                displayClassName="text-sm font-medium text-foreground"
+                editorClassName="text-sm font-medium"
+              />
+
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <StatusBadge
+                  status={deliverable.status}
+                  onChange={handleUpdateStatus}
+                  className="text-[10px] px-2 py-0.5"
+                />
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-6 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      <MoreHorizontal className="size-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={handleDeleteDeliverable}
+                    >
+                      <Trash className="mr-2 size-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {deliverable.doneWhen && (
+              <p className="text-xs text-muted-foreground">
+                Done when: {deliverable.doneWhen}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <CollapsibleContent>
+          <div className="border-t border-border/30 px-3 pb-3 pt-2 space-y-2">
             <EditableField
-              value={deliverable.title ?? ""}
-              onSave={handleUpdateTitle}
-              placeholder="Add a deliverable title"
-              displayClassName="text-base font-medium leading-tight"
-              editorClassName="text-base font-medium leading-tight"
+              value={deliverable.doneWhen ?? ""}
+              onSave={async (nextValue) => {
+                try {
+                  await updateDeliverable({
+                    deliverableId: deliverable.id,
+                    doneWhen: nextValue,
+                  });
+                } catch (error) {
+                  console.error("Failed to update deliverable doneWhen", error);
+                }
+              }}
+              placeholder="When is this done?"
+              displayClassName="text-xs text-muted-foreground"
+              editorClassName="text-xs"
             />
 
-            <div className="flex items-center gap-1">
-              <StatusBadge
-                status={deliverable.status}
-                onChange={handleUpdateStatus}
-              />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-destructive"
-                onClick={handleDeleteDeliverable}
-                aria-label="Delete deliverable"
-              >
-                <Trash className="size-4" />
-              </Button>
-            </div>
-          </div>
-
-          <CollapsibleContent className="space-y-3">
-            <div className="flex flex-col">
-              <EditableField
-                value={deliverable.doneWhen ?? ""}
-                onSave={handleUpdateDoneWhen}
-                placeholder="Add a deliverable done when"
-                displayClassName="text-sm text-muted-foreground"
-                editorClassName="text-sm"
-              />
-              {deliverable.notes ? (
-                <Alert>
-                  <AlertTitle>Note</AlertTitle>
-                  <AlertDescription>{deliverable.notes}</AlertDescription>
-                </Alert>
-              ) : null}
-            </div>
-
             {actions === undefined ? (
-              <div className="text-sm text-muted-foreground">
-                Loading actions...
-              </div>
+              <div className="text-xs text-muted-foreground">Loading...</div>
             ) : (
               <PlanActions actions={actions} deliverableId={deliverable.id} />
             )}
-          </CollapsibleContent>
-        </div>
+          </div>
+        </CollapsibleContent>
       </Collapsible>
     </div>
   );

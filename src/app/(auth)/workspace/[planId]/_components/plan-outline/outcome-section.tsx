@@ -1,16 +1,21 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { MousePointerClick, Plus, Trash } from "lucide-react";
+import { ChevronDown, MoreHorizontal, Plus, Trash } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
-  CollapsibleChevronTrigger,
   CollapsibleContent,
+  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
 import { DeliverableItem } from "./deliverable-item";
 import { EditableField } from "./editable-field";
 import { useOutlineSelection } from "./outline-selection-context";
@@ -31,8 +36,7 @@ export function OutcomeSection({
     outcomeId: outcome.id,
   });
 
-  const { selectedNode, selectOutcome, selectDeliverable, clearSelection } =
-    useOutlineSelection();
+  const { selectDeliverable, clearSelection } = useOutlineSelection();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const updateOutcome = useMutation(
@@ -127,9 +131,6 @@ export function OutcomeSection({
     }
   });
 
-  const isSelected =
-    selectedNode?.type === "outcome" && selectedNode.outcomeId === outcome.id;
-
   const deliverableCount = deliverables?.length ?? 0;
   const completedDeliverables =
     deliverables?.reduce(
@@ -140,144 +141,142 @@ export function OutcomeSection({
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "p-2 sm:p-3 border rounded-xl bg-card transition-colors",
-        isSelected ? "border-primary/60 bg-primary/5" : "border-primary/5",
-      )}
+      className="group rounded-2xl border border-border/50 bg-card shadow-sm transition-all hover:border-border/80 hover:shadow-md"
     >
-      <div className="flex items-center gap-1 justify-between">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground/50">
-          Outcome {index + 1}
-        </span>
+      {/* Outcome Header */}
+      <div className="flex items-start gap-3 p-4">
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+              #{index + 1}
+            </span>
+            <StatusBadge
+              status={outcome.status}
+              onChange={async (nextStatus) => {
+                try {
+                  await updateOutcome({
+                    outcomeId: outcome.id,
+                    status: nextStatus,
+                  });
+                } catch (error) {
+                  console.error("Failed to update outcome status", error);
+                }
+              }}
+            />
+          </div>
 
-        <div className="flex items-center gap-1">
-          <StatusBadge
-            status={outcome.status}
-            onChange={async (nextStatus) => {
+          <EditableField
+            value={outcome.title ?? ""}
+            onSave={async (nextValue) => {
               try {
                 await updateOutcome({
                   outcomeId: outcome.id,
-                  status: nextStatus,
+                  title: nextValue,
                 });
               } catch (error) {
-                console.error("Failed to update outcome status", error);
+                console.error("Failed to update outcome title", error);
               }
             }}
+            placeholder="Outcome title"
+            displayClassName="text-lg font-semibold text-foreground"
+            editorClassName="text-lg font-semibold"
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => selectOutcome(outcome.id)}
-            aria-pressed={isSelected}
-            aria-label="Select outcome"
-            className={cn(
-              "text-muted-foreground",
-              isSelected && "text-primary",
-            )}
-          >
-            <MousePointerClick className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:text-destructive"
-            onClick={async () => {
+          <EditableField
+            value={outcome.summary ?? ""}
+            onSave={async (nextValue) => {
               try {
-                await deleteOutcome({ outcomeId: outcome.id });
-                if (
-                  selectedNode?.type === "outcome" &&
-                  selectedNode.outcomeId === outcome.id
-                ) {
-                  clearSelection();
-                }
+                await updateOutcome({
+                  outcomeId: outcome.id,
+                  summary: nextValue,
+                });
               } catch (error) {
-                console.error("Failed to delete outcome", error);
+                console.error("Failed to update outcome summary", error);
               }
             }}
-            aria-label="Delete outcome"
-          >
-            <Trash className="size-4" />
-          </Button>
+            placeholder="Brief summary"
+            displayClassName="text-sm text-muted-foreground leading-relaxed"
+            editorClassName="text-sm"
+          />
         </div>
-      </div>
-      <div className="flex flex-col">
-        <EditableField
-          value={outcome.title ?? ""}
-          onSave={async (nextValue) => {
-            try {
-              await updateOutcome({
-                outcomeId: outcome.id,
-                title: nextValue,
-              });
-            } catch (error) {
-              console.error("Failed to update outcome title", error);
-            }
-          }}
-          placeholder="Add an outcome title"
-          displayClassName="text-xl font-semibold"
-          editorClassName="text-xl font-semibold"
-        />
-        <EditableField
-          value={outcome.summary ?? ""}
-          onSave={async (nextValue) => {
-            try {
-              await updateOutcome({
-                outcomeId: outcome.id,
-                summary: nextValue,
-              });
-            } catch (error) {
-              console.error("Failed to update outcome summary", error);
-            }
-          }}
-          placeholder="Add a brief outcome summary"
-          displayClassName="text-sm text-muted-foreground"
-          editorClassName="text-sm"
-        />
+
+        {/* Actions Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="flex-shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={async () => {
+                try {
+                  await deleteOutcome({ outcomeId: outcome.id });
+                  clearSelection();
+                } catch (error) {
+                  console.error("Failed to delete outcome", error);
+                }
+              }}
+            >
+              <Trash className="mr-2 size-4" />
+              Delete outcome
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <Collapsible className="mt-2 border border-primary/10 rounded-xl">
-        <div className="flex items-center p-1 gap-1">
-          <CollapsibleChevronTrigger aria-label="Toggle deliverables" />
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground justify-between w-full">
-            <span>Deliverables</span>
-            {deliverableCount > 0 ? (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                {completedDeliverables}/{deliverableCount} done
-              </span>
-            ) : (
-              <span className="text-xs text-muted-foreground/80">None yet</span>
-            )}
+      {/* Deliverables Section */}
+      <Collapsible defaultOpen={true} className="border-t border-border/40">
+        <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-2 text-sm transition-colors hover:bg-muted/30">
+          <div className="flex items-center gap-2">
+            <ChevronDown className="size-4 text-muted-foreground transition-transform [[data-state=closed]_&]:rotate-[-90deg]" />
+            <span className="font-medium text-muted-foreground">
+              Deliverables
+            </span>
           </div>
-        </div>
+          {deliverableCount > 0 ? (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {completedDeliverables}/{deliverableCount}
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground/60">None yet</span>
+          )}
+        </CollapsibleTrigger>
+
         <CollapsibleContent>
-          <div className="flex flex-col">
+          <div className="px-4 pb-3">
             {deliverables === undefined ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                Loading deliverables...
+              <div className="py-4 text-center text-sm text-muted-foreground">
+                Loading...
               </div>
             ) : deliverables.length === 0 ? (
-              <div className="p-4 text-sm text-muted-foreground">
-                No deliverables yet. Add one to break this outcome into concrete
-                pieces.
+              <div className="rounded-lg bg-muted/20 py-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No deliverables yet
+                </p>
               </div>
             ) : (
-              deliverables.map((deliverable, deliverableIndex) => (
-                <DeliverableItem
-                  key={deliverable.id}
-                  outcomeId={outcome.id}
-                  deliverable={deliverable}
-                  index={deliverableIndex}
-                />
-              ))
+              <div className="space-y-2">
+                {deliverables.map((deliverable, deliverableIndex) => (
+                  <DeliverableItem
+                    key={deliverable.id}
+                    outcomeId={outcome.id}
+                    deliverable={deliverable}
+                    index={deliverableIndex}
+                  />
+                ))}
+              </div>
             )}
-          </div>
-          <div className="p-2">
+
             <Button
               type="button"
-              variant="dashed"
+              variant="ghost"
               size="sm"
+              className="mt-3"
               onClick={async () => {
                 try {
                   const result = await addDeliverable({
