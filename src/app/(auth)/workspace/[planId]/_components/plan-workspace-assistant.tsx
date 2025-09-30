@@ -7,14 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import type { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
-type PlanSummary = NonNullable<
-  FunctionReturnType<typeof api.plans.queries.getPlanSummary>
->;
-
-type PlanWorkspaceAssistantContentProps = {
-  plan: PlanSummary;
-  className?: string;
-};
+type PlanSummary = FunctionReturnType<typeof api.plans.queries.getPlanSummary>;
 
 type AdjustmentExample = {
   id: string;
@@ -73,6 +66,11 @@ function AdjustmentExampleCard({
     </article>
   );
 }
+
+type PlanWorkspaceAssistantContentProps = {
+  plan?: PlanSummary;
+  className?: string;
+};
 
 export function PlanWorkspaceAssistantContent({
   plan: _plan,
@@ -136,7 +134,7 @@ export function PlanWorkspaceAssistantContent({
 }
 
 type PlanWorkspaceAssistantProps = {
-  plan: PlanSummary;
+  plan?: PlanSummary;
   className?: string;
 };
 

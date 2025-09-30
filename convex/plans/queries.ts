@@ -11,7 +11,7 @@ export const listPlans = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      return [];
+      throw new Error("User not authenticated");
     }
 
     const plans = await ctx.db
@@ -44,12 +44,12 @@ export const getPlanSummary = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      return null;
+      throw new Error("User not authenticated");
     }
 
     const plan = await ctx.db.get(args.planId);
     if (!plan || plan.userId !== identity.subject) {
-      return null;
+      throw new Error("Plan not found");
     }
 
     return {
@@ -75,7 +75,7 @@ export const getPlanPreview = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      return null;
+      throw new Error("User not authenticated");
     }
 
     const { plan } = await requirePlanOwnership(

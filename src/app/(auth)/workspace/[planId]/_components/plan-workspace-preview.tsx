@@ -20,24 +20,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
-type PlanSummary = NonNullable<
-  FunctionReturnType<typeof api.plans.queries.getPlanSummary>
->;
+type PlanSummary = FunctionReturnType<typeof api.plans.queries.getPlanSummary>;
 
-type PlanPreviewData = NonNullable<
-  FunctionReturnType<typeof api.plans.queries.getPlanPreview>
+type PlanPreviewData = FunctionReturnType<
+  typeof api.plans.queries.getPlanPreview
 >;
 
 type PreviewMode = "preview" | "markdown";
 
-type PlanWorkspacePreviewContentProps = {
-  plan: PlanSummary;
-  className?: string;
+type PlanWorkspacePreviewContentWrapperProps = {
+  plan?: PlanSummary;
 };
 
-export function PlanWorkspacePreviewContent({
+export function PlanWorkspacePreviewContentWrapper({
   plan,
-  className,
+}: PlanWorkspacePreviewContentWrapperProps) {
+  if (!plan) {
+    return (
+      <div className="flex items-center justify-center">
+        <Loader2 className="w-4 h-4 animate-spin" />
+      </div>
+    );
+  }
+
+  return <PlanWorkspacePreviewContent plan={plan} />;
+}
+type PlanWorkspacePreviewContentProps = {
+  plan: PlanSummary;
+};
+
+function PlanWorkspacePreviewContent({
+  plan,
 }: PlanWorkspacePreviewContentProps) {
   const [mode, setMode] = useState<PreviewMode>("preview");
   const previewData = useQuery(api.plans.queries.getPlanPreview, {
@@ -84,7 +97,7 @@ export function PlanWorkspacePreviewContent({
     <Tabs
       value={mode}
       onValueChange={(value) => setMode(value as PreviewMode)}
-      className={cn("flex flex-col gap-4 h-full min-h-0", className)}
+      className="flex flex-col gap-4 h-full min-h-0"
     >
       <div className="flex flex-col gap-3">
         <div className="text-lg font-semibold uppercase tracking-wider text-muted-foreground">
@@ -181,7 +194,7 @@ export function PlanWorkspacePreviewContent({
 }
 
 type PlanWorkspacePreviewProps = {
-  plan: PlanSummary;
+  plan?: PlanSummary;
 };
 
 export function PlanWorkspacePreview({ plan }: PlanWorkspacePreviewProps) {
@@ -198,7 +211,7 @@ export function PlanWorkspacePreview({ plan }: PlanWorkspacePreviewProps) {
           <SheetTitle>Plan preview</SheetTitle>
         </SheetHeader>
         <div className="flex h-full flex-col overflow-hidden">
-          <PlanWorkspacePreviewContent plan={plan} className="h-full" />
+          <PlanWorkspacePreviewContentWrapper plan={plan} />
         </div>
       </SheetContent>
     </Sheet>

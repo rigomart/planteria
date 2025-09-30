@@ -1,6 +1,6 @@
 "use client";
 
-import { type Preloaded, usePreloadedQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import type { ReactNode } from "react";
 import {
   Collapsible,
@@ -8,7 +8,8 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 import { StripedPattern } from "@/components/ui/striped-pattern";
-import type { api } from "@/convex/_generated/api";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { PlanOutline } from "./plan-outline";
 import {
   PlanWorkspaceAssistant,
@@ -16,21 +17,15 @@ import {
 } from "./plan-workspace-assistant";
 import {
   PlanWorkspacePreview,
-  PlanWorkspacePreviewContent,
+  PlanWorkspacePreviewContentWrapper,
 } from "./plan-workspace-preview";
 
 type PlanWorkspaceContentProps = {
-  preloadedPlan: Preloaded<typeof api.plans.queries.getPlanSummary>;
+  planId: Id<"plans">;
 };
 
-export function PlanWorkspaceContent({
-  preloadedPlan,
-}: PlanWorkspaceContentProps) {
-  const plan = usePreloadedQuery(preloadedPlan);
-
-  if (!plan) {
-    return null;
-  }
+export function PlanWorkspaceContent({ planId }: PlanWorkspaceContentProps) {
+  const plan = useQuery(api.plans.queries.getPlanSummary, { planId });
 
   return (
     <div className="flex h-full min-h-0 flex-col lg:overflow-hidden">
@@ -47,7 +42,7 @@ export function PlanWorkspaceContent({
           </div>
 
           <div className="flex-1 overflow-y-auto z-10">
-            <PlanOutline planId={plan.id} />
+            <PlanOutline plan={plan} />
           </div>
         </section>
       </div>
@@ -58,7 +53,7 @@ export function PlanWorkspaceContent({
         </MobileWorkspaceSection>
 
         <MobileWorkspaceSection title="Plan preview">
-          <PlanWorkspacePreviewContent plan={plan} />
+          <PlanWorkspacePreviewContentWrapper plan={plan} />
         </MobileWorkspaceSection>
       </div>
     </div>
