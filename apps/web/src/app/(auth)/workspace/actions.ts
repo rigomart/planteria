@@ -4,6 +4,7 @@ import { fetchAction } from "convex/nextjs";
 import { redirect } from "next/navigation";
 import { z } from "zod/v3";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { getToken } from "@/lib/auth-server";
 
 const schema = z.object({
@@ -23,18 +24,21 @@ export async function createPlanForIdea(_initialState: unknown, formData: FormDa
     return { message: validatedFields.error.message };
   }
 
+  let planId: Id<"plans">;
+
   try {
-    const { planId } = await fetchAction(
+    const { planId: generatedPlanId } = await fetchAction(
       api.plans.generation.generatePlan,
       { idea: validatedFields.data.idea },
       { token },
     );
-
-    redirect(`/workspace/${planId}`);
+    planId = generatedPlanId;
   } catch (error) {
     console.error("Failed to generate plan", error);
     const message = error instanceof Error ? error.message : "Failed to generate plan.";
 
     return { message };
   }
+
+  redirect(`/workspace/${planId}`);
 }

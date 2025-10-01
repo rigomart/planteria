@@ -1,7 +1,7 @@
 "use client";
 
 import type { FunctionReturnType } from "convex/server";
-import { ExternalLink, Sparkles } from "lucide-react";
+import { ExternalLink, Lightbulb, Sparkles } from "lucide-react";
 import type { api } from "@/convex/_generated/api";
 import { OutlineSelectionProvider } from "./outline-selection-context";
 import { PlanOutcomes } from "./plan-outcomes";
@@ -14,7 +14,24 @@ type PlanSummary = FunctionReturnType<typeof api.plans.queries.getPlanSummary>;
 
 export function PlanOutline({ plan }: PlanOutlineProps) {
   if (!plan) {
-    return <div className="px-4 py-3 text-sm text-muted-foreground">Loading plan...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh] py-8 px-4">
+        <div className="relative mb-4">
+          <span className="absolute inset-0 rounded-full blur-2xl bg-primary/20 animate-pulse" />
+          <span className="relative inline-flex items-center justify-center size-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30 shadow-lg">
+            <Sparkles className="size-8 text-primary animate-spin-slow" />
+          </span>
+        </div>
+        <div className="text-center space-y-1">
+          <div className="text-base sm:text-lg font-semibold text-primary">
+            Loading your plan...
+          </div>
+          <div className="text-sm text-muted-foreground">
+            We’re prepping your workspace and fetching your plan details.
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (plan.status === "scraping" || plan.status === "generating") {
@@ -60,14 +77,14 @@ function PlanGeneratingLoader({ plan }: { plan: PlanSummary }) {
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">
               <div className="rounded-lg bg-primary/10 p-2">
-                <Sparkles className="size-4 text-primary" />
+                <Lightbulb className="size-4 text-primary" />
               </div>
             </div>
             <div className="flex-1 text-left">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
                 Your idea
               </p>
-              <p className="text-sm text-foreground/90 leading-relaxed">{plan.idea}</p>
+              <p className="text-sm text-foreground/90 leading-relaxed break-words">{plan.idea}</p>
             </div>
           </div>
         </div>
@@ -85,25 +102,26 @@ function PlanGeneratingLoader({ plan }: { plan: PlanSummary }) {
                   Research sources
                 </p>
                 {insights.length > 0 ? (
-                  <span className="text-[11px] text-muted-foreground/80">
+                  <span className="text-[11px] text-muted-foreground/80 whitespace-nowrap">
                     {insights.length} found
                   </span>
                 ) : null}
               </div>
 
               {insights.length > 0 ? (
-                <ul className="space-y-2 text-sm text-foreground/90">
+                <ul className="space-y-2 text-sm text-foreground/90 max-h-56 overflow-y-auto">
                   {insights.slice(0, 4).map((insight, index) => (
                     <li key={insight.url} className="group flex items-start gap-2">
-                      <span className="mt-0.5 text-xs text-muted-foreground/70">{index + 1}.</span>
                       <a
                         href={insight.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex flex-col gap-1 text-left leading-snug text-primary transition hover:text-primary/80"
+                        className="inline-flex min-w-0 flex-1 flex-col gap-1 text-left leading-snug text-primary transition hover:text-primary/80"
                       >
-                        <span className="font-medium text-sm">{insight.title}</span>
-                        <span className="text-xs text-muted-foreground line-clamp-2">
+                        <span className="font-medium text-sm line-clamp-1 break-words">
+                          {insight.title}
+                        </span>
+                        <span className="text-xs text-muted-foreground line-clamp-2 break-words">
                           {insight.snippet}
                         </span>
                       </a>

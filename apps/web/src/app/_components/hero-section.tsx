@@ -2,12 +2,18 @@ import { ArrowRight, Sparkles, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StripedPattern } from "@/components/ui/striped-pattern";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function HeroSection() {
   return (
     <section className="relative isolate overflow-hidden rounded-3xl border border-border/70 bg-card/80 px-4 py-6 flex justify-center gap-8">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-radial-[circle_at_top] from-[#72dbb32e] to-transparent to-55% dark:bg-radial-[circle_at_top] dark:from-[#2e705a59] dark:to-transparent dark:to-65%" />
+      <StripedPattern
+        direction="right"
+        className="text-primary/25 dark:text-primary/30"
+        width={18}
+        height={18}
+      />
       <div className="flex flex-col gap-3 lg:text-left justify-center">
         <Badge
           variant="outline"
