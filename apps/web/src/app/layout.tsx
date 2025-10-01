@@ -16,68 +16,19 @@ const geistMono = Geist_Mono({
 });
 
 const description =
-  "Planteria turns a specific product mission into an actionable plan with outcomes, deliverables, and doneWhen criteria in minutes.";
+  "Planteria turns an idea into an actionable plan with outcomes, deliverables, and actions in minutes.";
 
-const title = "Planteria – Ship a crisp plan for your next feature";
+const title = "Planteria – Ship a crisp plan for your next idea";
 
-const ogImageUrl = "https://planteria.app/og-image.png";
-
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ??
-  (process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-    : undefined);
-
-const metadataBase = appUrl ? new URL(appUrl) : undefined;
-
-const baseMetadata: Metadata = {
+export const metadata: Metadata = {
   title,
   description,
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     title,
     description,
-    url: appUrl ?? "https://planteria.app/",
     siteName: "Planteria",
-    images: [
-      {
-        url: ogImageUrl,
-        width: 1200,
-        height: 630,
-        alt: "Planteria workspace showing structured plan outline",
-      },
-    ],
-    type: "website",
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-    images: [ogImageUrl],
-  },
-  keywords: [
-    "planteria",
-    "ai planning tool",
-    "product planning",
-    "ship feature",
-    "indie developer",
-    "roadmap",
-    "done when",
-  ],
-  icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/favicon.ico" }],
-    shortcut: [{ url: "/favicon.ico" }],
   },
 };
-
-if (metadataBase) {
-  baseMetadata.metadataBase = metadataBase;
-}
-
-export const metadata = baseMetadata;
 
 export default function RootLayout({
   children,
