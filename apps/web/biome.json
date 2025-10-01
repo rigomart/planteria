@@ -16,6 +16,9 @@
       "recommended": true,
       "suspicious": {
         "noUnknownAtRules": "off"
+      },
+      "correctness": {
+        "useUniqueElementIds": "off"
       }
     },
     "domains": {
