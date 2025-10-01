@@ -17,6 +17,7 @@ const PROVIDERS = {
 type Provider = (typeof PROVIDERS)[keyof typeof PROVIDERS];
 
 const API_KEY_PATTERN = /^sk-[A-Za-z0-9_-]{21,}$/;
+const PLANTERIA_KEY_PATTERN = /^plnt_[A-Za-z0-9_-]{43}$/;
 
 function validateApiKey(value: string) {
   const trimmed = value.trim();
@@ -83,6 +84,10 @@ function generatePlanteriaKey() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const keyBody = bytesToBase64Url(bytes);
   return `plnt_${keyBody.slice(0, 43)}`;
+}
+
+function sanitizePlanteriaApiKey(value: string) {
+  return value.trim();
 }
 
 export const saveOpenAIKey = mutation({
@@ -300,5 +305,40 @@ export const getPlanteriaApiKeyMetadata = internalQuery({
       salt: existing.salt,
       lastFour: existing.lastFour,
     } as const;
+  },
+});
+
+export const resolveUserByPlanteriaApiKey = internalQuery({
+  args: {
+    apiKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const candidate = sanitizePlanteriaApiKey(args.apiKey);
+
+    if (!candidate || !PLANTERIA_KEY_PATTERN.test(candidate)) {
+      return null;
+    }
+
+    const keyDocs = await ctx.db
+      .query("user_api_keys")
+      .withIndex("by_provider", (q) => q.eq("provider", PROVIDERS.PLANTERIA))
+      .collect();
+
+    for (const doc of keyDocs) {
+      if (!doc.hash || !doc.salt) {
+        continue;
+      }
+
+      const hashed = await hashWithSalt(candidate, doc.salt);
+
+      if (hashed === doc.hash) {
+        return {
+          userId: doc.userId,
+          lastFour: doc.lastFour,
+        } as const;
+      }
+    }
+
+    return null;
   },
 });

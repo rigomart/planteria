@@ -90,5 +90,7 @@ export default defineSchema({
     lastFour: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_user_provider", ["userId", "provider"]),
+  })
+    .index("by_user_provider", ["userId", "provider"])
+    .index("by_provider", ["provider"]),
 });
