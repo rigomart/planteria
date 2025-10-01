@@ -201,7 +201,7 @@ function AssistantComposer({ plan, layout }: { plan?: PlanSummary; layout: Assis
       toast.success("Plan adjusted.");
     } catch (error) {
       console.error("Failed to adjust plan", error);
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = sanitizeAdjustmentError(error);
       toast.error(`Adjustment failed: ${message}`);
     } finally {
       setIsSubmitting(false);
@@ -252,6 +252,25 @@ function AssistantComposer({ plan, layout }: { plan?: PlanSummary; layout: Assis
       </div>
     </form>
   );
+}
+
+function sanitizeAdjustmentError(error: unknown): string {
+  const raw = error instanceof Error ? error.message : String(error ?? "");
+  const lower = raw.toLowerCase();
+
+  if (lower.includes("adjustment limit")) {
+    return "You've reached the adjustment limit (3) for this plan.";
+  }
+
+  if (lower.includes("openai api key") || lower.includes("missing openai")) {
+    return "OpenAI API key required. Add one from Settings.";
+  }
+
+  if (lower.includes("unauthorized") || lower.includes("auth")) {
+    return "You're signed out. Sign in and try again.";
+  }
+
+  return "Couldn't apply the adjustment. Please try again.";
 }
 
 function containerClassName(layout: AssistantLayout) {

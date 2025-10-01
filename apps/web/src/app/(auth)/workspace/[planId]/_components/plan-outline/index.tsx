@@ -110,22 +110,22 @@ function PlanGeneratingLoader({ plan }: { plan: PlanSummary }) {
               </div>
 
               {insights.length > 0 ? (
-                <ul className="space-y-3 text-sm text-foreground/90 max-h-56 overflow-y-auto">
+                <ul className="flex flex-col gap-3 text-sm text-foreground/90 max-h-56 overflow-y-auto">
                   {insights.slice(0, 4).map((insight, idx) => (
-                    <li key={`${insight.url}-${idx}`} className="group">
+                    <li key={`${insight.url}-${idx}`}>
                       <Link
                         href={insight.url}
                         target="_blank"
                         rel="noreferrer"
                         className="block space-y-1 text-left transition hover:opacity-80"
                       >
-                        <div className="font-medium text-sm text-primary line-clamp-1">
+                        <span className="font-medium text-sm text-primary line-clamp-1">
                           {insight.title}
-                        </div>
-                        <div className="text-xs text-muted-foreground line-clamp-2">
-                          {insight.snippet}
-                        </div>
+                        </span>
                       </Link>
+                      <span className="text-xs text-muted-foreground line-clamp-2">
+                        {insight.snippet.slice(0, 100)}
+                      </span>
                     </li>
                   ))}
                   {insights.length > 4 ? (
