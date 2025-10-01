@@ -2,20 +2,21 @@ import { ArrowRight, Sparkles, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function HeroSection() {
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl border border-border/70 bg-card/80 px-4 py-6 flex flex-col justify-center gap-8">
+    <section className="relative isolate overflow-hidden rounded-3xl border border-border/70 bg-card/80 px-4 py-6 flex justify-center gap-8">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-radial-[circle_at_top] from-[#72dbb32e] to-transparent to-55% dark:bg-radial-[circle_at_top] dark:from-[#2e705a59] dark:to-transparent dark:to-65%" />
-      <div className="flex flex-col gap-3 text-center lg:text-left items-center justify-center ">
+      <div className="flex flex-col gap-3 lg:text-left justify-center">
         <Badge
           variant="outline"
           className="mx-auto w-fit text-xs lg:mx-0 rounded-full border-primary/50"
         >
           Action-first planning for indie devs
         </Badge>
-        <div className="flex flex-col gap-5 items-center justify-center">
-          <h1 className="text-balance font-semibold tracking-tight text-2xl lg:text-5xl text-center max-w-2xl">
+        <div className="flex flex-col gap-5 items-start">
+          <h1 className="text-balance font-semibold tracking-tight text-2xl lg:text-5xl max-w-2xl">
             Ship focused product plans with AI guardrails
           </h1>
 
@@ -25,11 +26,83 @@ export function HeroSection() {
               <ArrowRight className="size-4" aria-hidden />
             </Link>
           </Button>
+
+          <McpCallout />
         </div>
       </div>
 
       <HeroWorkspacePreview />
     </section>
+  );
+}
+
+function McpCallout() {
+  const clientConfigs = [
+    {
+      id: "cursor",
+      client: "Cursor",
+      config: `{
+  "name": "planteria",
+  "command": "npx planteria-mcp",
+  "args": ["--api-key", "<YOUR_PLANTERIA_API_KEY>"]
+}`,
+    },
+    {
+      id: "codex",
+      client: "Codex",
+      config: `mcp add planteria \
+  --command "npx planteria-mcp" \
+  --args "--api-key" "<YOUR_PLANTERIA_API_KEY>"`,
+    },
+    {
+      id: "claude-code",
+      client: "Claude Code",
+      config: `{
+  "servers": {
+    "planteria": {
+      "command": "npx planteria-mcp",
+      "args": ["--api-key", "<YOUR_PLANTERIA_API_KEY>"]
+    }
+  }
+}`,
+    },
+  ];
+
+  return (
+    <div className="w-full rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-muted-foreground">
+      <div className="flex flex-col gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            Connect Planteria everywhere
+          </p>
+          <p className="text-sm text-foreground">
+            Use the MCP server with your favorite AI tool and keep plans in sync while you ship.
+          </p>
+        </div>
+
+        <Tabs defaultValue={clientConfigs[0]?.id} className="w-full">
+          <TabsList className="w-full flex-wrap justify-start bg-background/60">
+            {clientConfigs.map(({ id, client }) => (
+              <TabsTrigger key={id} value={id} className="px-3 py-1.5 text-xs">
+                {client}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {clientConfigs.map(({ id, config }) => (
+            <TabsContent key={id} value={id}>
+              <pre className="overflow-x-auto rounded-md border border-border/60 bg-background/80 p-3 text-[11px] leading-relaxed text-foreground">
+                <code>{config}</code>
+              </pre>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Replace <span className="text-foreground">&lt;YOUR_PLANTERIA_API_KEY&gt;</span> with
+                an API key from settings.
+              </p>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+    </div>
   );
 }
 
