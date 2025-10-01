@@ -111,11 +111,8 @@ function PlanGeneratingLoader({ plan }: { plan: PlanSummary }) {
 
               {insights.length > 0 ? (
                 <ul className="space-y-2 text-sm text-foreground/90 max-h-56 overflow-y-auto">
-                  {insights.slice(0, 4).map((insight, index) => (
+                  {insights.slice(0, 4).map((insight) => (
                     <li key={insight.url} className="group flex items-start gap-2">
-                      <span className="text-xs text-muted-foreground/70 flex-shrink-0">
-                        {index + 1}.
-                      </span>
                       <Link
                         href={insight.url}
                         target="_blank"

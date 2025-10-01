@@ -8,13 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export function HeroSection() {
   return (
     <section className="relative isolate overflow-hidden rounded-3xl border border-border/70 bg-card/80 px-4 py-6 flex justify-center gap-8">
-      <StripedPattern
-        direction="right"
-        className="text-primary/25 dark:text-primary/30"
-        width={18}
-        height={18}
-      />
-      <div className="flex flex-col gap-3 lg:text-left justify-center">
+      <StripedPattern direction="right" className="text-primary/20" width={10} height={10} />
+
+      <div className="flex flex-col gap-3 lg:text-left justify-center z-10">
         <Badge
           variant="outline"
           className="mx-auto w-fit text-xs lg:mx-0 rounded-full border-primary/50"
@@ -147,7 +143,7 @@ function HeroWorkspacePreview() {
   ];
 
   return (
-    <div className="relative mx-auto max-w-4xl w-full overflow-hidden rounded-xl border border-border/50 bg-card shadow-lg shadow-primary/10 p-4">
+    <div className="relative mx-auto max-w-4xl w-full overflow-hidden rounded-xl border border-border/50 bg-background shadow-lg shadow-primary/10 p-4 z-10">
       <div className="flex items-center justify-between pb-4">
         <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
           Workspace preview

@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { createPlanForIdea } from "../actions";
+import { getIdeaMetrics, IDEA_MAX_LENGTH, IDEA_MIN_LENGTH, validateIdea } from "../idea-validation";
 
 const initialState = { message: "" };
 const quickPrompts = [
@@ -23,6 +24,10 @@ export function PlanCreationPanel() {
   const isKeyLoading = keyStatus === undefined;
   const hasKey = keyStatus?.hasKey ?? false;
   const showKeyWarning = !isKeyLoading && !hasKey;
+  const ideaMetrics = getIdeaMetrics(idea);
+  const localIdeaError = idea ? validateIdea(idea) : null;
+  const isIdeaInvalid = Boolean(localIdeaError);
+  const isSubmitDisabled = pending || showKeyWarning || isKeyLoading || isIdeaInvalid;
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/80 shadow">
@@ -57,13 +62,26 @@ export function PlanCreationPanel() {
               value={idea}
               onChange={(event) => setIdea(event.target.value)}
               disabled={pending || showKeyWarning || isKeyLoading}
-              minLength={20}
-              maxLength={240}
+              minLength={IDEA_MIN_LENGTH}
+              maxLength={IDEA_MAX_LENGTH}
+              aria-invalid={isIdeaInvalid || undefined}
               required
             />
             <div className="flex flex-col gap-3 border-t border-border/60 py-2 px-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-              <span>We'll turn this into a sequenced plan you can iterate on.</span>
-              <Button type="submit" disabled={pending || showKeyWarning || isKeyLoading} size="sm">
+              <div className="flex flex-col gap-1">
+                <span>We'll turn this into a sequenced plan you can iterate on.</span>
+                <span className="hidden sm:block">
+                  {ideaMetrics.length}/{IDEA_MAX_LENGTH} chars • {ideaMetrics.wordCount} words
+                </span>
+                {localIdeaError ? (
+                  <span className="text-destructive/80">{localIdeaError}</span>
+                ) : (
+                  <span className="sm:hidden">
+                    {ideaMetrics.length}/{IDEA_MAX_LENGTH} chars • {ideaMetrics.wordCount} words
+                  </span>
+                )}
+              </div>
+              <Button type="submit" disabled={isSubmitDisabled} size="sm">
                 {pending ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
