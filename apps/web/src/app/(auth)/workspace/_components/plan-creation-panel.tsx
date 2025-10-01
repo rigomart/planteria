@@ -20,7 +20,6 @@ export function PlanCreationPanel() {
   const [idea, setIdea] = useState("");
   const [state, formAction, pending] = useActionState(createPlanForIdea, initialState);
   const keyStatus = useQuery(api.userApiKeys.getOpenAIKeyStatus);
-
   const isKeyLoading = keyStatus === undefined;
   const hasKey = keyStatus?.hasKey ?? false;
   const showKeyWarning = !isKeyLoading && !hasKey;
@@ -51,7 +50,7 @@ export function PlanCreationPanel() {
           </label>
           <div className="rounded-2xl border border-border/60 bg-background/90 shadow-lg">
             <textarea
-              id={`idea-${Date.now()}`}
+              id="idea"
               name="idea"
               placeholder="e.g. Platform for private communities with posts, chat, and member billing"
               className="h-32 w-full rounded-2xl border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"

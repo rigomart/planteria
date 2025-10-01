@@ -13,6 +13,7 @@ import type * as agents_planning from "../agents/planning.js";
 import type * as auth from "../auth.js";
 import type * as deliverables_queries from "../deliverables/queries.js";
 import type * as deliverables from "../deliverables.js";
+import type * as firecrawl from "../firecrawl.js";
 import type * as http_mcp from "../http/mcp.js";
 import type * as http from "../http.js";
 import type * as lib_ownership from "../lib/ownership.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "deliverables/queries": typeof deliverables_queries;
   deliverables: typeof deliverables;
+  firecrawl: typeof firecrawl;
   "http/mcp": typeof http_mcp;
   http: typeof http;
   "lib/ownership": typeof lib_ownership;

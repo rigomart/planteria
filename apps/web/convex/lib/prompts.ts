@@ -1,10 +1,19 @@
 import type { PlanDraft } from "./plan_schemas";
 
-type DraftPlanPromptInput = {
-  idea: string;
+export type ResearchInsight = {
+  title: string;
+  url: string;
+  snippet: string;
 };
 
-export function buildPlanDraftPrompt({ idea }: DraftPlanPromptInput) {
+type DraftPlanPromptInput = {
+  idea: string;
+  insights?: ResearchInsight[];
+};
+
+export function buildPlanDraftPrompt({ idea, insights }: DraftPlanPromptInput) {
+  const insightsSection = buildInsightsSection(insights);
+
   return `
 * Provide a concise title and summary expressing the user-visible outcome and value.
 * Create outcomes → deliverables → actions that result in working, demoable increments. Avoid layer-only splits; each item should be end-to-end across client/server as needed.
@@ -17,7 +26,10 @@ Return the plan as JSON only per the provided schema.
 
 This is the idea the user provided:
   
-"""${idea}"""`;
+"""${idea}"""
+
+Use the following context from existing products or posts as inspiration for the plan scope:
+${insightsSection}`;
 }
 
 type AdjustmentPromptInput = PlanDraft & {
@@ -39,4 +51,20 @@ Existing plan:
 ${serialized}
 
 Instruction: """${instruction.trim()}"""`;
+}
+
+function buildInsightsSection(insights: ResearchInsight[] | undefined) {
+  if (!insights || insights.length === 0) {
+    return "(No external research context available.)";
+  }
+
+  const formatted = insights
+    .slice(0, 6)
+    .map((insight, index) => {
+      const snippet = insight.snippet.trim();
+      return `Insight ${index + 1}: ${insight.title} — ${insight.url}\n${snippet}`;
+    })
+    .join("\n\n");
+
+  return formatted;
 }

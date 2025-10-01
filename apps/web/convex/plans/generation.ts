@@ -1,11 +1,11 @@
 import { createThread } from "@convex-dev/agent";
 import { v } from "convex/values";
-import { components, internal } from "../_generated/api";
+import { api, components, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action, internalAction, internalMutation } from "../_generated/server";
 import { createPlanningAgent } from "../agents/planning";
 import { planDraftSchema, STATUS_VALUES } from "../lib/plan_schemas";
-import { buildPlanDraftPrompt } from "../lib/prompts";
+import { buildPlanDraftPrompt, type ResearchInsight } from "../lib/prompts";
 
 const GENERATING_SUMMARY = "Hang tight while we generate your plan.";
 const MAX_GENERATION_ERROR_LENGTH = 240;
@@ -144,6 +144,21 @@ export const generatePlanInBackground = internalAction({
 
       eventId = logResult.eventId;
 
+      let researchInsights: ResearchInsight[] = [];
+
+      try {
+        const research = await ctx.runAction(api.firecrawl.searchAndScrape, {
+          idea: args.idea,
+          limit: 5,
+        });
+
+        if (research && Array.isArray(research.insights)) {
+          researchInsights = research.insights;
+        }
+      } catch (firecrawlError) {
+        console.warn("Firecrawl research failed", firecrawlError);
+      }
+
       const aiResponse = await planningAgent.generateObject(
         ctx,
         { threadId },
@@ -151,6 +166,7 @@ export const generatePlanInBackground = internalAction({
           schema: planDraftSchema,
           prompt: buildPlanDraftPrompt({
             idea: args.idea,
+            insights: researchInsights,
           }),
         },
       );
