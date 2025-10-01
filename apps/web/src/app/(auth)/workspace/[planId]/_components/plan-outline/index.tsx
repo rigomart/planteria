@@ -110,26 +110,26 @@ function PlanGeneratingLoader({ plan }: { plan: PlanSummary }) {
               </div>
 
               {insights.length > 0 ? (
-                <ul className="space-y-2 text-sm text-foreground/90 max-h-56 overflow-y-auto">
-                  {insights.slice(0, 4).map((insight) => (
-                    <li key={insight.url} className="group flex items-start gap-2">
+                <ul className="space-y-3 text-sm text-foreground/90 max-h-56 overflow-y-auto">
+                  {insights.slice(0, 4).map((insight, idx) => (
+                    <li key={`${insight.url}-${idx}`} className="group">
                       <Link
                         href={insight.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex min-w-0 flex-1 flex-col gap-1 text-left leading-snug text-primary transition hover:text-primary/80"
+                        className="block space-y-1 text-left transition hover:opacity-80"
                       >
-                        <span className="font-medium text-sm line-clamp-1 break-words">
+                        <div className="font-medium text-sm text-primary line-clamp-1">
                           {insight.title}
-                        </span>
-                        <span className="text-xs text-muted-foreground line-clamp-2 break-words">
+                        </div>
+                        <div className="text-xs text-muted-foreground line-clamp-2">
                           {insight.snippet}
-                        </span>
+                        </div>
                       </Link>
                     </li>
                   ))}
                   {insights.length > 4 ? (
-                    <li className="text-xs text-muted-foreground">
+                    <li className="text-xs text-muted-foreground pt-1">
                       + {insights.length - 4} more sources
                     </li>
                   ) : null}
