@@ -22,8 +22,15 @@ const title = "Planteria – Ship a crisp plan for your next feature";
 
 const ogImageUrl = "https://planteria.app/og-image.png";
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://planteria.app"),
+const appUrl =
+  process.env.NEXT_PUBLIC_APP_URL ??
+  (process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    : undefined);
+
+const metadataBase = appUrl ? new URL(appUrl) : undefined;
+
+const baseMetadata: Metadata = {
   title,
   description,
   alternates: {
@@ -32,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: "https://planteria.app/",
+    url: appUrl ?? "https://planteria.app/",
     siteName: "Planteria",
     images: [
       {
@@ -65,6 +72,12 @@ export const metadata: Metadata = {
     shortcut: [{ url: "/favicon.ico" }],
   },
 };
+
+if (metadataBase) {
+  baseMetadata.metadataBase = metadataBase;
+}
+
+export const metadata = baseMetadata;
 
 export default function RootLayout({
   children,
