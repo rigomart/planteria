@@ -57,6 +57,8 @@ export function PlanCreationPanel() {
               value={idea}
               onChange={(event) => setIdea(event.target.value)}
               disabled={pending || showKeyWarning || isKeyLoading}
+              minLength={20}
+              maxLength={240}
               required
             />
             <div className="flex flex-col gap-3 border-t border-border/60 py-2 px-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">

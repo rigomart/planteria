@@ -2,6 +2,7 @@
 
 import type { FunctionReturnType } from "convex/server";
 import { ExternalLink, Lightbulb, Sparkles } from "lucide-react";
+import Link from "next/link";
 import type { api } from "@/convex/_generated/api";
 import { OutlineSelectionProvider } from "./outline-selection-context";
 import { PlanOutcomes } from "./plan-outcomes";
@@ -112,7 +113,10 @@ function PlanGeneratingLoader({ plan }: { plan: PlanSummary }) {
                 <ul className="space-y-2 text-sm text-foreground/90 max-h-56 overflow-y-auto">
                   {insights.slice(0, 4).map((insight, index) => (
                     <li key={insight.url} className="group flex items-start gap-2">
-                      <a
+                      <span className="text-xs text-muted-foreground/70 flex-shrink-0">
+                        {index + 1}.
+                      </span>
+                      <Link
                         href={insight.url}
                         target="_blank"
                         rel="noreferrer"
@@ -124,7 +128,7 @@ function PlanGeneratingLoader({ plan }: { plan: PlanSummary }) {
                         <span className="text-xs text-muted-foreground line-clamp-2 break-words">
                           {insight.snippet}
                         </span>
-                      </a>
+                      </Link>
                     </li>
                   ))}
                   {insights.length > 4 ? (
