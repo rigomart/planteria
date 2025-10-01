@@ -20,6 +20,7 @@ export default defineSchema({
     summary: v.string(),
     mission: v.optional(v.string()),
     status: planLifecycleStatus,
+    aiAdjustmentsUsed: v.optional(v.number()),
     researchInsights: v.optional(
       v.array(
         v.object({
@@ -103,4 +104,11 @@ export default defineSchema({
   })
     .index("by_user_provider", ["userId", "provider"])
     .index("by_provider", ["provider"]),
+
+  user_ai_usage: defineTable({
+    userId: v.string(),
+    plansGenerated: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
 });

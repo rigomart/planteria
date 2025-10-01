@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,33 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignIn() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSignIn = async () => {
-    await authClient.signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onSuccess: () => {
-          router.push("/");
-        },
-        onError: (ctx) => {
-          alert(ctx.error.message);
-        },
-      },
-    );
-  };
+  const [loading, setLoading] = useState(false);
 
   const handleGithubSignIn = async () => {
+    setLoading(true);
     await authClient.signIn.social(
       {
         provider: "github",
@@ -46,11 +25,15 @@ export default function SignIn() {
         onError: (ctx) => {
           alert(ctx.error.message);
         },
+        onSuccess: () => {
+          setLoading(false);
+        },
       },
     );
   };
 
   const handleGoogleSignIn = async () => {
+    setLoading(true);
     await authClient.signIn.social(
       {
         provider: "google",
@@ -58,6 +41,9 @@ export default function SignIn() {
       {
         onError: (ctx) => {
           alert(ctx.error.message);
+        },
+        onSuccess: () => {
+          setLoading(false);
         },
       },
     );
@@ -68,66 +54,17 @@ export default function SignIn() {
       <CardHeader>
         <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Enter your email below to login to your account
+          Choose a provider to sign in to your account
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSignIn();
-          }}
-          className="grid gap-4"
-        >
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              value={email}
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="password"
-              autoComplete="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Button type="submit" className="w-full">
-              Sign in with Password
-            </Button>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-neutral-800" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-card px-2 text-neutral-500">or continue with</span>
-            </div>
-          </div>
-
+        <div className="grid gap-4">
           <Button
             type="button"
             variant="outline"
             className="w-full gap-2"
             onClick={handleGithubSignIn}
+            disabled={loading}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
               <title>GitHub</title>
@@ -144,6 +81,7 @@ export default function SignIn() {
             variant="outline"
             className="w-full gap-2"
             onClick={handleGoogleSignIn}
+            disabled={loading}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +109,7 @@ export default function SignIn() {
             </svg>
             Sign in with Google
           </Button>
-        </form>
+        </div>
       </CardContent>
       <CardFooter>
         <div className="flex justify-center w-full border-t py-4">

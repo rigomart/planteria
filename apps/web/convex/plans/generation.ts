@@ -4,6 +4,7 @@ import { api, components, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action, internalAction, internalMutation } from "../_generated/server";
 import { createPlanningAgent } from "../agents/planning";
+import { MAX_PLANS_PER_USER } from "../lib/limits";
 import { resolveOpenAiKey } from "../lib/openAiKey";
 import { planDraftSchema, STATUS_VALUES } from "../lib/plan_schemas";
 import { buildPlanDraftPrompt, type ResearchInsight } from "../lib/prompts";
@@ -87,6 +88,26 @@ export const createPlanShell = internalMutation({
   },
   handler: async (ctx, args) => {
     const timestamp = Date.now();
+
+    const usage = await ctx.db
+      .query("user_ai_usage")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+
+    let currentCount = usage?.plansGenerated ?? null;
+
+    if (currentCount === null) {
+      const existingPlans = await ctx.db
+        .query("plans")
+        .withIndex("by_user", (q) => q.eq("userId", args.userId))
+        .collect();
+      currentCount = existingPlans.length;
+    }
+
+    if (currentCount >= MAX_PLANS_PER_USER) {
+      throw new Error("Plan limit reached. Contact support to unlock more generations.");
+    }
+
     const planId = await ctx.db.insert("plans", {
       userId: args.userId,
       idea: args.idea,
@@ -97,7 +118,22 @@ export const createPlanShell = internalMutation({
       createdAt: timestamp,
       updatedAt: timestamp,
       researchInsights: [],
+      aiAdjustmentsUsed: 0,
     });
+
+    if (usage) {
+      await ctx.db.patch(usage._id, {
+        plansGenerated: currentCount + 1,
+        updatedAt: timestamp,
+      });
+    } else {
+      await ctx.db.insert("user_ai_usage", {
+        userId: args.userId,
+        plansGenerated: currentCount + 1,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+    }
 
     return { planId };
   },

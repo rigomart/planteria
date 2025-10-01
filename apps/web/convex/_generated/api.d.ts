@@ -16,6 +16,7 @@ import type * as deliverables from "../deliverables.js";
 import type * as firecrawl from "../firecrawl.js";
 import type * as http_mcp from "../http/mcp.js";
 import type * as http from "../http.js";
+import type * as lib_limits from "../lib/limits.js";
 import type * as lib_openAiKey from "../lib/openAiKey.js";
 import type * as lib_ownership from "../lib/ownership.js";
 import type * as lib_planThreads from "../lib/planThreads.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   firecrawl: typeof firecrawl;
   "http/mcp": typeof http_mcp;
   http: typeof http;
+  "lib/limits": typeof lib_limits;
   "lib/openAiKey": typeof lib_openAiKey;
   "lib/ownership": typeof lib_ownership;
   "lib/planThreads": typeof lib_planThreads;

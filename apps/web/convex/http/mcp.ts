@@ -100,7 +100,7 @@ export const getPendingWork = httpAction(async (ctx, request) => {
     }
 
     parsedBody = result.data;
-  } catch (error) {
+  } catch (_error) {
     return json(400, {
       error: "invalid_json",
       message: "Request body must be valid JSON.",
@@ -153,7 +153,7 @@ export const getPlanDetails = httpAction(async (ctx, request) => {
     }
 
     parsedBody = result.data;
-  } catch (error) {
+  } catch (_error) {
     return json(400, {
       error: "invalid_json",
       message: "Request body must be valid JSON.",

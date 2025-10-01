@@ -28,6 +28,7 @@ export const listPlans = query({
         status: plan.status,
         researchInsights: plan.researchInsights ?? [],
         generationError: plan.generationError ?? null,
+        aiAdjustmentsUsed: plan.aiAdjustmentsUsed ?? 0,
         createdAt: plan.createdAt,
         updatedAt: plan.updatedAt,
       }))
@@ -61,6 +62,7 @@ export const getPlanSummary = query({
       status: plan.status,
       researchInsights: plan.researchInsights ?? [],
       generationError: plan.generationError ?? null,
+      aiAdjustmentsUsed: plan.aiAdjustmentsUsed ?? 0,
       createdAt: plan.createdAt,
       updatedAt: plan.updatedAt,
     };
@@ -147,6 +149,7 @@ export const getPlanPreview = query({
         status: plan.status,
         researchInsights: plan.researchInsights ?? [],
         generationError: plan.generationError ?? null,
+        aiAdjustmentsUsed: plan.aiAdjustmentsUsed ?? 0,
         createdAt: plan.createdAt,
         updatedAt: plan.updatedAt,
       },

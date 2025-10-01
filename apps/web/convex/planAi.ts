@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import { action, mutation } from "./_generated/server";
 import { createPlanningAgent } from "./agents/planning";
+import { MAX_PLAN_ADJUSTMENTS_PER_PLAN } from "./lib/limits";
 import { resolveOpenAiKey } from "./lib/openAiKey";
 import { requirePlanOwnership } from "./lib/ownership";
 import { type PlanDraft, planDraftSchema } from "./lib/plan_schemas";
@@ -72,6 +73,11 @@ export const adjustPlan = action({
 
     if (!plan) {
       throw new Error("Plan not found");
+    }
+
+    const adjustmentsUsed = plan.plan.aiAdjustmentsUsed ?? 0;
+    if (adjustmentsUsed >= MAX_PLAN_ADJUSTMENTS_PER_PLAN) {
+      throw new Error("Plan adjustment limit reached. Contact support for more adjustments.");
     }
 
     const threadId = await getOrCreatePlanThread(ctx, {
@@ -152,6 +158,11 @@ export const applyPlanAdjustment = mutation({
 
     const { plan } = await requirePlanOwnership(ctx, args.planId, identity.subject);
 
+    const adjustmentsUsed = plan.aiAdjustmentsUsed ?? 0;
+    if (adjustmentsUsed >= MAX_PLAN_ADJUSTMENTS_PER_PLAN) {
+      throw new Error("Plan adjustment limit reached. Contact support for more adjustments.");
+    }
+
     if (plan.idea !== proposal.idea) {
       throw new Error("Plan idea mismatch");
     }
@@ -163,6 +174,7 @@ export const applyPlanAdjustment = mutation({
       summary: proposal.summary,
       status: "ready",
       updatedAt: timestamp,
+      aiAdjustmentsUsed: adjustmentsUsed + 1,
     });
 
     const existingOutcomes = await ctx.db
