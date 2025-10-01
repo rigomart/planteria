@@ -206,7 +206,6 @@ export function SettingsContent() {
                 OpenAI API key
               </label>
               <Input
-                id="openai-key"
                 type="password"
                 placeholder="sk-..."
                 value={openAiInput}

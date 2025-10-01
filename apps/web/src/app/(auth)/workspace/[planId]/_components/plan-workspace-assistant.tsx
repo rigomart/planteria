@@ -217,7 +217,7 @@ function AssistantComposer({ plan, layout }: { plan?: PlanSummary; layout: Assis
       )}
     >
       <textarea
-        id="plan-adjustment"
+        id={`plan-adjustment-${plan?.id}`}
         placeholder={
           isPlanReady
             ? "e.g. Add monetization strategy with subscription plans."

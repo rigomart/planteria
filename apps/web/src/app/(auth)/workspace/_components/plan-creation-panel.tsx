@@ -51,7 +51,7 @@ export function PlanCreationPanel() {
           </label>
           <div className="rounded-2xl border border-border/60 bg-background/90 shadow-lg">
             <textarea
-              id="idea"
+              id={`idea-${Date.now()}`}
               name="idea"
               placeholder="e.g. Platform for private communities with posts, chat, and member billing"
               className="h-32 w-full rounded-2xl border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"

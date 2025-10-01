@@ -102,7 +102,6 @@ export function OpenAIKeyManager() {
           <div className="space-y-2">
             <Label htmlFor="openai-key">OpenAI API key</Label>
             <Input
-              id="openai-key"
               type="password"
               autoComplete="off"
               placeholder="sk-..."

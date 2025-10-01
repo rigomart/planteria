@@ -10,7 +10,7 @@ export function Logo({ className, size = 48, ...props }: LogoProps) {
     <svg
       width={size}
       height={size}
-      viewBox="0 0 100 100"
+      viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
@@ -18,27 +18,21 @@ export function Logo({ className, size = 48, ...props }: LogoProps) {
       role="img"
       {...props}
     >
-      {/* Central stem/trunk */}
-      <line x1="50" y1="75" x2="50" y2="20" stroke="currentColor" strokeWidth="3" />
+      <line x1="32" y1="52" x2="32" y2="12" stroke="currentColor" strokeWidth="4" />
 
       {/* Branch nodes - representing plan hierarchy */}
-      {/* Top node */}
-      <circle cx="50" cy="25" r="5" fill="currentColor" />
+      <circle cx="32" cy="16" r="4.5" fill="currentColor" />
 
-      {/* Middle left branch */}
-      <line x1="50" y1="45" x2="30" y2="35" stroke="currentColor" strokeWidth="2" />
-      <circle cx="30" cy="35" r="4" fill="currentColor" />
+      <line x1="32" y1="28" x2="15" y2="20" stroke="currentColor" strokeWidth="3.5" />
+      <circle cx="15" cy="20" r="4" fill="currentColor" />
 
-      {/* Middle right branch */}
-      <line x1="50" y1="55" x2="70" y2="45" stroke="currentColor" strokeWidth="2" />
-      <circle cx="70" cy="45" r="4" fill="currentColor" />
+      <line x1="32" y1="34" x2="49" y2="25" stroke="currentColor" strokeWidth="3.5" />
+      <circle cx="49" cy="25" r="4" fill="currentColor" />
 
-      {/* Lower left branch */}
-      <line x1="50" y1="65" x2="35" y2="60" stroke="currentColor" strokeWidth="2" />
-      <circle cx="35" cy="60" r="4" fill="currentColor" />
+      <line x1="32" y1="42" x2="22" y2="40" stroke="currentColor" strokeWidth="3.5" />
+      <circle cx="22" cy="40" r="4" fill="currentColor" />
 
-      {/* Base root node */}
-      <circle cx="50" cy="75" r="4" fill="currentColor" />
+      <circle cx="32" cy="52" r="4.5" fill="currentColor" />
     </svg>
   );
 }
