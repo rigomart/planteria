@@ -37,7 +37,7 @@ Add a server entry that runs the Node script and passes your API key via env or 
     "planteria": {
       "command": "node",
       "args": [
-        "./node_modules/@planteria/mcp/dist/server.js",
+        "./node_modules/@planteria/mcp/dist/main.js",
         "--api-key",
         "YOUR_KEY"
       ]
@@ -73,7 +73,7 @@ Any MCP client that supports stdio transports can be configured similarly.
 You can start the server to verify it launches (it will wait for an MCP client on stdio):
 
 ```bash
-PLANTERIA_API_KEY=your_key node ./node_modules/@planteria/mcp/dist/server.js
+PLANTERIA_API_KEY=your_key node ./node_modules/@planteria/mcp/dist/main.js
 ```
 
 Then use your MCP client to invoke `list-plans`, and pass a returned `id` to `get-pending-work` or `get-plan-details`.

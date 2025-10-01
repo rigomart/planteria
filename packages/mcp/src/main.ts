@@ -1,9 +1,10 @@
+#!/usr/bin/env node
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const CONVEX_HTTP_BASE = new URL("https://valuable-gopher-881.convex.site");
+const CONVEX_HTTP_BASE = new URL("https://energetic-yak-906.convex.site");
 
 type CliOptions = {
   apiKey: string;
