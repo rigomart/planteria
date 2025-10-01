@@ -79,7 +79,7 @@ function extractUrl(result: Record<string, unknown>): string | null {
 
 function extractTitle(result: Record<string, unknown>): string | null {
   const directTitle = typeof result.title === "string" ? result.title : null;
-  if (directTitle && directTitle.trim()) return directTitle.trim();
+  if (directTitle?.trim()) return directTitle.trim();
 
   const metadata = result.metadata;
   if (metadata && typeof metadata === "object") {
