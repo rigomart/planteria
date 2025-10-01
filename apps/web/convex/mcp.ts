@@ -4,8 +4,6 @@ import type { Doc } from "./_generated/dataModel";
 import { internalQuery } from "./_generated/server";
 
 type PlanDoc = Doc<"plans">;
-type DeliverableDoc = Doc<"deliverables">;
-type ActionDoc = Doc<"actions">;
 
 type PlanSummary = {
   _id: PlanDoc["_id"];
