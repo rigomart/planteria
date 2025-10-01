@@ -15,7 +15,7 @@ export function HeroSection() {
           variant="outline"
           className="mx-auto w-fit text-xs lg:mx-0 rounded-full border-primary/50"
         >
-          MVP-first planning for indie devs
+          MVP-first planning for developers
         </Badge>
         <div className="flex flex-col gap-5 items-center lg:items-start">
           <h1 className="text-balance font-semibold tracking-tight text-4xl text-center lg:text-left lg:text-5xl max-w-2xl">

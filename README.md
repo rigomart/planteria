@@ -1,6 +1,6 @@
 # Planteria
 
-**Planteria** is an AI-powered planning tool designed to help **indie devs** quickly turn fuzzy ideas into clear, shippable plans. It treats plans as structured data—moving from **ideas → outcomes → deliverables → actions**—with strict guardrails to ensure clarity, demoability, and focus on the minimum shippable path.
+**Planteria** is an AI-powered planning tool designed to help **developers** quickly turn fuzzy ideas into clear, shippable plans. It treats plans as structured data—moving from **ideas → outcomes → deliverables → actions**—with strict guardrails to ensure clarity, demoability, and focus on the minimum shippable path.
 
 The tool emphasizes:
 
@@ -169,4 +169,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-Built with ❤️ for indie developers who want to ship faster.
+Built with ❤️ for developers who want to ship faster.

@@ -1,6 +1,6 @@
 ## Planteria
 
-**Planteria** is an AI-powered planning tool designed to help **solo builders** quickly turn fuzzy ideas into clear, shippable plans. It treats plans as structured data—moving from **ideas → outcomes → deliverables → actions**—with strict guardrails to ensure clarity, demoability, and focus on the minimum shippable path.
+**Planteria** is an AI-powered planning tool designed to help **developers** quickly turn fuzzy ideas into clear, shippable plans. It treats plans as structured data—moving from **ideas → outcomes → deliverables → actions**—with strict guardrails to ensure clarity, demoability, and focus on the minimum shippable path.
 
 The tool emphasizes:
 
@@ -14,7 +14,7 @@ At its core, Planteria is about **maximizing user speed and clarity** while keep
 
 ### Core Product Intent
 
-- Audience: indie developers who come with a concrete idea they want to ship.
+- Audience: developers who come with a concrete idea they want to ship.
 - Input expectation: the user types a specific build mission, not a vague prompt or brainstorming request. Treat that mission as the source of truth.
 - Output: a structured plan of outcomes → deliverables → actions with crisp `doneWhen` criteria aimed at the smallest shippable slice.
 - Copy and examples: anywhere the repo shows “example prompts,” they should model specificity and product outcomes. Prefer templates like “Build [capability] that [effect] when [signal]” over generic tasks.
