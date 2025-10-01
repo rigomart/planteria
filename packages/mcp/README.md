@@ -1,4 +1,4 @@
-# @planteria/mcp
+# @mirdor/planteria-mcp
 
 A Model Context Protocol (MCP) stdio server that lets MCP-compatible AI clients access your Planteria plans.
 
@@ -9,44 +9,57 @@ It exposes tools to list your latest plans, review pending work, and fetch full 
 - Node.js 18+
 - A Planteria account with an API key
 
-## Install
-
-```bash
-# npm
-npm install --save-dev @planteria/mcp
-
-# pnpm
-pnpm add -D @planteria/mcp
-
-# yarn
-yarn add -D @planteria/mcp
-```
-
 ## Get a Planteria API key
 
 - In Planteria, open Settings → API Keys → Create Key.
 - Copy the key and keep it secure.
 
-## Configure an MCP client (Claude Desktop example)
+## Configure MCP clients
 
-Add a server entry that runs the Node script and passes your API key via env or args.
+Below are examples for popular clients. All use the same approach: run via `npx -y @mirdor/planteria-mcp@latest` and provide `PLANTERIA_API_KEY`.
+
+### Cursor
+
+Add to `~/.cursor/mcp.json`:
 
 ```json
 {
-  "mcpServers": {
-    "planteria": {
-      "command": "node",
-      "args": [
-        "./node_modules/@planteria/mcp/dist/main.js",
-        "--api-key",
-        "YOUR_KEY"
-      ]
+  "Planteria": {
+    "command": "npx",
+    "args": ["-y", "@mirdor/planteria-mcp@latest"],
+    "env": {
+      "PLANTERIA_API_KEY": "<YOUR_PLANTERIA_API_KEY>"
     }
   }
 }
 ```
 
-Any MCP client that supports stdio transports can be configured similarly.
+### Codex
+
+Add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.planteria]
+command = "npx"
+args = ["-y", "@mirdor/planteria-mcp@latest"]
+env = {"PLANTERIA_API_KEY" = "<YOUR_PLANTERIA_API_KEY>"}
+```
+
+### Claude Desktop
+
+Add to your Claude Desktop settings JSON under `mcpServers` (path varies by OS):
+
+```json
+{
+  "mcpServers": {
+    "planteria": {
+      "command": "npx",
+      "args": ["-y", "@mirdor/planteria-mcp@latest"],
+      "env": { "PLANTERIA_API_KEY": "YOUR_KEY" }
+    }
+  }
+}
+```
 
 ## Exposed tools
 
@@ -73,14 +86,14 @@ Any MCP client that supports stdio transports can be configured similarly.
 You can start the server to verify it launches (it will wait for an MCP client on stdio):
 
 ```bash
-PLANTERIA_API_KEY=your_key node ./node_modules/@planteria/mcp/dist/main.js
+PLANTERIA_API_KEY=your_key npx -y @mirdor/planteria-mcp@latest
 ```
 
 Then use your MCP client to invoke `list-plans`, and pass a returned `id` to `get-pending-work` or `get-plan-details`.
 
 ## Troubleshooting
 
-- 401 Unauthorized: API key missing or invalid. Check `PLANTERIA_API_KEY` or `--api-key`.
+- 401 Unauthorized: API key missing or invalid. Check `PLANTERIA_API_KEY`.
 - 404 Plan not found: `planId` doesn’t exist for your account or is malformed.
 - 400 Malformed plan id: `planId` is not a valid Planteria document id.
 - Invalid JSON / network errors: Ensure a stable connection and retry.

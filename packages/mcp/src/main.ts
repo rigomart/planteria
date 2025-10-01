@@ -19,9 +19,7 @@ type FetchOptions = {
 type LoggerLevel = "info" | "error";
 
 const CLI_SCHEMA = z.object({
-  apiKey: z
-    .string()
-    .min(1, "API key is required. Generate one from Planteria settings and pass --api-key <KEY>"),
+  apiKey: z.string().min(1, "PLANTERIA_API_KEY environment variable is required."),
 });
 
 const LIST_PLANS_SCHEMA = z.object({
@@ -248,38 +246,15 @@ class HttpError extends Error {
   }
 }
 
-function parseCliOptions(argv: readonly string[]): CliOptions {
-  const parsedPairs: Record<string, string | undefined> = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const token = argv[index];
-    if (!token.startsWith("--")) continue;
-
-    const [rawKey, rawValue] = token.slice(2).split("=", 2);
-    const key = rawKey.trim();
-    if (!key) continue;
-
-    if (rawValue !== undefined) {
-      parsedPairs[key] = rawValue;
-      continue;
-    }
-
-    const next = argv[index + 1];
-    if (next && !next.startsWith("--")) {
-      parsedPairs[key] = next;
-      index += 1;
-    } else {
-      parsedPairs[key] = undefined;
-    }
-  }
-
+function parseCliOptions(_argv: readonly string[]): CliOptions {
   const result = CLI_SCHEMA.safeParse({
-    apiKey: parsedPairs["api-key"] ?? process.env.PLANTERIA_API_KEY,
+    apiKey: process.env.PLANTERIA_API_KEY,
   });
 
   if (!result.success) {
     const formatted = result.error.issues.map((issue) => `- ${issue.message}`).join("\n");
-    log("error", "startup", "invalid_cli", { details: formatted });
-    throw new Error("Invalid CLI arguments. See stderr for details.");
+    log("error", "startup", "invalid_env", { details: formatted });
+    throw new Error("Invalid environment configuration. See stderr for details.");
   }
 
   return result.data;
@@ -338,7 +313,7 @@ async function callConvex<T>(
   let json: unknown;
   try {
     json = text ? JSON.parse(text) : {};
-  } catch (error) {
+  } catch {
     throw new HttpError(
       "Convex returned an invalid JSON payload",
       response.status,

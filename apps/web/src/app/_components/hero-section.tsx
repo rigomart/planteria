@@ -47,19 +47,21 @@ function McpCallout() {
     {
       id: "cursor",
       client: "Cursor",
-      config: `{
-  "name": "planteria",
-  "command": "npx planteria-mcp",
-  "args": ["--api-key", "<YOUR_PLANTERIA_API_KEY>"]
+      config: `"Planteria": {
+    "command": "npx",
+    "args": ["-y", "@mirdor/planteria-mcp@latest"],
+    "env": {
+      "PLANTERIA_API_KEY": "<YOUR_PLANTERIA_API_KEY>"
+    }
 }`,
     },
     {
       id: "codex",
       client: "Codex",
       config: `[mcp_servers.planteria]
-    command = "npx"
-    args = ["-y", "planteria-mcp"]
-    env = { "API_KEY" = "<YOUR_PLANTERIA_API_KEY>" }`,
+  command = "npx"
+  args = ["-y", "@mirdor/planteria-mcp@latest"]
+  env = {"PLANTERIA_API_KEY" = "<YOUR_PLANTERIA_API_KEY>"}`,
     },
   ];
 
@@ -82,7 +84,7 @@ function McpCallout() {
 
           {clientConfigs.map(({ id, config }) => (
             <TabsContent key={id} value={id}>
-              <pre className="rounded-md border border-border/60 bg-background/80 p-3 text-xs leading-relaxed text-foreground overflow-x-auto w-full h-36">
+              <pre className="rounded-md border border-border/60 bg-background/80 p-3 text-xs leading-relaxed text-foreground overflow-x-auto w-full h-44">
                 <code>{config}</code>
               </pre>
               <p className="mt-2 text-xs text-muted-foreground">
