@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 const description =
   "Planteria turns an idea into an actionable plan with outcomes, deliverables, and actions in minutes.";
 
-const title = "Planteria – Ship a crisp plan for your next idea";
+const title = "Planteria – Turn your idea into a shippable plan";
 
 export const metadata: Metadata = {
   title,
