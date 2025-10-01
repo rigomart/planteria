@@ -4,7 +4,7 @@ export const STATUS_VALUES = ["todo", "doing", "done"] as const;
 
 export const statusSchema = z.enum(STATUS_VALUES);
 
-export const PLAN_LIFECYCLE_STATUS_VALUES = ["generating", "ready", "error"] as const;
+export const PLAN_LIFECYCLE_STATUS_VALUES = ["scraping", "generating", "ready", "error"] as const;
 
 export type PlanLifecycleStatus = (typeof PLAN_LIFECYCLE_STATUS_VALUES)[number];
 

@@ -89,10 +89,11 @@ export const createPlanShell = internalMutation({
       idea: args.idea,
       title: "New plan",
       summary: GENERATING_SUMMARY,
-      status: "generating",
+      status: "scraping",
       generationError: null,
       createdAt: timestamp,
       updatedAt: timestamp,
+      researchInsights: [],
     });
 
     return { planId };
@@ -158,6 +159,11 @@ export const generatePlanInBackground = internalAction({
       } catch (firecrawlError) {
         console.warn("Firecrawl research failed", firecrawlError);
       }
+
+      await ctx.runMutation(internal.plans.generation.storeResearchInsights, {
+        planId: args.planId,
+        insights: researchInsights,
+      });
 
       const aiResponse = await planningAgent.generateObject(
         ctx,
@@ -261,6 +267,28 @@ export const initializePlan = internalMutation({
         }
       }
     }
+  },
+});
+
+export const storeResearchInsights = internalMutation({
+  args: {
+    planId: v.id("plans"),
+    insights: v.array(
+      v.object({
+        title: v.string(),
+        url: v.string(),
+        snippet: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const timestamp = Date.now();
+
+    await ctx.db.patch(args.planId, {
+      status: "generating",
+      researchInsights: args.insights,
+      updatedAt: timestamp,
+    });
   },
 });
 

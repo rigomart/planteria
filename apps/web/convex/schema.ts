@@ -4,6 +4,7 @@ import { v } from "convex/values";
 export const status = v.union(v.literal("todo"), v.literal("doing"), v.literal("done"));
 
 const planLifecycleStatus = v.union(
+  v.literal("scraping"),
   v.literal("generating"),
   v.literal("ready"),
   v.literal("error"),
@@ -19,6 +20,15 @@ export default defineSchema({
     summary: v.string(),
     mission: v.optional(v.string()),
     status: planLifecycleStatus,
+    researchInsights: v.optional(
+      v.array(
+        v.object({
+          title: v.string(),
+          url: v.string(),
+          snippet: v.string(),
+        }),
+      ),
+    ),
     generationError: v.optional(v.union(v.string(), v.null())),
     createdAt: v.number(),
     updatedAt: v.number(),

@@ -52,7 +52,7 @@ export function PlanWorkspaceHeader({ plan, className }: PlanWorkspaceHeaderProp
                 {title}
               </h1>
               <div className="mt-0.5 flex items-center gap-2">
-                <PlanStatus status={status} />
+                <PlanStatus status={status} insightCount={plan?.researchInsights?.length} />
                 {plan ? (
                   <span className="hidden text-[11px] text-muted-foreground/80 sm:inline">
                     Updated {new Date(plan.updatedAt).toLocaleString()}
@@ -91,6 +91,34 @@ export function PlanWorkspaceHeader({ plan, className }: PlanWorkspaceHeaderProp
                         </p>
                       </div>
                     )}
+                    <div>
+                      <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1.5">
+                        Research sources
+                      </h4>
+                      {plan.researchInsights && plan.researchInsights.length > 0 ? (
+                        <ul className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                          {plan.researchInsights.map((insight) => (
+                            <li key={insight.url} className="text-sm leading-snug">
+                              <a
+                                href={insight.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-medium text-primary hover:text-primary/80"
+                              >
+                                {insight.title}
+                              </a>
+                              <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                                {insight.snippet}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          No external sources recorded.
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
@@ -112,8 +140,10 @@ export function PlanWorkspaceHeader({ plan, className }: PlanWorkspaceHeaderProp
 
 function PlanStatus({
   status,
+  insightCount,
 }: {
-  status: PlanSummary["status"] | "generating" | "ready" | "error";
+  status: PlanSummary["status"] | "scraping" | "generating" | "ready" | "error";
+  insightCount?: number;
 }) {
   const style = getPlanStatusStyle(status);
   return (
@@ -125,12 +155,23 @@ function PlanStatus({
     >
       <span className={cn("size-1.5 rounded-full", style.dot)} />
       {style.label}
+      {typeof insightCount === "number" && insightCount > 0 ? (
+        <span className="text-[10px] text-muted-foreground/80">• {insightCount} sources</span>
+      ) : null}
     </span>
   );
 }
 
-function getPlanStatusStyle(status: PlanSummary["status"] | "generating" | "ready" | "error") {
+function getPlanStatusStyle(
+  status: PlanSummary["status"] | "scraping" | "generating" | "ready" | "error",
+) {
   switch (status) {
+    case "scraping":
+      return {
+        label: "Scraping",
+        badge: "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+        dot: "bg-blue-500",
+      } as const;
     case "ready":
       return {
         label: "Ready",
