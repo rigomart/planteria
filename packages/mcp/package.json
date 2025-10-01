@@ -1,0 +1,30 @@
+{
+	"name": "@planteria/mcp",
+	"version": "0.0.1",
+	"description": "MCP server for Planteria",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/rigomart/planteria"
+	},
+	"homepage": "https://github.com/rigomart/planteria#readme",
+	"keywords": [
+		"mcp",
+		"planteria",
+		"ai",
+		"product development"
+	],
+	"scripts": {
+		"lint": "biome check --write"
+	},
+	"author": "Miguel Rodriguez",
+	"license": "MIT",
+	"packageManager": "pnpm@10.15.1",
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.18.2",
+		"zod": "^4.1.11"
+	},
+	"devDependencies": {
+		"@types/node": "^20.19.19"
+	}
+}
