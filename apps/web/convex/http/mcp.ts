@@ -13,6 +13,10 @@ const pendingWorkRequestSchema = z.object({
   planId: z.string().trim().min(1, "planId is required"),
 });
 
+const planDetailsRequestSchema = z.object({
+  planId: z.string().trim().min(1, "planId is required"),
+});
+
 function json(status: number, payload: unknown): Response {
   return new Response(JSON.stringify(payload), {
     status,
@@ -116,6 +120,60 @@ export const getPendingWork = httpAction(async (ctx, request) => {
     }
 
     return json(200, pendingWork);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === "invalid_plan_id") {
+      return json(400, {
+        error: "malformed_plan_id",
+        message: "planId is not a valid Planteria document id.",
+      });
+    }
+
+    throw error;
+  }
+});
+
+export const getPlanDetails = httpAction(async (ctx, request) => {
+  const auth = await authenticate(readBearerToken(request), ctx);
+  if (!auth.ok) {
+    return auth.response;
+  }
+
+  let parsedBody: z.infer<typeof planDetailsRequestSchema>;
+
+  try {
+    const body = await request.json();
+    const result = planDetailsRequestSchema.safeParse(body);
+
+    if (!result.success) {
+      return json(400, {
+        error: "invalid_plan_id",
+        message: "Body must include a non-empty planId field.",
+      });
+    }
+
+    parsedBody = result.data;
+  } catch (error) {
+    return json(400, {
+      error: "invalid_json",
+      message: "Request body must be valid JSON.",
+    });
+  }
+
+  try {
+    const details = await ctx.runQuery(internal.mcp.planDetailsForUser, {
+      userId: auth.userId,
+      planId: parsedBody.planId,
+    });
+
+    if (!details) {
+      return json(404, {
+        error: "plan_not_found",
+        message: "Plan could not be found for the supplied API key.",
+      });
+    }
+
+    return json(200, details);
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (message === "invalid_plan_id") {

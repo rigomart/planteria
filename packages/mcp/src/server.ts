@@ -64,8 +64,35 @@ const PENDING_WORK_SCHEMA = z.object({
 	}),
 });
 
+const PLAN_DETAILS_SCHEMA = z.object({
+	plan: z.object({
+		id: z.string(),
+		title: z.string(),
+		summary: z.string(),
+	}),
+	outcomes: z.array(
+		z.object({
+			title: z.string(),
+			summary: z.string(),
+			deliverables: z.array(
+				z.object({
+					title: z.string(),
+					doneWhen: z.string(),
+					notes: z.string().nullable(),
+					actions: z.array(
+						z.object({
+							title: z.string(),
+						}),
+					),
+				}),
+			),
+		}),
+	),
+});
+
 type ListPlansPayload = z.infer<typeof LIST_PLANS_SCHEMA>;
 type PendingWorkPayload = z.infer<typeof PENDING_WORK_SCHEMA>;
+type PlanDetailsPayload = z.infer<typeof PLAN_DETAILS_SCHEMA>;
 
 function safeHeadingText(value: string): string {
 	const cleaned = value
@@ -152,6 +179,61 @@ function formatPendingWorkMarkdown(payload: PendingWorkPayload): string {
 	}
 
 	return sections.join("\n\n");
+}
+
+function formatPlanDetailsMarkdown(payload: PlanDetailsPayload): string {
+	const sections: string[] = [
+		"# Plan",
+		`Plan ID: ${payload.plan.id}`,
+		`Title: ${safeHeadingText(payload.plan.title)}`,
+	];
+
+	const summary = formatParagraph(payload.plan.summary);
+	if (summary) {
+		sections.push("", summary);
+	}
+
+	if (payload.outcomes.length === 0) {
+		sections.push("", "No outcomes defined.");
+		return sections.join("\n");
+	}
+
+	for (const outcome of payload.outcomes) {
+		const outcomeSection: string[] = ["", `## ${safeHeadingText(outcome.title)}`];
+		const outcomeSummary = formatParagraph(outcome.summary);
+		if (outcomeSummary) {
+			outcomeSection.push("", outcomeSummary);
+		}
+
+		if (outcome.deliverables.length === 0) {
+			outcomeSection.push("", "No deliverables in this outcome.");
+			sections.push(outcomeSection.join("\n"));
+			continue;
+		}
+
+		for (const deliverable of outcome.deliverables) {
+			const deliverableBlock: string[] = [`### ${safeHeadingText(deliverable.title)}`];
+			const doneWhen = formatParagraph(deliverable.doneWhen);
+			if (doneWhen) {
+				deliverableBlock.push("", "Done When:", "```", doneWhen, "```");
+			}
+			const notes = formatParagraph(deliverable.notes ?? undefined);
+			if (notes) {
+				deliverableBlock.push("", "Notes:", "```", notes, "```");
+			}
+			if (deliverable.actions.length > 0) {
+				deliverableBlock.push("", "Actions:");
+				for (const action of deliverable.actions) {
+					deliverableBlock.push(`- ${safeHeadingText(action.title)}`);
+				}
+			}
+			outcomeSection.push(deliverableBlock.join("\n"));
+		}
+
+		sections.push(outcomeSection.join("\n\n"));
+	}
+
+	return sections.join("\n");
 }
 
 class HttpError extends Error {
@@ -348,6 +430,40 @@ async function main() {
 						{
 							type: "text",
 							text: `get-pending-work failed: ${humanizeError(error)}`,
+						},
+					],
+				};
+			}
+		},
+	);
+
+	server.registerTool(
+		"get-plan-details",
+		{
+			title: "Get Plan Details",
+			description: "Return the full plan with outcomes and deliverables.",
+			inputSchema: {
+				planId: z.string().min(1, "planId is required"),
+			},
+		},
+		async ({ planId }) => {
+			try {
+				const payload = await callConvex(cliOptions, PLAN_DETAILS_SCHEMA, "/mcp/plan-details", {
+					method: "POST",
+					body: { planId },
+				});
+
+				return {
+					content: [{ type: "text", text: formatPlanDetailsMarkdown(payload) }],
+				};
+			} catch (error) {
+				log("error", "get-plan-details", "failed", serializeError(error));
+				return {
+					isError: true,
+					content: [
+						{
+							type: "text",
+							text: `get-plan-details failed: ${humanizeError(error)}`,
 						},
 					],
 				};

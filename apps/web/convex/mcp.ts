@@ -185,3 +185,94 @@ export const pendingWorkForPlan = internalQuery({
     } as const;
   },
 });
+
+type FullPlanDeliverable = {
+  title: string;
+  doneWhen: string;
+  notes: string | null;
+  actions: {
+    title: string;
+  }[];
+};
+
+type FullPlanOutcome = {
+  title: string;
+  summary: string;
+  deliverables: FullPlanDeliverable[];
+};
+
+export const planDetailsForUser = internalQuery({
+  args: {
+    userId: v.string(),
+    planId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const planId = ctx.db.normalizeId("plans", args.planId);
+    if (!planId) {
+      const invalidIdError = new Error("invalid_plan_id");
+      invalidIdError.name = "InvalidPlanId";
+      throw invalidIdError;
+    }
+
+    const plan = await ctx.db.get(planId);
+
+    if (!plan || plan.userId !== args.userId) {
+      return null;
+    }
+
+    const planSummary = summarizePlan(plan);
+
+    const outcomes = await ctx.db
+      .query("outcomes")
+      .withIndex("by_plan_order", (q) => q.eq("planId", planId))
+      .collect();
+
+    outcomes.sort((a, b) => a.order - b.order);
+
+    const detailedOutcomes: FullPlanOutcome[] = [];
+
+    for (const outcome of outcomes) {
+      const deliverables = await ctx.db
+        .query("deliverables")
+        .withIndex("by_outcome_order", (q) => q.eq("outcomeId", outcome._id))
+        .collect();
+
+      deliverables.sort((a, b) => a.order - b.order);
+
+      const detailedDeliverables: FullPlanDeliverable[] = [];
+
+      for (const deliverable of deliverables) {
+        const actions = await ctx.db
+          .query("actions")
+          .withIndex("by_deliverable_order", (q) => q.eq("deliverableId", deliverable._id))
+          .collect();
+
+        actions.sort((a, b) => a.order - b.order);
+
+        detailedDeliverables.push({
+          title: deliverable.title,
+          doneWhen: deliverable.doneWhen,
+          notes: deliverable.notes ?? null,
+          actions: actions.map((action) => ({
+            title: action.title,
+          })),
+        });
+      }
+
+      detailedOutcomes.push({
+        title: outcome.title,
+        summary: outcome.summary,
+        deliverables: detailedDeliverables,
+      });
+    }
+
+    return {
+      plan: {
+        id: planSummary._id,
+        title: planSummary.title,
+        summary: planSummary.summary,
+      },
+      outcomes: detailedOutcomes,
+    } as const;
+  },
+});
