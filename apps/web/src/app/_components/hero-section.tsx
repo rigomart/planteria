@@ -139,12 +139,6 @@ function HeroWorkspacePreview() {
         <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
           Workspace preview
         </span>
-        <Badge
-          variant="outline"
-          className="border-primary/50 text-xs uppercase text-primary rounded-full"
-        >
-          Live synced
-        </Badge>
       </div>
       <div className="grid gap-3 md:grid-cols-12 select-none">
         {/* AI Assistant Panel (left) */}

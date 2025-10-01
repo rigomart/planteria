@@ -8,9 +8,9 @@ import { getIdeaMetrics, IDEA_MAX_LENGTH, IDEA_MIN_LENGTH, validateIdea } from "
 
 const initialState = { message: "" };
 const quickPrompts = [
-  "Automated onboarding checklist that adapts tasks to first-login signals",
-  "Slack bot that triages bug reports into weekly solo sprint slices",
-  "Self-updating changelog that turns merged PRs into customer updates",
+  "Browser extension that summarizes any GitHub PR and flags risky files.",
+  "Web app that turns CSVs into embeddable filterable tables with shareable views.",
+  "AI tutor that generates minimal-pair pronunciation drills from any sentence.",
 ];
 
 export function PlanCreationPanel() {
@@ -37,7 +37,7 @@ export function PlanCreationPanel() {
           </h1>
           <p className="mt-3 text-sm text-muted-foreground sm:text-base">
             Describe the idea swirling in your head. Planteria scaffolds a structured workflow with
-            outcomes, deliverables, and next actions so builders know the next move.
+            outcomes, deliverables, and next actions so developers know the next move.
           </p>
         </div>
 

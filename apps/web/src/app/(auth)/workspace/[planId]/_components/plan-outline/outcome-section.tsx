@@ -118,7 +118,7 @@ export function OutcomeSection({ planId, outcome, index }: OutcomeSectionProps) 
   return (
     <div
       ref={containerRef}
-      className="group rounded-2xl border border-border/50 bg-card shadow-sm transition-all hover:border-border/80 hover:shadow-md"
+      className="group rounded-2xl border border-border/50 bg-background shadow-sm transition-all hover:border-border/80 hover:shadow-md"
     >
       {/* Outcome Header */}
       <div className="flex items-start gap-3 p-4">

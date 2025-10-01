@@ -175,8 +175,8 @@ export function PlanWorkspacePreview({ plan }: PlanWorkspacePreviewProps) {
     <Sheet>
       <SheetTrigger asChild>
         <Button type="button" variant="outline" size="sm">
-          Export preview
-          <Eye className="size-4" />
+          Export
+          <Download className="size-4" />
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="gap-0 p-0 sm:max-w-xl">

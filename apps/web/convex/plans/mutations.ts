@@ -16,15 +16,15 @@ export const deletePlan = mutation({
       throw new Error("Unauthorized");
     }
 
-    const { plan } = await requirePlanOwnership(ctx, args.planId, identity.subject);
+    await requirePlanOwnership(ctx, args.planId, identity.subject);
 
-    await deletePlanHierarchy(ctx, args.planId, plan.userId);
+    await deletePlanHierarchy(ctx, args.planId);
 
     return { success: true };
   },
 });
 
-async function deletePlanHierarchy(ctx: MutationCtx, planId: Id<"plans">, userId: string) {
+async function deletePlanHierarchy(ctx: MutationCtx, planId: Id<"plans">) {
   const outcomes = await ctx.db
     .query("outcomes")
     .withIndex("by_plan", (q) => q.eq("planId", planId))
@@ -71,17 +71,4 @@ async function deletePlanHierarchy(ctx: MutationCtx, planId: Id<"plans">, userId
   }
 
   await ctx.db.delete(planId);
-
-  const usage = await ctx.db
-    .query("user_ai_usage")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .first();
-
-  if (usage) {
-    const nextCount = Math.max(0, usage.plansGenerated - 1);
-    await ctx.db.patch(usage._id, {
-      plansGenerated: nextCount,
-      updatedAt: Date.now(),
-    });
-  }
 }
