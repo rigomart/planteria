@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { getToken } from "@/lib/auth-server";
-import { FaqSection } from "./_components/faq-section";
 import { FeaturesSection } from "./_components/features-section";
 import { FlowSection } from "./_components/flow-section";
 import { HeroSection } from "./_components/hero-section";
@@ -30,7 +29,6 @@ export default async function Home() {
 
         <FeaturesSection />
         <FlowSection />
-        <FaqSection />
 
         <section className="rounded-3xl border border-primary/20 bg-primary/10 px-5 py-6 text-center shadow-lg shadow-primary/15 dark:bg-primary/15">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-3">

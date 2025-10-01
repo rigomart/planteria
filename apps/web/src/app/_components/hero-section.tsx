@@ -15,16 +15,20 @@ export function HeroSection() {
           variant="outline"
           className="mx-auto w-fit text-xs lg:mx-0 rounded-full border-primary/50"
         >
-          Action-first planning for indie devs
+          MVP-first planning for indie devs
         </Badge>
-        <div className="flex flex-col gap-5 items-start">
-          <h1 className="text-balance font-semibold tracking-tight text-2xl lg:text-5xl max-w-2xl">
-            Ship focused product plans with AI guardrails
+        <div className="flex flex-col gap-5 items-center lg:items-start">
+          <h1 className="text-balance font-semibold tracking-tight text-4xl text-center lg:text-left lg:text-5xl max-w-2xl">
+            Turn your idea into a shippable plan
           </h1>
+          <p className="text-sm text-muted-foreground max-w-xl">
+            Outcomes → Deliverables → Actions. Guardrails keep scope tight so you ship the smallest
+            viable slice.
+          </p>
 
           <Button asChild size="lg">
             <Link href="/sign-up" className="flex items-center gap-2">
-              Start planning
+              Create your plan
               <ArrowRight className="size-4" aria-hidden />
             </Link>
           </Button>
