@@ -1,12 +1,8 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { AlertCircle, Loader2, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { Loader2, Sparkles } from "lucide-react";
 import { useActionState, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { api } from "@/convex/_generated/api";
 import { createPlanForIdea } from "../actions";
 import { getIdeaMetrics, IDEA_MAX_LENGTH, IDEA_MIN_LENGTH, validateIdea } from "../idea-validation";
 
@@ -20,14 +16,10 @@ const quickPrompts = [
 export function PlanCreationPanel() {
   const [idea, setIdea] = useState("");
   const [state, formAction, pending] = useActionState(createPlanForIdea, initialState);
-  const keyStatus = useQuery(api.userApiKeys.getOpenAIKeyStatus);
-  const isKeyLoading = keyStatus === undefined;
-  const hasKey = keyStatus?.hasKey ?? false;
-  const showKeyWarning = !isKeyLoading && !hasKey;
   const ideaMetrics = getIdeaMetrics(idea);
   const localIdeaError = idea ? validateIdea(idea) : null;
   const isIdeaInvalid = Boolean(localIdeaError);
-  const isSubmitDisabled = pending || showKeyWarning || isKeyLoading || isIdeaInvalid;
+  const isSubmitDisabled = pending || isIdeaInvalid;
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/80 shadow">
@@ -61,7 +53,7 @@ export function PlanCreationPanel() {
               className="h-32 w-full rounded-2xl border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-0"
               value={idea}
               onChange={(event) => setIdea(event.target.value)}
-              disabled={pending || showKeyWarning || isKeyLoading}
+              disabled={pending}
               minLength={IDEA_MIN_LENGTH}
               maxLength={IDEA_MAX_LENGTH}
               aria-invalid={isIdeaInvalid || undefined}
@@ -100,7 +92,7 @@ export function PlanCreationPanel() {
                 size="sm"
                 className="rounded-full bg-muted/60 text-muted-foreground transition hover:bg-muted text-xs"
                 onClick={() => setIdea(prompt)}
-                disabled={pending || showKeyWarning || isKeyLoading}
+                disabled={pending}
               >
                 {prompt}
               </Button>
@@ -108,18 +100,6 @@ export function PlanCreationPanel() {
           </div>
           {state.message ? (
             <p className="text-sm font-medium text-destructive">{state.message}</p>
-          ) : null}
-          {showKeyWarning ? (
-            <Alert className="flex items-start gap-2 border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-100">
-              <AlertCircle className="mt-0.5 size-4" />
-              <AlertDescription className="text-sm">
-                Add your OpenAI API key in{" "}
-                <Link href="/settings" className="font-medium underline underline-offset-2">
-                  Settings
-                </Link>{" "}
-                to generate plans.
-              </AlertDescription>
-            </Alert>
           ) : null}
         </div>
       </form>

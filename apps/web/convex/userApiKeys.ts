@@ -7,6 +7,7 @@ import {
   type QueryCtx,
   query,
 } from "./_generated/server";
+import { isDefaultOpenAiKeyAvailable } from "./lib/openAiKey";
 import { decryptSecret, encryptSecret } from "./lib/secretVault";
 
 const PROVIDERS = {
@@ -164,8 +165,20 @@ export const getOpenAIKeyStatus = query({
     const existing = await findKeyDoc(ctx, identity.subject, PROVIDERS.OPENAI);
 
     if (!existing) {
+      if (isDefaultOpenAiKeyAvailable()) {
+        return {
+          hasKey: true,
+          source: "default" as const,
+          lastFour: null,
+          updatedAt: null,
+        } as const;
+      }
+
       return {
         hasKey: false,
+        source: null,
+        lastFour: null,
+        updatedAt: null,
       } as const;
     }
 
@@ -173,6 +186,7 @@ export const getOpenAIKeyStatus = query({
       hasKey: true,
       lastFour: existing.lastFour,
       updatedAt: existing.updatedAt,
+      source: "user" as const,
     } as const;
   },
 });

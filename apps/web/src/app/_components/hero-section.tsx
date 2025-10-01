@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function HeroSection() {
   return (
-    <section className="relative isolate overflow-hidden rounded-3xl border border-border/70 bg-card/80 px-4 py-6 flex justify-center gap-8">
+    <section className="relative isolate overflow-hidden rounded-3xl border border-border/70 bg-card/80 px-4 py-6 grid grid-cols-12 justify-center gap-8">
       <StripedPattern direction="right" className="text-primary/20" width={10} height={10} />
 
-      <div className="flex flex-col gap-3 lg:text-left justify-center z-10">
+      <div className="flex flex-col gap-3 lg:text-left justify-center z-10 col-span-12 lg:col-span-4">
         <Badge
           variant="outline"
           className="mx-auto w-fit text-xs lg:mx-0 rounded-full border-primary/50"
@@ -52,40 +52,25 @@ function McpCallout() {
     {
       id: "codex",
       client: "Codex",
-      config: `mcp add planteria \
-  --command "npx planteria-mcp" \
-  --args "--api-key" "<YOUR_PLANTERIA_API_KEY>"`,
-    },
-    {
-      id: "claude-code",
-      client: "Claude Code",
-      config: `{
-  "servers": {
-    "planteria": {
-      "command": "npx planteria-mcp",
-      "args": ["--api-key", "<YOUR_PLANTERIA_API_KEY>"]
-    }
-  }
-}`,
+      config: `[mcp_servers.planteria]
+    command = "npx"
+    args = ["-y", "planteria-mcp"]
+    env = { "API_KEY" = "<YOUR_PLANTERIA_API_KEY>" }`,
     },
   ];
 
   return (
-    <div className="w-full rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-muted-foreground">
-      <div className="flex flex-col gap-4">
+    <div className="w-full rounded-xl border border-primary/20 bg-background/50 p-4 text-sm text-muted-foreground ">
+      <div className="flex flex-col gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            Connect Planteria everywhere
-          </p>
-          <p className="text-sm text-foreground">
-            Use the MCP server with your favorite AI tool and keep plans in sync while you ship.
-          </p>
+          <p className="font-semibold tracking-wide text-primary">Connect the MCP everywhere</p>
+          <p className="text-sm text-foreground">Use it with your favorite AI Tool</p>
         </div>
 
         <Tabs defaultValue={clientConfigs[0]?.id} className="w-full">
-          <TabsList className="w-full flex-wrap justify-start bg-background/60">
+          <TabsList className="w-full flex-wrap justify-start bg-background">
             {clientConfigs.map(({ id, client }) => (
-              <TabsTrigger key={id} value={id} className="px-3 py-1.5 text-xs">
+              <TabsTrigger key={id} value={id} className="px-3 py-1.5 text-sm">
                 {client}
               </TabsTrigger>
             ))}
@@ -93,10 +78,10 @@ function McpCallout() {
 
           {clientConfigs.map(({ id, config }) => (
             <TabsContent key={id} value={id}>
-              <pre className="overflow-x-auto rounded-md border border-border/60 bg-background/80 p-3 text-[11px] leading-relaxed text-foreground">
+              <pre className="rounded-md border border-border/60 bg-background/80 p-3 text-xs leading-relaxed text-foreground overflow-x-auto w-full h-36">
                 <code>{config}</code>
               </pre>
-              <p className="mt-2 text-[11px] text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Replace <span className="text-foreground">&lt;YOUR_PLANTERIA_API_KEY&gt;</span> with
                 an API key from settings.
               </p>
@@ -143,7 +128,7 @@ function HeroWorkspacePreview() {
   ];
 
   return (
-    <div className="relative mx-auto max-w-4xl w-full overflow-hidden rounded-xl border border-border/50 bg-background shadow-lg shadow-primary/10 p-4 z-10">
+    <div className="relative mx-auto max-w-4xl w-full overflow-hidden rounded-xl border border-border/50 bg-background shadow-lg shadow-primary/10 p-4 z-10 col-span-12 lg:col-span-8">
       <div className="flex items-center justify-between pb-4">
         <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
           Workspace preview

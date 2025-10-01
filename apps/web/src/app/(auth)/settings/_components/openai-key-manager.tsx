@@ -29,8 +29,10 @@ export function OpenAIKeyManager() {
   const canSubmit =
     trimmedKey.startsWith("sk-") && trimmedKey.length >= MIN_KEY_LENGTH && !isSubmitting;
 
+  const needsCustomKey = !status?.hasKey || status?.source !== "default";
+
   const lastUpdated = useMemo(() => {
-    if (!status?.hasKey || !status.updatedAt) {
+    if (!status?.hasKey || status.source === "default" || !status.updatedAt) {
       return null;
     }
 
@@ -118,10 +120,10 @@ export function OpenAIKeyManager() {
               ) : (
                 <Save className="size-4" />
               )}
-              {status?.hasKey ? "Update key" : "Save key"}
+              {status?.source === "user" ? "Update key" : "Save key"}
             </Button>
 
-            {status?.hasKey ? (
+            {status?.source === "user" ? (
               <Button type="button" variant="ghost" disabled={isDeleting} onClick={handleDelete}>
                 {isDeleting ? (
                   <Loader2 className="mr-2 size-4 animate-spin" />
@@ -134,18 +136,25 @@ export function OpenAIKeyManager() {
           </div>
         </form>
 
-        {status?.hasKey ? (
+        {status?.source === "user" ? (
           <div className="mt-4 rounded-xl border border-border/50 bg-muted/10 p-4 text-sm">
             <p>
               Active key ending in <span className="font-semibold">{status.lastFour}</span>
             </p>
             {lastUpdated ? <p className="text-muted-foreground">Updated {lastUpdated}</p> : null}
           </div>
-        ) : (
+        ) : needsCustomKey ? (
           <Alert className="mt-4 border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-100">
             <AlertTitle>Key required</AlertTitle>
             <AlertDescription className="text-sm">
               Plans can only be generated once you provide a valid OpenAI API key above.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert className="mt-4 border-primary/40 bg-primary/10 text-primary-foreground">
+            <AlertTitle>Ready to go</AlertTitle>
+            <AlertDescription className="text-sm">
+              Planteria is using the default OpenAI key. Add your own to run calls on your account.
             </AlertDescription>
           </Alert>
         )}

@@ -4,6 +4,7 @@ import { api, components, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { action, internalAction, internalMutation } from "../_generated/server";
 import { createPlanningAgent } from "../agents/planning";
+import { resolveOpenAiKey } from "../lib/openAiKey";
 import { planDraftSchema, STATUS_VALUES } from "../lib/plan_schemas";
 import { buildPlanDraftPrompt, type ResearchInsight } from "../lib/prompts";
 
@@ -55,7 +56,9 @@ export const generatePlan = action({
       userId: identity.subject,
     });
 
-    if (!userKey) {
+    const resolvedKey = resolveOpenAiKey(userKey);
+
+    if (!resolvedKey) {
       throw new Error(MISSING_OPENAI_KEY_ERROR);
     }
 
@@ -118,11 +121,13 @@ export const generatePlanInBackground = internalAction({
         userId: args.userId,
       });
 
-      if (!userKey) {
+      const resolvedKey = resolveOpenAiKey(userKey);
+
+      if (!resolvedKey) {
         throw new Error(MISSING_OPENAI_KEY_ERROR);
       }
 
-      const planningAgent = createPlanningAgent(userKey.apiKey);
+      const planningAgent = createPlanningAgent(resolvedKey.apiKey);
 
       const threadId = await createThread(ctx, components.agent, {
         userId: args.userId,

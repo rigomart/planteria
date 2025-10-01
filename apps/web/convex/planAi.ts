@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import { action, mutation } from "./_generated/server";
 import { createPlanningAgent } from "./agents/planning";
+import { resolveOpenAiKey } from "./lib/openAiKey";
 import { requirePlanOwnership } from "./lib/ownership";
 import { type PlanDraft, planDraftSchema } from "./lib/plan_schemas";
 import { getOrCreatePlanThread } from "./lib/planThreads";
@@ -59,7 +60,9 @@ export const adjustPlan = action({
       userId: identity.subject,
     });
 
-    if (!userKey) {
+    const resolvedKey = resolveOpenAiKey(userKey);
+
+    if (!resolvedKey) {
       throw new Error(MISSING_OPENAI_KEY_ERROR);
     }
 
@@ -88,7 +91,7 @@ export const adjustPlan = action({
     const startedAt = Date.now();
 
     try {
-      const planningAgent = createPlanningAgent(userKey.apiKey);
+      const planningAgent = createPlanningAgent(resolvedKey.apiKey);
       const prompt = buildPlanAdjustmentPrompt({
         ...currentPlan,
         instruction: args.prompt,

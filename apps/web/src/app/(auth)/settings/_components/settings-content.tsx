@@ -76,7 +76,7 @@ export function SettingsContent() {
       return "No OpenAI key on file.";
     }
 
-    return `Key ending in ${openAiStatus.lastFour} updated ${formatUpdatedAt(openAiStatus.updatedAt)}.`;
+    return `Key ending in ${openAiStatus.lastFour}.`;
   }, [openAiStatus]);
 
   const planteriaStatusLine = useMemo(() => {
