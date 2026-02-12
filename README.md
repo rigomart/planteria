@@ -4,7 +4,7 @@ AI-powered planning tool that turns fuzzy ideas into structured, shippable plans
 
 ## Tech Stack
 
-- **Framework** — Next.js 15 (App Router, Turbopack) + React 19
+- **Framework** — Next.js 16 (App Router, Turbopack) + React 19
 - **Backend** — Convex (realtime database, serverless functions, scheduled jobs)
 - **Auth** — Better Auth with GitHub & Google OAuth, backed by Convex
 - **AI** — OpenAI GPT-5 via `@ai-sdk/openai`, Firecrawl for web research
@@ -60,7 +60,7 @@ Frontend uses Next.js route groups to split auth/unauth layouts. Convex colocate
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20.9+
 - pnpm (`corepack enable`)
 - A [Convex](https://convex.dev) account
 
