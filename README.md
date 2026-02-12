@@ -1,172 +1,130 @@
 # Planteria
 
-**Planteria** is an AI-powered planning tool designed to help **developers** quickly turn fuzzy ideas into clear, shippable plans. It treats plans as structured data—moving from **ideas → outcomes → deliverables → actions**—with strict guardrails to ensure clarity, demoability, and focus on the minimum shippable path.
+AI-powered planning tool that turns fuzzy ideas into structured, shippable plans in minutes. [Live app](https://planteria-web.vercel.app/)
 
-The tool emphasizes:
+## Tech Stack
 
-* **Simplicity first**: No technical specs, no UI design, no overcomplexity.
-* **Fast value**: Users go from idea to validated plan in minutes.
-* **Structured editing**: Supports both node-level (rename, split/merge, move, prune) and plan-level operations (rescope, reprioritize, audit).
-* **AI guardrails**: Enforces validity rules (e.g., outcomes capped at 7, deliverables at 9 each, actions at 7 each, no orphaned items, demoable `doneWhen` statements).
-* **Phased growth**: Starts lean with auto-accepted edits and no integrations, then gradually adds exports, MCP agent access, approval workflows, grounding with evidence, and eventually branching/advanced prioritization.
+- **Framework** — Next.js 16 (App Router, Turbopack) + React 19
+- **Backend** — Convex (realtime database, serverless functions, scheduled jobs)
+- **Auth** — Better Auth with GitHub & Google OAuth, backed by Convex
+- **AI** — OpenAI GPT-5 via `@ai-sdk/openai`, Firecrawl for web research
+- **Styling** — Tailwind CSS 4, Radix UI primitives, class-variance-authority
+- **MCP** — Standalone Model Context Protocol server for external AI tool access
+- **Monorepo** — Turborepo + pnpm workspaces
+- **Code Quality** — Biome (lint + format), TypeScript strict mode
 
-At its core, Planteria is about **maximizing user speed and clarity** while keeping complexity low, with AI acting as a copilot for structured planning.
+## How It Works
 
-## Architecture
+A user types a build idea (e.g. "offline-first recipe manager with meal planning"). From there, Planteria runs a three-stage pipeline:
 
-Planteria is built as a modern web application with the following components:
+1. **Research** — Firecrawl searches the web for the idea, scrapes the top results, and extracts snippets (title, URL, up to 900 chars each). These become `researchInsights` stored on the plan.
 
-- **Frontend**: Next.js 15 with App Router, React 19, and Tailwind CSS
-- **Backend**: Convex for realtime database and serverless functions
-- **AI Integration**: OpenAI SDK for plan generation and adjustments
-- **MCP Server**: Model Context Protocol server for external tool integrations
-- **Authentication**: Better Auth integration
-- **Build System**: Turborepo monorepo with pnpm
+2. **Generation** — A Convex scheduled action feeds the research context plus the user's idea to an OpenAI agent (`@convex-dev/agent` wrapping GPT-5). The agent is prompted to return JSON only — a hierarchy of Outcomes (max 7), Deliverables (max 9 each), and Actions (max 7 each), all with crisp `doneWhen` criteria. The output is validated against Zod schemas before anything is persisted.
+
+3. **Persistence** — The validated structure is written to Convex in one transaction: plan shell, outcomes, deliverables, and actions. Because Convex queries are reactive, the frontend picks up the change instantly — the plan flips from `generating` to `ready` without polling.
+
+The user can then edit the plan inline (rename, reorder via drag-and-drop, split/merge nodes, change status) or ask the AI to adjust the whole plan with a natural-language instruction. Adjustments replace the full hierarchy and are capped at 3 per plan to keep things intentional.
+
+External AI tools (Claude, ChatGPT, etc.) can read plans via the MCP server, which exposes three endpoints authenticated with user-generated API keys: `list-plans`, `get-pending-work`, and `get-plan-details`.
 
 ## Project Structure
 
 ```
 planteria/
-├── apps/web/                 # Main Next.js application
+├── apps/web/                     # Next.js application
 │   ├── src/
-│   │   ├── app/             # Next.js App Router pages
-│   │   ├── components/      # Reusable UI components
-│   │   └── lib/             # Utility functions
-│   ├── convex/              # Convex backend functions
-│   └── public/              # Static assets
-├── packages/mcp/            # MCP server package
-└── packages/                # Future packages
+│   │   ├── app/
+│   │   │   ├── (auth)/           # Auth-gated routes — workspace and settings
+│   │   │   ├── (unauth)/         # Public routes — sign-in, sign-up
+│   │   │   ├── api/auth/         # Better Auth catch-all route handler
+│   │   │   └── _components/      # Landing page sections (hero, features, flow)
+│   │   ├── components/ui/        # Shadcn-style primitives built on Radix
+│   │   ├── hooks/                # Shared React hooks (e.g. use-mobile)
+│   │   └── lib/                  # Auth client/server setup, cn utility
+│   └── convex/                   # All backend logic lives here
+│       ├── schema.ts             # Single source of truth for the data model
+│       ├── agents/               # LLM agent config (model, system prompt)
+│       ├── plans/                # Plan CRUD + the generation pipeline
+│       ├── lib/                  # Prompts, Zod schemas, rate limits, ownership checks
+│       ├── http/                 # HTTP routes for MCP endpoints
+│       └── *.ts                  # Domain modules (outcomes, deliverables, actions, auth, keys)
+├── packages/mcp/                 # Standalone MCP server, published as @mirdor/planteria-mcp
+│   └── src/main.ts               # Stdio transport, 3 tools, Bearer auth against Convex HTTP
+├── turbo.json                    # Task pipeline — build depends on ^build, dev is persistent
+└── pnpm-workspace.yaml           # apps/* and packages/*
 ```
 
-## Core Product Intent
-
-- **Audience**: Indie developers who come with a concrete idea they want to ship
-- **Input expectation**: Users type a specific build mission, not a vague prompt or brainstorming request
-- **Output**: A structured plan of outcomes → deliverables → actions with crisp `doneWhen` criteria aimed at the smallest shippable slice
-- **Voice and UX**: Action-first, opinionated guardrails, crisp copy
-
-### Example Mission Patterns
-
-- "Build [specific capability] that [measurable effect] when [signal/trigger]"
-- "Turn [input type] into [artifact] with [constraints] to achieve [outcome]"
-- "Detect [problem] and auto-[remediation] so [user/business benefit]"
+Frontend uses Next.js route groups to split auth/unauth layouts. Convex colocates backend logic with the web app (`apps/web/convex/`) since it's the only consumer — no need for a separate package. The MCP server is a separate package because it ships as a standalone CLI binary.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Node.js**: Version 18 or later
-- **pnpm**: Package manager (required)
-- **Convex Account**: For backend services
+- Node.js 20.9+
+- pnpm (`corepack enable`)
+- A [Convex](https://convex.dev) account
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/rigos/planteria.git
-   cd planteria
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
-
-3. **Set up environment variables**
-
-   Create a `.env.local` file in `apps/web/` with:
-   ```env
-   NEXT_PUBLIC_CONVEX_URL=your_convex_deployment_url
-   ```
-
-4. **Start the development servers**
-
-   ```bash
-   # Start the web application
-   pnpm dev
-
-   # In another terminal, start Convex dev server
-   cd apps/web && npx convex dev
-   ```
-
-5. **Open your browser**
-
-   Navigate to `http://localhost:3000` to see the application.
-
-## Development
-
-### Available Scripts
-
-- `pnpm dev` - Start development servers
-- `pnpm build` - Build for production
-- `pnpm start` - Start production server
-- `pnpm lint` - Run linting and formatting
-- `pnpm check-types` - Type checking
-
-### Development Workflow
-
-1. **Code Changes**: Make changes in the respective packages
-2. **Linting**: Run `pnpm lint` to ensure code quality
-3. **Type Checking**: Run `pnpm check-types` to verify TypeScript
-4. **Testing**: Manual testing with `pnpm dev` and Convex dev server
-
-### MCP Server
-
-The MCP server provides external tool access to Planteria data:
+### Setup
 
 ```bash
-cd packages/mcp
-node src/server.ts --api-key your_planteria_api_key
+git clone https://github.com/rigos/planteria.git
+cd planteria
+pnpm install
 ```
 
-Available MCP tools:
-- `list-plans` - Get the latest five plans
-- `get-pending-work` - Get incomplete work for a plan
-- `get-plan-details` - Get full plan details
+Create `apps/web/.env.local`:
 
-## Data Model
+```env
+NEXT_PUBLIC_CONVEX_URL=<your-convex-deployment-url>
+SITE_URL=http://localhost:3000
 
-The core data structure follows a hierarchical planning model:
+# OAuth (optional — email/password works without these)
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+```
 
-- **Plans**: Top-level containers with mission statements
-- **Outcomes**: High-level results (max 7 per plan)
-- **Deliverables**: Concrete work items with `doneWhen` criteria (max 9 per outcome)
-- **Actions**: Specific tasks to complete deliverables (max 7 per deliverable)
+Set these in your Convex dashboard:
 
-All entities support status tracking (`todo`, `doing`, `done`) and maintain creation/update timestamps.
+```
+OPENAI_API_KEY       # fallback key — users can also provide their own in Settings
+FIRECRAWL_API_KEY    # powers web research during plan generation
+SITE_URL             # your deployment URL
+```
 
-## Authentication & Security
+### Run
 
-- **Authentication**: Better Auth with Convex integration
-- **API Keys**: User-managed API keys for external access
-- **Authorization**: Row-level security via Convex auth
+```bash
+# Terminal 1 — Next.js dev server
+pnpm dev
 
-## Deployment
+# Terminal 2 — Convex backend
+cd apps/web && npx convex dev
+```
 
-### Web Application
+Open [http://localhost:3000](http://localhost:3000).
 
-1. **Build the application**
-   ```bash
-   pnpm build
-   ```
+## Scripts
 
-2. **Deploy to Vercel/Netlify** or your preferred platform
+From the repo root (via Turborepo):
 
-### Convex Backend
+| Command | What it does |
+|---------|-------------|
+| `pnpm dev` | Start Next.js dev server with Turbopack |
+| `pnpm build` | Production build (Next.js + MCP) |
+| `pnpm lint` | Lint and auto-fix with Biome |
+| `pnpm check-types` | TypeScript type checking across all packages |
+| `pnpm test` | Run tests |
 
-1. **Deploy Convex functions**
-   ```bash
-   cd apps/web
-   npx convex deploy
-   ```
+Inside `apps/web/`:
 
-2. **Update environment variables** in your deployment platform
-
+| Command | What it does |
+|---------|-------------|
+| `pnpm format` | Auto-format with Biome |
+| `npx convex dev` | Start Convex dev backend with hot reload |
+| `npx convex deploy` | Deploy Convex functions to production |
 
 ## License
 
-MIT License - see LICENSE file for details.
-
----
-
-Built with ❤️ for developers who want to ship faster.
+MIT
